@@ -11,8 +11,8 @@ class UserInterface extends JPanel{
     static int base_x = 20, base_y = 40, disp = 53;
     static char dispCB[][] = new char[8][8];
     
-    public UserInterface(char[][] intialCB) {
-        dispCB = intialCB;
+    public UserInterface(char[][] initialCB) {
+        dispCB = initialCB;
         // image of board
         img_board = new ImageIcon(path_board).getImage();
         // images of white pieces 
