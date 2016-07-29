@@ -23,4 +23,18 @@ public class Constants {
     public static final String path_q = black_basepath + "q.png";
     public static final String path_r = black_basepath + "r.png";
     
+    public static final char W_ROOK = 'R';
+    public static final char W_KNIGHT = 'N';
+    public static final char W_BISHOP = 'B';
+    public static final char W_QUEEN = 'Q';
+    public static final char W_KING = 'K';   
+    public static final char W_PAWN = 'P';
+    public static final char BLANK = ' ';
+    public static final char B_ROOK = 'r';
+    public static final char B_KNIGHT = 'n';
+    public static final char B_BISHOP = 'b';
+    public static final char B_QUEEN = 'q';
+    public static final char B_KING = 'k';   
+    public static final char B_PAWN = 'p';
+    
 }

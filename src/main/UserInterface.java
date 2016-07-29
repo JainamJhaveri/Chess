@@ -9,11 +9,10 @@ class UserInterface extends JPanel{
     Image img_B, img_K, img_N, img_P, img_Q, img_R;
     Image img_b, img_k, img_n, img_p, img_q, img_r;
     static int base_x = 20, base_y = 40, disp = 53;
+    static char dispCB[][] = new char[8][8];
     
-//    static int x = 0, y = 0;
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+    public UserInterface(char[][] intialCB) {
+        dispCB = intialCB;
         // image of board
         img_board = new ImageIcon(path_board).getImage();
         // images of white pieces 
@@ -30,44 +29,70 @@ class UserInterface extends JPanel{
         img_p = new ImageIcon(path_p).getImage();
         img_q = new ImageIcon(path_q).getImage();
         img_r = new ImageIcon(path_r).getImage();
-                
+    }
+    
+    
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+                        
         g.drawImage(img_board, 20, 40, this);        
 
-        // initial stage for black pieces
-        g.drawImage(img_r, base_x, base_y, this);
-        g.drawImage(img_n, base_x + disp, base_y, this);
-        g.drawImage(img_b, base_x + 2 * disp, base_y, this);
-        g.drawImage(img_q, base_x + 3 * disp, base_y, this);
-        g.drawImage(img_k, base_x + 4 * disp, base_y, this);
-        g.drawImage(img_b, base_x + 5 * disp, base_y, this);
-        g.drawImage(img_n, base_x + 6 * disp, base_y, this);
-        g.drawImage(img_r, base_x + 7 * disp, base_y, this);
-        
-        // initial stage for black pawns
-        int dy1 = base_y + disp;        
-        for( int i=0; i<8; i++ ){
-            int dx1 = base_x + i * disp;            
-            g.drawImage(img_p, dx1, dy1, this);
-        }
-        
-        // initial stage for white pawns
-        dy1 = base_y + 6 * disp;        
-        for( int i=0; i<8; i++ ){
-            int dx1 = base_x + i * disp;                        
-            g.drawImage(img_P, dx1, dy1, this);
-        }
-        
-        // initial stage for black pieces
-        dy1 = base_y + 7 * disp;
-        g.drawImage(img_R, base_x, dy1, this);
-        g.drawImage(img_N, base_x + disp, dy1, this);
-        g.drawImage(img_B, base_x + 2 * disp, dy1, this);
-        g.drawImage(img_Q, base_x + 3 * disp, dy1, this);
-        g.drawImage(img_K, base_x + 4 * disp, dy1, this);
-        g.drawImage(img_B, base_x + 5 * disp, dy1, this);
-        g.drawImage(img_N, base_x + 6 * disp, dy1, this);
-        g.drawImage(img_R, base_x + 7 * disp, dy1, this);        
-        
+        /*--------------------------------------------------------------------------------------------------------
+        img_piece is used as a reference pointer to the images iteratively. Following for loop will populate 
+                the chessboard with images of pieces according to the contents of dispChess array.
+        ---------------------------------------------------------------------------------------------------------*/
+        Image img_piece = null;        
+        for(int i=0; i<8; i++){
+            for(int j=0; j<8; j++){
+                switch(dispCB[i][j]){
+                    case B_PAWN:
+                        img_piece = img_p;
+                        break;
+                    case B_KING:
+                        img_piece = img_k;
+                        break;
+                    case B_QUEEN:
+                        img_piece = img_q;
+                        break;
+                    case B_ROOK:
+                        img_piece = img_r;
+                        break;
+                    case B_BISHOP:
+                        img_piece = img_b;
+                        break;
+                    case B_KNIGHT:
+                        img_piece = img_n;
+                        break;
+                    case W_PAWN:
+                        img_piece = img_P;
+                        break;
+                    case W_KING:
+                        img_piece = img_K;
+                        break;
+                    case W_QUEEN:
+                        img_piece = img_Q;
+                        break;
+                    case W_ROOK:
+                        img_piece = img_R;
+                        break;
+                    case W_BISHOP:
+                        img_piece = img_B;
+                        break;
+                    case W_KNIGHT:
+                        img_piece = img_N;
+                        break;   
+                    default:
+                        img_piece = null;
+                        break;
+                }
+                /*--------------------------------------------------------------------------------------------------------
+                                drawing images by displacing 'j' (with base_x as horizontal base) 
+                                            for each 'i' with base_y as vertical base
+                ---------------------------------------------------------------------------------------------------------*/
+                g.drawImage(img_piece, base_x + j * disp, base_y + i * disp, this);
+            }
+        }                
     }
 
 }
