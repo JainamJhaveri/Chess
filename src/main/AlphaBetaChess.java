@@ -22,11 +22,11 @@ public class AlphaBetaChess {
         {B_ROOK,    B_KNIGHT,   B_BISHOP,   B_QUEEN,    B_KING,     B_BISHOP,   B_KNIGHT,   B_ROOK},
         {B_PAWN,    B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN},
         {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},
-        {BLANK,     B_QUEEN,      B_KNIGHT,      B_QUEEN,      B_PAWN,      BLANK,      BLANK,      BLANK},
-        {W_QUEEN,     BLANK,      BLANK,      W_QUEEN,      W_PAWN,      BLANK,      BLANK,      BLANK},
+        {BLANK,     BLANK,      BLANK,      W_BISHOP,      BLANK,      BLANK,      BLANK,      BLANK},
+        {W_BISHOP,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},
         {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},        
         {W_PAWN,    W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN},
-        {W_ROOK,    W_KNIGHT,   W_BISHOP,   BLANK,    W_KING,     W_BISHOP,   W_KNIGHT,   W_ROOK}
+        {W_ROOK,    W_KNIGHT,   W_BISHOP,   W_QUEEN,    W_KING,     W_BISHOP,   W_KNIGHT,   W_ROOK}
     };
 
     public static void main(String[] args) {
@@ -62,7 +62,7 @@ public class AlphaBetaChess {
 //                        list += possibleWhiteR(i, j);
                         break;
                     case W_BISHOP:
-//                        list += possibleWhiteB(i, j);
+                        list += possibleWhiteB(i, j);
                         break;
                     case W_KNIGHT:
 //                        list += possibleWhiteN(i, j);
@@ -155,6 +155,11 @@ public class AlphaBetaChess {
                     }
                 }catch(ArrayIndexOutOfBoundsException e){continue;}
                 
+                    /*------------------------------------------------------------------------ 
+                        If a black piece is present on the end of all blank spaces in a
+                        particular direction and next square contains a black piece then 
+                        capturing that black piece will also be a valid move for white queen
+                    ------------------------------------------------------------------------*/
                 if(Character.isLowerCase(chessBoard[newRow][newCol])){
                     currentPiece = chessBoard[newRow][newCol];
                     chessBoard[newRow][newCol] = W_QUEEN;
@@ -170,6 +175,66 @@ public class AlphaBetaChess {
             }
         }
         System.out.println("WQueen's possible moves: " +count);
+        System.out.println(list);
+        return list;
+    }
+    
+    private static String possibleWhiteB(int oldRow, int oldCol){
+        String list = "";
+        int newRow, newCol, dist, count= 0;
+        char currentPiece;
+        /*--------------------------------------------------------------------------------------- 
+            i and j are used for all 4 directions for the bishop as they are incremented by 2.
+            Example: i=-1, j=-1 will consider square at -45deg from the current position 
+            and increasing dist will diagonally cover all the squares in -45deg direction
+        -------------------------------------------------------------------------------------- */
+        for(int i=-1; i<2; i=i+2){            
+            for(int j=-1; j<2; j=j+2){
+                
+                dist = 1;
+                newRow = oldRow + i * dist;
+                newCol = oldCol + j * dist;
+                try{            // if the piece is at corner or at borders, newRow and newCol index can go out of bounds
+                    /*------------------------------------------------------------------------ 
+                        By this while loop, all the moves on diagonal (depending on i and j) 
+                        blank spaces are considered valid moves for bishop till the king 
+                        remains safe after bishop's movement
+                    ------------------------------------------------------------------------*/
+                    while(chessBoard[newRow][newCol] == BLANK){                    
+                        chessBoard[newRow][newCol] = W_BISHOP;
+                        chessBoard[oldRow][oldCol] = BLANK;                        
+                        if(isW_KingSafe()){
+                            list += oldRow + "" + oldCol + "" + newRow + "" + newCol + "" + BLANK;
+                            count++;
+                        }
+                        chessBoard[newRow][newCol] = BLANK;
+                        chessBoard[oldRow][oldCol] = W_BISHOP;
+                        dist++ ;
+                        newRow = oldRow + i * dist;
+                        newCol = oldCol + j * dist;
+                    }
+                }catch(ArrayIndexOutOfBoundsException e){continue;}
+                
+                /*------------------------------------------------------------------------ 
+                    If a black piece is present on the end of all blank spaces in a
+                    particular diagonal and next square contains a black piece then 
+                    capturing that black piece will also be a valid move for white bishop
+                ------------------------------------------------------------------------*/
+                if(Character.isLowerCase(chessBoard[newRow][newCol])){
+                    currentPiece = chessBoard[newRow][newCol];
+                    chessBoard[newRow][newCol] = W_BISHOP;
+                    chessBoard[oldRow][oldCol] = BLANK;                        
+                    if(isW_KingSafe()){
+                        list += oldRow + "" + oldCol + "" + newRow + "" + newCol + "" + currentPiece;
+                        count++;
+                    }
+                    chessBoard[newRow][newCol] = currentPiece;
+                    chessBoard[oldRow][oldCol] = W_BISHOP;
+                }
+
+            }
+        }
+        System.out.println("WBishop's possible moves: " +count);
         System.out.println(list);
         return list;
     }
