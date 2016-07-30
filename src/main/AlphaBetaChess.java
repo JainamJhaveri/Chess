@@ -22,9 +22,9 @@ public class AlphaBetaChess {
         {B_ROOK,    B_KNIGHT,   B_BISHOP,   B_QUEEN,    B_KING,     B_BISHOP,   B_KNIGHT,   B_ROOK},
         {B_PAWN,    B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN},
         {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},
-        {BLANK,     BLANK,      BLANK,      W_BISHOP,      BLANK,      BLANK,      BLANK,      BLANK},
+        {BLANK,     BLANK,      B_PAWN,      W_ROOK,      B_KING,      BLANK,      BLANK,      BLANK},
         {W_BISHOP,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},
-        {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},        
+        {BLANK,     BLANK,      BLANK,      B_QUEEN,      BLANK,      BLANK,      BLANK,      BLANK},        
         {W_PAWN,    W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN},
         {W_ROOK,    W_KNIGHT,   W_BISHOP,   W_QUEEN,    W_KING,     W_BISHOP,   W_KNIGHT,   W_ROOK}
     };
@@ -32,7 +32,6 @@ public class AlphaBetaChess {
     public static void main(String[] args) {
         possibleWMoves();
 
-        
         JFrame f = new JFrame("Smart Chess");
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         UserInterface ui = new UserInterface(chessBoard);
@@ -59,7 +58,7 @@ public class AlphaBetaChess {
                         list += possibleWhiteQ(i, j);
                         break;
                     case W_ROOK:
-//                        list += possibleWhiteR(i, j);
+                        list += possibleWhiteR(i, j);
                         break;
                     case W_BISHOP:
                         list += possibleWhiteB(i, j);
@@ -69,7 +68,7 @@ public class AlphaBetaChess {
                         break;   
                     default:
                         break;
-                }
+                }   
             }
         }   
         System.out.println(list);
@@ -235,6 +234,108 @@ public class AlphaBetaChess {
             }
         }
         System.out.println("WBishop's possible moves: " +count);
+        System.out.println(list);
+        return list;
+    }
+
+    private static String possibleWhiteR(int oldRow, int oldCol){
+        String list = "";
+        int newRow, newCol, dist, count= 0;
+        char currentPiece;
+        /*--------------------------------------------------------------------------------------- 
+                i is used to cover left and right directions of white rook
+            and increasing dist will cover all the squares in both left and right direction
+        -------------------------------------------------------------------------------------- */
+        newRow = oldRow;
+        for(int i=-1; i<2; i=i+2){                        
+            dist = 1;                
+            newCol = oldCol + i * dist;
+
+            try{            // if the piece is at corner or at borders, newRow and newCol index can go out of bounds
+                /*------------------------------------------------------------------------ 
+                By this while loop, all the moves on horizontal blank spaces are considered
+                    valid moves for rook till the king remains safe after it's movement
+                ------------------------------------------------------------------------*/
+                while(chessBoard[newRow][newCol] == BLANK){                    
+                    chessBoard[newRow][newCol] = W_ROOK;
+                    chessBoard[oldRow][oldCol] = BLANK;                        
+                    if(isW_KingSafe()){
+                        list += oldRow + "" + oldCol + "" + newRow + "" + newCol + "" + BLANK;
+                        count++;
+                    }
+                    chessBoard[newRow][newCol] = BLANK;
+                    chessBoard[oldRow][oldCol] = W_ROOK;
+                    dist++ ;
+                    newCol = oldCol + i * dist;
+                }
+            }catch(ArrayIndexOutOfBoundsException e){continue;}
+
+            /*------------------------------------------------------------------------ 
+                If a black piece is present on the end of all blank spaces in a
+                particular row and next square contains a black piece then 
+                capturing that black piece will also be a valid move for white rook
+            ------------------------------------------------------------------------*/
+            if(Character.isLowerCase(chessBoard[newRow][newCol])){                
+                currentPiece = chessBoard[newRow][newCol];
+                chessBoard[newRow][newCol] = W_ROOK;
+                chessBoard[oldRow][oldCol] = BLANK;                        
+                if(isW_KingSafe()){
+                    list += oldRow + "" + oldCol + "" + newRow + "" + newCol + "" + currentPiece;
+                    count++;
+                }
+                chessBoard[newRow][newCol] = currentPiece;
+                chessBoard[oldRow][oldCol] = W_ROOK;
+            }
+        }
+        
+        /*--------------------------------------------------------------------------------------- 
+                i is used to cover up and down directions of white rook
+            and increasing dist will cover all the squares in both left and right direction
+        -------------------------------------------------------------------------------------- */
+        newCol = oldCol;
+        for(int i=-1; i<2; i=i+2){                        
+            dist = 1;                
+            newRow = oldRow + i * dist;
+
+            try{            // if the piece is at corner or at borders, newRow and newCol index can go out of bounds
+                /*------------------------------------------------------------------------ 
+                By this while loop, all the moves on vertical blank spaces are considered
+                    valid moves for rook till the king remains safe after it's movement
+                ------------------------------------------------------------------------*/
+                while(chessBoard[newRow][newCol] == BLANK){                    
+                    chessBoard[newRow][newCol] = W_ROOK;
+                    chessBoard[oldRow][oldCol] = BLANK;                        
+                    if(isW_KingSafe()){
+                        list += oldRow + "" + oldCol + "" + newRow + "" + newCol + "" + BLANK;
+                        count++;
+                    }
+                    chessBoard[newRow][newCol] = BLANK;
+                    chessBoard[oldRow][oldCol] = W_ROOK;
+                    dist++ ;
+                    newRow = oldRow + i * dist;
+                }
+            }catch(ArrayIndexOutOfBoundsException e){continue;}
+
+            /*------------------------------------------------------------------------ 
+                If a black piece is present on the end of all blank spaces in a
+                particular column and next square contains a black piece then 
+                capturing that black piece will also be a valid move for white rook
+            ------------------------------------------------------------------------*/            
+            if(Character.isLowerCase(chessBoard[newRow][newCol])){
+                System.out.println("he");
+                currentPiece = chessBoard[newRow][newCol];
+                chessBoard[newRow][newCol] = W_ROOK;
+                chessBoard[oldRow][oldCol] = BLANK;                        
+                if(isW_KingSafe()){
+                    list += oldRow + "" + oldCol + "" + newRow + "" + newCol + "" + currentPiece;
+                    count++;
+                }
+                chessBoard[newRow][newCol] = currentPiece;
+                chessBoard[oldRow][oldCol] = W_ROOK;
+            }
+        }
+        
+        System.out.println("WRook's possible moves: " +count);
         System.out.println(list);
         return list;
     }
