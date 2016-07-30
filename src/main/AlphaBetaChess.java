@@ -3,7 +3,7 @@ import static main.Constants.*;
 import javax.swing.JFrame;
 
 public class AlphaBetaChess {
-
+/*
     static char chessBoard[][] = 
     {
         {B_ROOK,    B_KNIGHT,   B_BISHOP,   B_QUEEN,    B_KING,     B_BISHOP,   B_KNIGHT,   B_ROOK},
@@ -15,8 +15,8 @@ public class AlphaBetaChess {
         {W_PAWN,    W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN},
         {W_ROOK,    W_KNIGHT,   W_BISHOP,   W_QUEEN,    W_KING,     W_BISHOP,   W_KNIGHT,   W_ROOK}
     };
-    
-    /*  // test chess board
+    */
+      // test chess board
     static char chessBoard[][] = 
     {
         {B_ROOK,    B_KNIGHT,   B_BISHOP,   B_QUEEN,    B_KING,     B_BISHOP,   B_KNIGHT,   B_ROOK},
@@ -27,7 +27,7 @@ public class AlphaBetaChess {
         {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},        
         {W_PAWN,    W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN},
         {W_ROOK,    W_KNIGHT,   W_BISHOP,   BLANK,    W_KING,     W_BISHOP,   W_KNIGHT,   W_ROOK}
-    };*/
+    };
 
     public static void main(String[] args) {
         possibleWMoves();
@@ -153,20 +153,20 @@ public class AlphaBetaChess {
                         newRow = oldRow + i * dist;
                         newCol = oldCol + j * dist;
                     }
-                }catch(ArrayIndexOutOfBoundsException e){}
-                try{
-                    if(Character.isLowerCase(chessBoard[newRow][newCol])){
-                        currentPiece = chessBoard[newRow][newCol];
-                        chessBoard[newRow][newCol] = W_QUEEN;
-                        chessBoard[oldRow][oldCol] = BLANK;                        
-                        if(isW_KingSafe()){
-                            list += oldRow + "" + oldCol + "" + newRow + "" + newCol + "" + currentPiece;
-                            count++;
-                        }
-                        chessBoard[newRow][newCol] = currentPiece;
-                        chessBoard[oldRow][oldCol] = W_QUEEN;
+                }catch(ArrayIndexOutOfBoundsException e){continue;}
+                
+                if(Character.isLowerCase(chessBoard[newRow][newCol])){
+                    currentPiece = chessBoard[newRow][newCol];
+                    chessBoard[newRow][newCol] = W_QUEEN;
+                    chessBoard[oldRow][oldCol] = BLANK;                        
+                    if(isW_KingSafe()){
+                        list += oldRow + "" + oldCol + "" + newRow + "" + newCol + "" + currentPiece;
+                        count++;
                     }
-                }catch(ArrayIndexOutOfBoundsException e){}
+                    chessBoard[newRow][newCol] = currentPiece;
+                    chessBoard[oldRow][oldCol] = W_QUEEN;
+                }
+
             }
         }
         System.out.println("WQueen's possible moves: " +count);
