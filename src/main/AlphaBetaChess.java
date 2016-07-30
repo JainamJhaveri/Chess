@@ -15,6 +15,19 @@ public class AlphaBetaChess {
         {W_PAWN,    W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN},
         {W_ROOK,    W_KNIGHT,   W_BISHOP,   W_QUEEN,    W_KING,     W_BISHOP,   W_KNIGHT,   W_ROOK}
     };
+    
+    /*  // test chess board
+    static char chessBoard[][] = 
+    {
+        {B_ROOK,    B_KNIGHT,   B_BISHOP,   B_QUEEN,    B_KING,     B_BISHOP,   B_KNIGHT,   B_ROOK},
+        {B_PAWN,    B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN},
+        {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},
+        {BLANK,     B_QUEEN,      B_KNIGHT,      B_QUEEN,      B_PAWN,      BLANK,      BLANK,      BLANK},
+        {W_QUEEN,     BLANK,      BLANK,      W_QUEEN,      W_PAWN,      BLANK,      BLANK,      BLANK},
+        {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},        
+        {W_PAWN,    W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN},
+        {W_ROOK,    W_KNIGHT,   W_BISHOP,   BLANK,    W_KING,     W_BISHOP,   W_KNIGHT,   W_ROOK}
+    };*/
 
     public static void main(String[] args) {
         possibleWMoves();
@@ -43,7 +56,7 @@ public class AlphaBetaChess {
                         list += possibleWhiteK(i, j);
                         break;
                     case W_QUEEN:
-//                        list += possibleWhiteQ(i, j);
+                        list += possibleWhiteQ(i, j);
                         break;
                     case W_ROOK:
 //                        list += possibleWhiteR(i, j);
@@ -72,9 +85,8 @@ public class AlphaBetaChess {
         String list = "";
         int newCol, newRow, count = 0;        
         for(int i= -1; i<2; i++){
-            for(int j= -1; j<2; j++){
-                // if it is lower case, it means black piece is present 
-                if(1 == i && 1 == j)
+            for(int j= -1; j<2; j++){                
+                if(0 == i && 0 == j)
                     continue;
                 newRow = oldRow + i;
                 newCol = oldCol + j;                
@@ -86,8 +98,6 @@ public class AlphaBetaChess {
                     if(Character.isLowerCase(chessBoard[newRow][newCol]) || chessBoard[newRow][newCol] == BLANK){
                         count++;                        
                         char currentPiece = chessBoard[newRow][newCol];
-                        
-                        
                         /*---------------------------------------------------------------------------------
                         place white king in new position and check if it is safe for the king to move there
                         ---------------------------------------------------------------------------------*/
@@ -104,7 +114,63 @@ public class AlphaBetaChess {
                 }catch(ArrayIndexOutOfBoundsException e){}
             }
         }
-        System.out.println(count);
+        System.out.println("WKing's possible moves: " +count);
+        return list;
+    }
+        
+    private static String possibleWhiteQ(int oldRow, int oldCol){
+        String list = "";
+        int newRow, newCol, dist, count= 0;
+        char currentPiece;
+        /*--------------------------------------------------------------------------------------- 
+            i and j are used for all 8 directions for the queen.
+            Example: i=-1, j=-1 will consider square at -45deg from the current position 
+            and increasing dist will diagonally cover all the squares in -45deg direction
+        -------------------------------------------------------------------------------------- */
+        for(int i=-1; i<2; i++){            
+            for(int j=-1; j<2; j++){
+                if(0 == i && 0 == j)    // the position where piece itself is present
+                    continue;
+                dist = 1;
+                newRow = oldRow + i * dist;
+                newCol = oldCol + j * dist;
+                try{            // if the piece is at corner or at borders, newRow and newCol index can go out of bounds
+                    /*------------------------------------------------------------------------ 
+                        By this while loop, all the moves on diagonal, horizontal or 
+                        vertical(depending on i and j) blank spaces are considered valid 
+                        moves for queen till the king remains safe after queen's movement
+                    ------------------------------------------------------------------------*/
+                    while(chessBoard[newRow][newCol] == BLANK){                    
+                        chessBoard[newRow][newCol] = W_QUEEN;
+                        chessBoard[oldRow][oldCol] = BLANK;                        
+                        if(isW_KingSafe()){
+                            list += oldRow + "" + oldCol + "" + newRow + "" + newCol + "" + BLANK;
+                            count++;
+                        }
+                        chessBoard[newRow][newCol] = BLANK;
+                        chessBoard[oldRow][oldCol] = W_QUEEN;
+                        dist++ ;
+                        newRow = oldRow + i * dist;
+                        newCol = oldCol + j * dist;
+                    }
+                }catch(ArrayIndexOutOfBoundsException e){}
+                try{
+                    if(Character.isLowerCase(chessBoard[newRow][newCol])){
+                        currentPiece = chessBoard[newRow][newCol];
+                        chessBoard[newRow][newCol] = W_QUEEN;
+                        chessBoard[oldRow][oldCol] = BLANK;                        
+                        if(isW_KingSafe()){
+                            list += oldRow + "" + oldCol + "" + newRow + "" + newCol + "" + currentPiece;
+                            count++;
+                        }
+                        chessBoard[newRow][newCol] = currentPiece;
+                        chessBoard[oldRow][oldCol] = W_QUEEN;
+                    }
+                }catch(ArrayIndexOutOfBoundsException e){}
+            }
+        }
+        System.out.println("WQueen's possible moves: " +count);
+        System.out.println(list);
         return list;
     }
     
