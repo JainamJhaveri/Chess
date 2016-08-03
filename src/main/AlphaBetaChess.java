@@ -21,11 +21,11 @@ public class AlphaBetaChess {
     static char chessBoard[][] = 
     {
         {B_ROOK,    B_KNIGHT,   B_BISHOP,   B_QUEEN,    B_KING,     B_BISHOP,   B_KNIGHT,   B_ROOK},
-        {B_PAWN,    B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN},
+        {W_PAWN,    B_PAWN,     B_PAWN,     W_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     W_PAWN},
         {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},
-        {BLANK,     BLANK,      W_KNIGHT,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},
-        {BLANK,     BLANK,      BLANK,      BLANK,      B_BISHOP,      BLANK,      BLANK,      BLANK},
-        {BLANK,     B_QUEEN,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},        
+        {BLANK,     BLANK,      B_PAWN,      BLANK,      B_PAWN,      BLANK,      BLANK,      BLANK},
+        {BLANK,     BLANK,      BLANK,      W_PAWN,      BLANK,      BLANK,      BLANK,      BLANK},
+        {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},        
         {W_PAWN,    W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN},
         {W_ROOK,    W_KNIGHT,   W_BISHOP,   W_QUEEN,    W_KING,     W_BISHOP,   W_KNIGHT,   W_ROOK}
     };
@@ -50,7 +50,7 @@ public class AlphaBetaChess {
             for(int j=0; j<8; j++){
                 switch(chessBoard[i][j]){                    
                     case W_PAWN:
-//                        list += possibleWhiteP(i, j);
+                        list += possibleWhiteP(i, j);
                         break;
                     case W_KING:
                         list += possibleWhiteK(i, j);
@@ -81,6 +81,57 @@ public class AlphaBetaChess {
                     Example: 3344q
     For piece at (3,3), valid move is (4,4) where black Queen is currently present
 ------------------------------------------------------------------------------------------ */
+    
+    private static String possibleWhiteP(int oldRow, int oldCol){
+        String list = "";
+        int newCol, newRow;
+        /*-----------------------------------------------------------------------------
+        i is used along with (newRow, newCol) for capturing either of diagonal squares 
+        (newRow, newCol) is the square where white pawn can possibly capture
+        -----------------------------------------------------------------------------*/
+        for(int i=-1; i<2; i=i+2){
+            newRow = oldRow - 1;
+            newCol = oldCol + i;
+            try{
+                if(oldRow != 1) 
+                {   // when white pawn is anywhere except 7th row
+                    // capture the piece
+                    list += addBlackPieceSquare(oldRow, oldCol, newRow, newCol, W_PAWN);                                        
+                }
+                else
+                {   // when white pawn reaches the 7th row                    
+                    // promote + capture                                        
+                    list += addWhitePawnPromotionPath(oldCol, newCol);
+                }
+            }catch(ArrayIndexOutOfBoundsException e){}                        
+        }
+        
+        /*-----------------------------------------------------------------------------
+        remaining cases for pawn are single advance, double advance and simple promotion        
+        -----------------------------------------------------------------------------*/
+        newRow = oldRow - 1;
+        newCol = oldCol;                
+        if(chessBoard[newRow][newCol] == BLANK)
+        {
+            // pawn single advance        
+            list += addBlankSquareOnPath(oldRow, oldCol, newRow, newCol, W_PAWN);
+        
+            // pawn double advance
+            if( oldRow == 6 && chessBoard[newRow - 1][newCol] == BLANK)
+            {
+                list += addBlankSquareOnPath(oldRow, oldCol, newRow - 1, newCol, W_PAWN);
+            }
+            else if(oldRow == 1)
+            {
+                list += addWhitePawnPromotionPath(oldCol, newCol);
+            }
+        }
+            
+
+        System.out.println("WPawn's possible moves: " +list);
+        return list;
+    }
+        
     
     private static String possibleWhiteK(int oldRow, int oldCol){        
         String list = "";
@@ -318,7 +369,34 @@ public class AlphaBetaChess {
         }
         return list;
     }
-            
+     
+    /*----------------------------------------------------------------------------------------------------------
+        Only for pawn promotion, notation is changed to oldCol, newCol, captured-piece, promotedPiece, W_PAWN 
+    ----------------------------------------------------------------------------------------------------------*/
+    private static String addWhitePawnPromotionPath(int oldCol, int newCol)
+    {        
+        String list = "";
+        char currentPiece;        
+        
+        int newRow = 0, oldRow = 1; 
+        
+        if(Character.isLowerCase(chessBoard[newRow][newCol]))
+        {
+            for(int k=0; k<4; k++){
+                currentPiece = chessBoard[newRow][newCol];
+                chessBoard[newRow][newCol] = promotedTo[k];
+                chessBoard[oldRow][oldCol] = BLANK;                        
+                if(isW_KingSafe())
+                {                                
+                    list += oldCol + "" + newCol + "" + currentPiece + "" + promotedTo[k] + "" + W_PAWN;
+                }
+                chessBoard[newRow][newCol] = currentPiece;
+                chessBoard[oldRow][oldCol] = W_PAWN;
+            }
+        }
+       return list;
+    }
+    
     private static void printCB() {
         for(int i=0; i<8; i++){
             for(int j=0; j<8; j++){

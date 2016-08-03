@@ -36,5 +36,6 @@ public class Constants {
     public static final char B_QUEEN = 'q';
     public static final char B_KING = 'k';   
     public static final char B_PAWN = 'p';
-    
+ 
+    public static char promotedTo[] = {W_QUEEN, W_ROOK, W_KNIGHT, W_BISHOP};
 }
