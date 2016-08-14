@@ -40,8 +40,8 @@ public class AlphaBetaChess
         // test chess board            
         initialChessBoard = new char[][]
         {
-            {B_ROOK,    B_KNIGHT,   B_BISHOP,   B_QUEEN,    B_KING,     B_BISHOP,   B_KNIGHT,   B_ROOK},
-            {B_PAWN,    B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN},
+            {B_ROOK,    B_KNIGHT,   B_BISHOP,   B_QUEEN,    B_KING,     B_BISHOP,   BLANK,   B_ROOK},
+            {W_PAWN,    B_PAWN,     B_PAWN,     B_PAWN,     W_PAWN,     BLANK,     W_PAWN,     W_PAWN},
             {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},
             {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},
             {B_PAWN,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},

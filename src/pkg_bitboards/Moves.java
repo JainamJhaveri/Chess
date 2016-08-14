@@ -50,7 +50,8 @@ public class Moves {
     }
        
     /******************************************************************************************
-     * (oldRow, oldCol, newRow, newCol) is the move format that we will follow for our bitboards
+     * (oldRow, oldCol, newRow, newCol) is the move format that we will follow for our movelist
+     * (oldCol, newCol, PromotionTo, Pawn) will be followed for promotion
      * This method returns legal moves for all White Pawns
      * @return String list (which contains space separated moves as of now)
      ******************************************************************************************/
@@ -59,22 +60,35 @@ public class Moves {
         String list = "";
         long moves;
         
-        /*  << 7 :: white pawn can capture right if there is a capturable black piece and the piece is not on FILE_A */
-        
-        moves = (WP << 7) & CAPTURABLE_B & ~RANK_1 & ~FILE_A;        
+        /*  << 7 :: white pawn can capture right if there is a capturable black piece and that piece is not on FILE_A */        
+        moves = (WP << 7) & CAPTURABLE_B & ~RANK_8 & ~FILE_A;        
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, -1);
         
-//        /*  << 9 :: white pawn can capture left if there is a capturable black piece and the piece is not on FILE_H */
-        moves = (WP << 9) & CAPTURABLE_B & ~RANK_1 & ~FILE_H;
+        /*  << 9 :: white pawn can capture left if there is a capturable black piece and that piece is not on FILE_H */
+        moves = (WP << 9) & CAPTURABLE_B & ~RANK_8 & ~FILE_H;
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, 1);
 
-//        /*  << 8 :: pawn can be pushed 1 position if it is not on rank 1 and there are no piece above its current rank */
-        moves = (WP << 8) & ~ALLPIECES;
+        /*  << 8 :: pawn can be pushed 1 position if it is not on rank 1 and there are no piece above its current rank */
+        moves = (WP << 8) & ~RANK_8 & ~ALLPIECES;
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, 0);
 
-//        /*  << 16 :: pawn can be pushed 2 positions if it is on rank 2 and there are no pieces on rank 4 or rank 3 for the corresponding pawn */
+        /*  << 16 :: pawn can be pushed 2 positions if it is on rank 2 and there are no pieces on rank 4 or rank 3 for the corresponding pawn */
         moves = ( (WP & RANK_2) << 16 ) &  ~( (ALLPIECES & RANK_4) | ((ALLPIECES & RANK_3) << 8) );
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -2, 0);
+        
+        
+        /*  << 7 :: right capture + promotion */        
+        moves = (WP << 7) & CAPTURABLE_B & RANK_8 & ~FILE_A;        
+//        printString("moves rcp", moves);
+        list += getPromotionPaths(moves, -1);
+        
+        /*  << 9 :: left capture + promotion */        
+        moves = (WP << 9) & CAPTURABLE_B & RANK_8 & ~FILE_H;
+        list += getPromotionPaths(moves, 1);
+
+        /*  << 8 :: simple promotion */        
+        moves = (WP << 8) & RANK_8 & ~ALLPIECES;
+        list += getPromotionPaths(moves, 0);
         
         return list;
     }
@@ -214,14 +228,15 @@ public class Moves {
 
     /***********************************************************************************************************************
      * From the trailing zeros of the rightmost significant bit (rightmost 1), we calculate the position of (newRow, newCol)
-     * And from that we calculate (oldRow, oldCol), append it to list String.
+     * And from that we calculate (oldRow, oldCol).
      * In our bitboards, leftmost bit is 7,7 and rightmost bit 0,0
      * @param moves bitboard of new moves whose movelist needs to be generated as (oldRow, newCol, newRow, newCol).
      * @param relativeRowDiff row difference of oldRow from newRow.
      * @param relativeColDiff col difference of oldCol from newCol.
-     * @return String movelist as oldRow, newCol, newRow, newCol.
+     * @return String movelist as (oldRow, newCol, newRow, newCol). Each move in the list is space separated as of now.
      **********************************************************************************************************************/
-    private static String getMovesWhereRelDifferenceFromNewCoordsIs(long moves, int relativeRowDiff, int relativeColDiff) {
+    private static String getMovesWhereRelDifferenceFromNewCoordsIs(long moves, int relativeRowDiff, int relativeColDiff) 
+    {
         String list = "";
         int trailingzeros, newRow, newCol, oldRow, oldCol;
         while(moves != 0)
@@ -239,6 +254,32 @@ public class Moves {
         return list;
     }
     
+    /***********************************************************************************************************************
+     * From the trailing zeros of the rightmost significant bit (rightmost 1), we calculate the position of newCol
+     * And to newCol we add relativeColDiff and get oldCol.
+     * In our bitboards, leftmost bit is 7,7 and rightmost bit 0,0.
+     * @param moves bitboard of new moves whose movelist needs to be generated as (oldCol, newCol, PromotionTo, Pawn).
+     * @param relativeColDiff col difference of oldCol from newCol.
+     * @return String movelist as oldRow, newCol, newRow, newCol. Each move in the list is space separated as of now.
+     **********************************************************************************************************************/
+    private static String getPromotionPaths(long moves, int relativeColDiff)
+    {
+        String list = "";
+        int trailingzeros, newCol, oldCol;
+        while(moves != 0)
+        {         
+            trailingzeros = Long.numberOfTrailingZeros(moves);
+            newCol = (63 - trailingzeros) % 8 ;
+            oldCol = newCol + relativeColDiff;                        
+            for(int k=0; k<4; k++)
+            {                
+                list += " " + oldCol + newCol + promotedTo[k] + W_PAWN;
+            }
+//            printString("moves", moves);
+            moves = moves & (moves - 1);
+        }
+        return list;
+    }
     
     /****************************************************************************************************************************
      * This method returns char array generated from all 12 bitboards.
