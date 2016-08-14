@@ -39,52 +39,39 @@ class UserInterface extends JPanel{
         g.drawImage(img_board, 20, 40, this);        
 
         /*--------------------------------------------------------------------------------------------------------
-        img_piece is used as a reference pointer to the images iteratively. Following for loop will populate 
-                the chessboard with images of pieces according to the contents of dispChess array.
+        img_piece is used as a reference pointer to the images iteratively. Following 'for' loop will populate 
+                the chessboard with images of pieces according to the contents of dispCB array.
         ---------------------------------------------------------------------------------------------------------*/
-        Image img_piece = null;        
+        Image img_piece;        
         for(int i=0; i<8; i++){
             for(int j=0; j<8; j++){
                 switch(dispCB[i][j]){
-                    case B_PAWN:
-                        img_piece = img_p;
-                        break;
-                    case B_KING:
-                        img_piece = img_k;
-                        break;
-                    case B_QUEEN:
-                        img_piece = img_q;
-                        break;
-                    case B_ROOK:
-                        img_piece = img_r;
-                        break;
-                    case B_BISHOP:
-                        img_piece = img_b;
-                        break;
-                    case B_KNIGHT:
-                        img_piece = img_n;
-                        break;
-                    case W_PAWN:
-                        img_piece = img_P;
-                        break;
-                    case W_KING:
-                        img_piece = img_K;
-                        break;
-                    case W_QUEEN:
-                        img_piece = img_Q;
-                        break;
-                    case W_ROOK:
-                        img_piece = img_R;
-                        break;
-                    case W_BISHOP:
-                        img_piece = img_B;
-                        break;
-                    case W_KNIGHT:
-                        img_piece = img_N;
-                        break;   
-                    default:
-                        img_piece = null;
-                        break;
+                    case B_PAWN:    img_piece = img_p;
+                                    break;
+                    case B_KING:    img_piece = img_k;
+                                    break;
+                    case B_QUEEN:   img_piece = img_q;
+                                    break;
+                    case B_ROOK:    img_piece = img_r;
+                                    break;
+                    case B_BISHOP:  img_piece = img_b;
+                                    break;
+                    case B_KNIGHT:  img_piece = img_n;
+                                    break;
+                    case W_PAWN:    img_piece = img_P;
+                                    break;
+                    case W_KING:    img_piece = img_K;
+                                    break;
+                    case W_QUEEN:   img_piece = img_Q;
+                                    break;
+                    case W_ROOK:    img_piece = img_R;
+                                    break;
+                    case W_BISHOP:  img_piece = img_B;
+                                    break;
+                    case W_KNIGHT:  img_piece = img_N;
+                                    break;   
+                    default:        img_piece = null;
+                                    break;
                 }
                 /*--------------------------------------------------------------------------------------------------------
                                 drawing images by displacing 'j' (with base_x as horizontal base) 
