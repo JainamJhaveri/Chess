@@ -17,38 +17,28 @@ import static pkg_bitboards.Constants.*;
     where 1 indicates the position where white pawns are currently present        
 **************************************************************************************************************************/                
 public class Moves {
-    static long WP = 0L, WR = 0L, WN = 0L, WB = 0L, WQ = 0L, WK = 0L, BP = 0L, BR = 0L, BN = 0L, BB = 0L, BQ = 0L, BK = 0L; // 12 bitboards
-    static long FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H ; // ranks a..h
-    static long RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8;  // files 1..8    
-    static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, ALLPIECES;
-    
-    static String moveHistory = "";
-                
-    
+    static long WP = 0L, WR = 0L, WN = 0L, WB = 0L, WQ = 0L, WK = 0L, BP = 0L, BR = 0L, BN = 0L, BB = 0L, BQ = 0L, BK = 0L; // 12 bitboards    
+    static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, OCCUPIEDSQ;                    
+        
     /*************************************************************************************************************************        
-        possibleWMoves() finds all possible LEGAL moves for white 
-        constants like PIECES_W_CANT_CAPTURE. They need to be recalculated here because bitboards may change after every move.
-    *************************************************************************************************************************/
+        * possibleWMoves() finds all possible LEGAL moves for white constants like PIECES_W_CANT_CAPTURE. 
+        * They need to be recalculated here because bitboards may change after every move.
+    *********************************************************************************/
     public static void possibleWMoves()
     {    
         PIECES_W_CANT_CAPTURE = (WP|WR|WN|WB|WQ|WK|BK);
         CAPTURABLE_B = (BP|BR|BN|BB|BQ);
         PIECES_B_CANT_CAPTURE = (BP|BR|BN|BB|BQ|BK|WK);
         CAPTURABLE_W = (WP|WR|WN|WB|WQ);
-        ALLPIECES = (WP|WR|WN|WB|WQ|WK|BP|BR|BN|BB|BQ|BK);
+        OCCUPIEDSQ = (WP|WR|WN|WB|WQ|WK|BP|BR|BN|BB|BQ|BK);
         
-        
+//        printMasks();
         String list = "";
-        list += possibleWP() ;
-        System.out.println("list: \n" +  list);
-//        printString("WR", WR);
-//        printString("WN",WN);
-//        printString("WB",WB);
-//        printString("WQ",WQ);
-//        printString("WK",WK);
-
+        list += possibleWP();
+//        list += possibleWR();
+        System.out.println("list: " +  list);
     }
-       
+  
     /******************************************************************************************
      * (oldRow, oldCol, newRow, newCol) is the move format that we will follow for our movelist
      * (oldCol, newCol, PromotionTo, Pawn) will be followed for promotion
@@ -60,151 +50,67 @@ public class Moves {
         String list = "";
         long moves;
         
-        /*  << 7 :: white pawn can capture right if there is a capturable black piece and that piece is not on FILE_A */        
-        moves = (WP << 7) & CAPTURABLE_B & ~RANK_8 & ~FILE_A;        
+        /*  << 9 :: white pawn can capture right if there is a capturable black piece and that piece is not on FILE_A */        
+        moves = (WP << 9) & CAPTURABLE_B & ~RANK_8 & ~FILE_A;                
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, -1);
-        
-        /*  << 9 :: white pawn can capture left if there is a capturable black piece and that piece is not on FILE_H */
-        moves = (WP << 9) & CAPTURABLE_B & ~RANK_8 & ~FILE_H;
+        System.out.println("After right cap: "+list);
+        /*  << 7 :: white pawn can capture left if there is a capturable black piece and that piece is not on FILE_H */
+        moves = (WP << 7) & CAPTURABLE_B & ~RANK_8 & ~FILE_H;
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, 1);
-
+        System.out.println("After left cap: "+list);
         /*  << 8 :: pawn can be pushed 1 position if it is not on rank 1 and there are no piece above its current rank */
-        moves = (WP << 8) & ~RANK_8 & ~ALLPIECES;
+        moves = (WP << 8) & ~RANK_8 & ~OCCUPIEDSQ;
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, 0);
-
+        System.out.println("After pawn push 1: "+list);
         /*  << 16 :: pawn can be pushed 2 positions if it is on rank 2 and there are no pieces on rank 4 or rank 3 for the corresponding pawn */
-        moves = ( (WP & RANK_2) << 16 ) &  ~( (ALLPIECES & RANK_4) | ((ALLPIECES & RANK_3) << 8) );
+        moves = ( (WP & RANK_2) << 16 ) &  ~( (OCCUPIEDSQ & RANK_4) | ((OCCUPIEDSQ & RANK_3) << 8) );
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -2, 0);
+        System.out.println("After pawn push 1: "+list);
         
-        
-        /*  << 7 :: right capture + promotion */        
-        moves = (WP << 7) & CAPTURABLE_B & RANK_8 & ~FILE_A;        
-//        printString("moves rcp", moves);
+        /*  << 9 :: right capture + promotion */        
+        moves = (WP << 9) & CAPTURABLE_B & RANK_8 & ~FILE_A;        
         list += getPromotionPaths(moves, -1);
-        
-        /*  << 9 :: left capture + promotion */        
-        moves = (WP << 9) & CAPTURABLE_B & RANK_8 & ~FILE_H;
+        System.out.println("After right cap + promotion: "+list);
+        /*  << 7 :: left capture + promotion */        
+        moves = (WP << 7) & CAPTURABLE_B & RANK_8 & ~FILE_H;
         list += getPromotionPaths(moves, 1);
-
+        System.out.println("After left cap + promotion: "+list);
         /*  << 8 :: simple promotion */        
-        moves = (WP << 8) & RANK_8 & ~ALLPIECES;
+        moves = (WP << 8) & RANK_8 & ~OCCUPIEDSQ;
         list += getPromotionPaths(moves, 0);
-        
+        System.out.println("After simple promotion: "+list);
         return list;
     }
 
-    /************************************************************************************
-     * Prints binary string value of a bitboard
-     * @param pc String description to be printed prior to binary String of bitboard.
-     * @param piece bitboard whose binary String value needs to be printed.
-     ************************************************************************************/
-    private static void printString(String pc, long piece) 
+    private static String possibleWR()
     {
-        System.out.print(pc +": ");
-        for(int i =0; i < Long.numberOfLeadingZeros(piece); i++)
-        {
-            System.out.print(0);    
-        }        
-        System.out.println(Long.toBinaryString(piece));
-    }
-
+        String list = "";
+        printString2("rook: ", WR);
+        printString2("rookMOVES: ", HandVMoves(34));
+        return list;
+    }       
     
-    /*************************************************************************************************
-    * RANKS are horizontal rows while FILES are vertical columns of a chess board.
-    * initFilesAndRanks() initializes the long values of each file (a to h) and rank (1 to 8).
-    * These values of RANKS and FILES will be used for move calculation for various pieces.
-    
-    * Example: For FILE E, Binary string is:
-    * FILE_E: 0000100000001000000010000000100000001000000010000000100000001000
-    * Here, 5th column is marked as 1s
-    * Example: For RANK 3, Binary string is:
-    * RANK_3: 0000000000000000000000000000000000000000111111110000000000000000
-    * Here, 3rd row is marked as 1s    
-    ************************************************************************************************/
-    
-    private static void initFilesAndRanks() 
-    {
-        String baseString = "0000000000000000000000000000000000000000000000000000000000000000";
-        String binString;
-        int position;
-        for(byte i=0; i<8; i++)
-        {
-            position =  i * 8;            
-            binString = baseString.substring( position + 8 ) + "11111111" + baseString.substring(0,position);
-            switch(i)
-            {
-                case 0: RANK_1 += Long.parseUnsignedLong(binString, 2); break;
-                case 1: RANK_2 += Long.parseUnsignedLong(binString, 2); break;
-                case 2: RANK_3 += Long.parseUnsignedLong(binString, 2); break;
-                case 3: RANK_4 += Long.parseUnsignedLong(binString, 2); break;
-                case 4: RANK_5 += Long.parseUnsignedLong(binString, 2); break;
-                case 5: RANK_6 += Long.parseUnsignedLong(binString, 2); break;
-                case 6: RANK_7 += Long.parseUnsignedLong(binString, 2); break;
-                case 7: RANK_8 += Long.parseUnsignedLong(binString, 2); break;    
-            }
-        }
-                
-        String basePattern = "00000000";
-        String binPattern;
-        for(byte i=0; i<8; i++)
-        {            
-            binPattern = basePattern.substring( i+1 ) + '1' + basePattern.substring( 0, i );            
-            binString = binPattern;
-            for(int j=0; j<3; j++)
-            {
-                binString += binString;
-            }            
-                                
-            switch(i)
-            {
-                case 0: FILE_H += Long.parseUnsignedLong(binString, 2); break;
-                case 1: FILE_G += Long.parseUnsignedLong(binString, 2); break;
-                case 2: FILE_F += Long.parseUnsignedLong(binString, 2); break;
-                case 3: FILE_E += Long.parseUnsignedLong(binString, 2); break;
-                case 4: FILE_D += Long.parseUnsignedLong(binString, 2); break;
-                case 5: FILE_C += Long.parseUnsignedLong(binString, 2); break;
-                case 6: FILE_B += Long.parseUnsignedLong(binString, 2); break;
-                case 7: FILE_A += Long.parseUnsignedLong(binString, 2); break;    
-            }
-        }
-//        
-//        printString("FILE_A: ", FILE_A);
-//        printString("FILE_B: ", FILE_B);
-//        printString("FILE_C: ", FILE_C);
-//        printString("FILE_D: ", FILE_D);
-//        printString("FILE_E: ", FILE_E);
-//        printString("FILE_F: ", FILE_F);
-//        printString("FILE_G: ", FILE_G);
-//        printString("FILE_H: ", FILE_H);
-//        
-//        printString("RANK_1: ", RANK_1);
-//        printString("RANK_2: ", RANK_2);
-//        printString("RANK_3: ", RANK_3);
-//        printString("RANK_4: ", RANK_4);
-//        printString("RANK_5: ", RANK_5);
-//        printString("RANK_6: ", RANK_6);
-//        printString("RANK_7: ", RANK_7);
-//        printString("RANK_8: ", RANK_8);
-    }
-    
+               
     /********************************************************************************************************************
      * In initialChessboard[][] which is passed from AlphaBetaChess class, topleft is 0,0 and bottomright is 7,7
-     * In our bitboards, leftmost bit is 7,7 and rightmost bit 0,0                    
+     * In our bitboards, leftmost bit is 7,7(63: h8) and rightmost bit 0,0 (0: a1)
      * @param initialChessBoard        
     ********************************************************************************************************************/
     public static void setBitBoardsFrom(char initialChessBoard[][])
     {
-        int position;
+        int position = 0;
         for(byte i=0; i<8; i++)
         {
-            position =  i * 8 ;
             for(byte j=0; j<8; j++)
-            {
-                String binString = "0000000000000000000000000000000000000000000000000000000000000000";                
-                binString = binString.substring(0,position) + "1" + binString.substring(position+1);
-//                System.out.println(binString + " i: " +i + " j: "+j);                
-                position++ ;  
-                switch(initialChessBoard[i][j])
+            {                
+                position = i*8 + j;  // positions from 0 to 63
+                String binString = getBinString(position);      
+                // initialCB ==> bitBoardPosition
+                // (7,7) => (0,7): 7
+                // (0,0) => (7,0): 56
+                // (7,0) => (0,0): 0
+                // (0,7) => (7,7): 63
+                switch(initialChessBoard[7-i][j])
                 {                    
                     case W_PAWN:    WP += Long.parseUnsignedLong(binString, 2); break;                    
                     case W_ROOK:    WR += Long.parseUnsignedLong(binString, 2); break;
@@ -222,8 +128,6 @@ public class Moves {
                 }
             }
         }
-        
-        initFilesAndRanks();
     }
 
     /***********************************************************************************************************************
@@ -236,15 +140,15 @@ public class Moves {
      * @return String movelist as (oldRow, newCol, newRow, newCol). Each move in the list is space separated as of now.
      **********************************************************************************************************************/
     private static String getMovesWhereRelDifferenceFromNewCoordsIs(long moves, int relativeRowDiff, int relativeColDiff) 
-    {
+    {        
+
         String list = "";
         int trailingzeros, newRow, newCol, oldRow, oldCol;
         while(moves != 0)
-        {         
-//            printString("moves: ", moves);
+        {                 
             trailingzeros = Long.numberOfTrailingZeros(moves);
             newRow = trailingzeros / 8;
-            newCol = (63 - trailingzeros) % 8 ;
+            newCol = trailingzeros % 8 ;
             oldRow = newRow + relativeRowDiff;
             oldCol = newCol + relativeColDiff;
             
@@ -269,13 +173,12 @@ public class Moves {
         while(moves != 0)
         {         
             trailingzeros = Long.numberOfTrailingZeros(moves);
-            newCol = (63 - trailingzeros) % 8 ;
+            newCol = trailingzeros % 8 ;
             oldCol = newCol + relativeColDiff;                        
             for(int k=0; k<4; k++)
             {                
                 list += " " + oldCol + newCol + promotedTo[k] + W_PAWN;
             }
-//            printString("moves", moves);
             moves = moves & (moves - 1);
         }
         return list;
@@ -291,13 +194,14 @@ public class Moves {
     *****************************************************************************************************************************/
     public static char[][] getDisplayBoard() 
     {
-        int shifts;
+//        printString2("WP", WP);
+        byte shifts;
         char myBitBoard[][] = new char[8][8];
         for(byte i=0; i<8; i++)
         {
             for(byte j=0; j<8; j++)
             {     
-                shifts = (7 - i) * 8 + (7 - j) ;    // from 63 to 0 shifts
+                shifts = (byte) ( (7 - i) * 8 + j ) ;    // from 0 to 63 shifts
                 if(      ((WP >> shifts) & 1) == 1  ) myBitBoard[i][j] = W_PAWN;
                 else if( ((WB >> shifts) & 1) == 1  ) myBitBoard[i][j] = W_BISHOP;
                 else if( ((WN >> shifts) & 1) == 1  ) myBitBoard[i][j] = W_KNIGHT;
@@ -315,5 +219,77 @@ public class Moves {
         }
         return myBitBoard;
     }
+
+    private static long rev(long bitboard) {
+        return Long.reverse(bitboard);
+    }    
+ 
+    private static void printString2(String pc, long piece) 
+    {
+        System.out.print(pc +": ");
+        String a = Long.toBinaryString(piece);        
+        for(byte i=0; i < Long.numberOfLeadingZeros(piece); i++)
+            a = '0' + a;
+        
+        System.out.println(a + " " + piece+"\n");
+        for(byte i = 0; i < 8; i++)
+        {
+            for(byte j = 7; j >= 0; j--)
+                System.out.print(" " + a.charAt( i * 8 +  j));            
+            System.out.println();
+        }        
+        
+    }
     
+       
+    private static long HandVMoves(int i)
+    {
+        long slider = 1L << 31;
+        printString2("1L << 0", 1L << 0);
+        printString2("1L << 1", 1L << 1);
+        printString2("1L << 2", 1L << 2);
+        
+//        printString2("Occupied", OCCUPIEDSQ);
+//        printString2("RankMask", RankMask[i/8]);
+        long horizontalPossibilities =(
+                                       ( ( OCCUPIEDSQ & RankMask[i/8] ) - 2*slider ) 
+                                ^ rev(rev( OCCUPIEDSQ & RankMask[i/8] ) - 2*rev(slider))
+                                      ) & RankMask[i/8];
+        printString2("horposs" ,horizontalPossibilities);
+        long verticalPossibilities = (
+                                       ( ( OCCUPIEDSQ & FileMask[i%8] ) - 2*slider ) 
+                                ^ rev(rev( OCCUPIEDSQ & FileMask[i%8] ) - 2*rev(slider))
+                                     ) & FileMask[i%8];        
+        printString2("verposs" ,verticalPossibilities);
+        return (horizontalPossibilities | verticalPossibilities);
+    }
+    
+    private static long DiagonalMoves(int i)
+    {
+        long slider = 1L << i;
+        long fwdDiaPossibilities =(
+                                       ( ( OCCUPIEDSQ & ForwardDiagonalMask[i/8 + i%8 - 7] ) - 2*slider ) 
+                                ^ rev(rev( OCCUPIEDSQ & ForwardDiagonalMask[i/8 + i%8 - 7] ) - 2*rev(slider))
+                                  ) & ForwardDiagonalMask[i/8 + i%8 - 7];
+        long backDiaPossibilities =(
+                                       ( ( OCCUPIEDSQ & BackDiagonalMask[i/8 + i%8] ) - 2*slider ) 
+                                ^ rev(rev( OCCUPIEDSQ & BackDiagonalMask[i/8 + i%8] ) - 2*rev(slider))
+                                   ) & BackDiagonalMask[i/8 + i%8];
+        return (fwdDiaPossibilities | backDiaPossibilities);
+    }
+
+    /*******
+     * 
+     * This method takes position (from 0 to 63) as input and returns corresponding binary string
+     * by placing 1 at position th bit from left and 0s at remaining bits
+     * 
+     * @param position
+     * @return String for populating bitboards
+     */
+    private static String getBinString(int position)
+    {
+        String binString = "0000000000000000000000000000000000000000000000000000000000000000";                
+        binString = binString.substring(0,63-position) + "1" + binString.substring(64-position);
+        return binString;
+    }
 }
