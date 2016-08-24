@@ -39,6 +39,7 @@ public class Moves {
         list += possibleWB();
         list += possibleWQ();
         list += possibleWN();
+        list += possibleWK();
         System.out.println("movelist: " +  list);
     }
   
@@ -123,6 +124,15 @@ public class Moves {
         return list;
     }
     
+    private static String possibleWK()
+    {
+        String list = "";
+        printString2("king:", WK);
+        list += getMoveListFromBitBoards(WK, 'K', "king");
+        System.out.println(list);
+        return list;
+    }
+    
     /**
      * This method returns horizontal or vertical moves according to the choice ('H' or 'D')
      * (oldRow, oldCol, newRow, newCol) is the move format that we will follow for our movelist
@@ -187,6 +197,26 @@ public class Moves {
                     newmoves = KnightMoves(oldposition);                    
                     printString2( piece+"MOVES: ", newmoves);                    
                     
+                    while(newmoves != 0)
+                    {
+                        oldposition = Long.numberOfTrailingZeros(newmoves);
+                        newRow = oldposition / 8;
+                        newCol = oldposition % 8 ;
+                        list += " " + oldRow + oldCol + newRow + newCol;
+                        newmoves = newmoves & (newmoves-1);
+                    }
+                    
+                    moves = moves & (moves-1);
+                }   break;
+            case 'K':
+                while(moves != 0)
+                {
+                    oldposition = Long.numberOfTrailingZeros(moves);
+                    oldRow = oldposition / 8;
+                    oldCol = oldposition % 8 ;
+                    newmoves = KingMoves(oldposition);                    
+                    printString2( piece+"MOVES: ", newmoves);                    
+                                        
                     while(newmoves != 0)
                     {
                         oldposition = Long.numberOfTrailingZeros(newmoves);
@@ -409,6 +439,22 @@ public class Moves {
         return newmoves;
     }
     
+    private static long KingMoves(int oldposition) {
+        long newmoves;
+        if(oldposition > 9)        
+            newmoves = (KingMask << (oldposition-9));        
+        else
+            newmoves = (KingMask >> (9-oldposition));
+
+        if(oldposition%8 == 0)
+            newmoves = newmoves & ~FILE_H;
+        else if(oldposition%8 == 7)
+            newmoves = newmoves & ~FILE_A;
+        
+        newmoves = newmoves & ~PIECES_W_CANT_CAPTURE;
+        return newmoves;
+    }
+    
     /*******
      * 
      * This method takes position (from 0 to 63) as input and returns corresponding bitboard
@@ -423,5 +469,7 @@ public class Moves {
         binString = binString.substring(0,63-position) + "1" + binString.substring(64-position);
         return Long.parseUnsignedLong(binString, 2);
     }
+
+    
     
 }
