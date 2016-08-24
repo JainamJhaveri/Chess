@@ -35,8 +35,11 @@ public class Moves {
 //        printMasks();
         String list = "";
         list += possibleWP();
-//        list += possibleWR();
-        System.out.println("list: " +  list);
+        list += possibleWR();        
+        list += possibleWB();
+        list += possibleWQ();
+        
+        System.out.println("movelist: " +  list);
     }
   
     /******************************************************************************************
@@ -79,18 +82,100 @@ public class Moves {
         moves = (WP << 8) & RANK_8 & ~OCCUPIEDSQ;
         list += getPromotionPaths(moves, 0);
         System.out.println("After simple promotion: "+list);
+        System.out.println("\npawn movelist: " +  list);
         return list;
     }
 
     private static String possibleWR()
     {
         String list = "";
-        printString2("rook: ", WR);
-        printString2("rookMOVES: ", HandVMoves(34));
+        printString2("rook: ", WR);        
+        list += getMoveListFromBitBoards(WR, 'H', "rook");
+        System.out.println("rook movelist: " +  list);
         return list;
-    }       
+    }
     
-               
+    private static String possibleWB()
+    {
+        String list = "";
+        printString2("bishop: ", WB);
+        list += getMoveListFromBitBoards(WB, 'D', "bishop");
+        System.out.println("bishop movelist: " +  list);
+        return list;
+    }
+    
+    private static String possibleWQ()
+    {
+        String list = "";
+        printString2("queen: ", WQ);        
+        list += getMoveListFromBitBoards(WQ, 'H', "queen");
+        list += getMoveListFromBitBoards(WQ, 'D', "queen");
+        System.out.println("queen movelist: " +  list);
+        return list;
+    }
+    
+    /**
+     * This method returns horizontal or vertical moves according to the choice ('H' or 'D')
+     * (oldRow, oldCol, newRow, newCol) is the move format that we will follow for our movelist
+     * @param PIECE_BB
+     * @param choice
+     * @return String of movelist 
+     */
+    private static String getMoveListFromBitBoards(long PIECE_BB, char choice, String piece)
+    {
+        String list = "";
+        long moves = PIECE_BB;
+        long newmoves;
+        int newRow, newCol, oldRow, oldCol;        
+        
+        if(choice == 'H'){
+            while(moves != 0)
+            {
+                int trailingzeros = Long.numberOfTrailingZeros(moves);
+                newmoves = HandVMoves(trailingzeros);                    
+                printString2( piece+"MOVES: ", newmoves);
+                oldRow = trailingzeros / 8;
+                oldCol = trailingzeros % 8 ;            
+
+                while(newmoves != 0)
+                {                 
+                    trailingzeros = Long.numberOfTrailingZeros(newmoves);
+                    newRow = trailingzeros / 8;
+                    newCol = trailingzeros % 8 ;                                    
+                    list += " " + oldRow + oldCol + newRow + newCol;
+                    newmoves = newmoves & (newmoves-1);
+                }
+
+                moves = moves & (moves-1);
+            }
+        }
+        else if(choice == 'D'){
+            while(moves != 0)
+            {
+                int trailingzeros = Long.numberOfTrailingZeros(moves);
+                newmoves = DiagonalMoves(trailingzeros);                    
+                printString2( piece+"MOVES: ", newmoves);
+                oldRow = trailingzeros / 8;
+                oldCol = trailingzeros % 8 ;            
+
+                while(newmoves != 0)
+                {                 
+                    trailingzeros = Long.numberOfTrailingZeros(newmoves);
+                    newRow = trailingzeros / 8;
+                    newCol = trailingzeros % 8 ;                                    
+                    list += " " + oldRow + oldCol + newRow + newCol;
+                    newmoves = newmoves & (newmoves-1);
+                }
+
+                moves = moves & (moves-1);
+            }
+        }
+        
+        
+                
+        return list;
+    }      
+    
     /********************************************************************************************************************
      * In initialChessboard[][] which is passed from AlphaBetaChess class, topleft is 0,0 and bottomright is 7,7
      * In our bitboards, leftmost bit is 7,7(63: h8) and rightmost bit 0,0 (0: a1)
@@ -104,26 +189,25 @@ public class Moves {
             for(byte j=0; j<8; j++)
             {                
                 position = i*8 + j;  // positions from 0 to 63
-                String binString = getBinString(position);      
-                // initialCB ==> bitBoardPosition
+                // initialCB ==> bitBoardPosition : position
                 // (7,7) => (0,7): 7
                 // (0,0) => (7,0): 56
                 // (7,0) => (0,0): 0
                 // (0,7) => (7,7): 63
                 switch(initialChessBoard[7-i][j])
                 {                    
-                    case W_PAWN:    WP += Long.parseUnsignedLong(binString, 2); break;                    
-                    case W_ROOK:    WR += Long.parseUnsignedLong(binString, 2); break;
-                    case W_BISHOP:  WB += Long.parseUnsignedLong(binString, 2); break;
-                    case W_KNIGHT:  WN += Long.parseUnsignedLong(binString, 2); break;
-                    case W_KING:    WK += Long.parseUnsignedLong(binString, 2); break;
-                    case W_QUEEN:   WQ += Long.parseUnsignedLong(binString, 2); break;                        
-                    case B_PAWN:    BP += Long.parseUnsignedLong(binString, 2); break;                    
-                    case B_ROOK:    BR += Long.parseUnsignedLong(binString, 2); break;
-                    case B_BISHOP:  BB += Long.parseUnsignedLong(binString, 2); break;
-                    case B_KNIGHT:  BN += Long.parseUnsignedLong(binString, 2); break;
-                    case B_KING:    BK += Long.parseUnsignedLong(binString, 2); break;
-                    case B_QUEEN:   BQ += Long.parseUnsignedLong(binString, 2); break;
+                    case W_PAWN:    WP += getBitBoardCorrespondingTo(position); break;                    
+                    case W_ROOK:    WR += getBitBoardCorrespondingTo(position); break;
+                    case W_BISHOP:  WB += getBitBoardCorrespondingTo(position); break;
+                    case W_KNIGHT:  WN += getBitBoardCorrespondingTo(position); break;
+                    case W_KING:    WK += getBitBoardCorrespondingTo(position); break;
+                    case W_QUEEN:   WQ += getBitBoardCorrespondingTo(position); break;                        
+                    case B_PAWN:    BP += getBitBoardCorrespondingTo(position); break;                    
+                    case B_ROOK:    BR += getBitBoardCorrespondingTo(position); break;
+                    case B_BISHOP:  BB += getBitBoardCorrespondingTo(position); break;
+                    case B_KNIGHT:  BN += getBitBoardCorrespondingTo(position); break;
+                    case B_KING:    BK += getBitBoardCorrespondingTo(position); break;
+                    case B_QUEEN:   BQ += getBitBoardCorrespondingTo(position); break;
                     default:        break;
                 }
             }
@@ -223,15 +307,18 @@ public class Moves {
     private static long rev(long bitboard) {
         return Long.reverse(bitboard);
     }    
- 
+
+    /**
+     * Prints bitboard ( for debugging purpose )
+     * @param pc name of piece whose bitboard is to be printed
+     * @param piece bitboard
+     */
     private static void printString2(String pc, long piece) 
     {
-        System.out.print(pc +": ");
+        System.out.println("\n"+pc +": ");
         String a = Long.toBinaryString(piece);        
         for(byte i=0; i < Long.numberOfLeadingZeros(piece); i++)
-            a = '0' + a;
-        
-        System.out.println(a + " " + piece+"\n");
+            a = '0' + a;        
         for(byte i = 0; i < 8; i++)
         {
             for(byte j = 7; j >= 0; j--)
@@ -244,23 +331,20 @@ public class Moves {
        
     private static long HandVMoves(int i)
     {
-        long slider = 1L << 31;
-        printString2("1L << 0", 1L << 0);
-        printString2("1L << 1", 1L << 1);
-        printString2("1L << 2", 1L << 2);
-        
+        long slider = 1L << i;
+
 //        printString2("Occupied", OCCUPIEDSQ);
 //        printString2("RankMask", RankMask[i/8]);
         long horizontalPossibilities =(
                                        ( ( OCCUPIEDSQ & RankMask[i/8] ) - 2*slider ) 
                                 ^ rev(rev( OCCUPIEDSQ & RankMask[i/8] ) - 2*rev(slider))
-                                      ) & RankMask[i/8];
-        printString2("horposs" ,horizontalPossibilities);
+                                      ) & RankMask[i/8] & ~PIECES_W_CANT_CAPTURE;
+//        printString2("horposs" ,horizontalPossibilities);
         long verticalPossibilities = (
                                        ( ( OCCUPIEDSQ & FileMask[i%8] ) - 2*slider ) 
                                 ^ rev(rev( OCCUPIEDSQ & FileMask[i%8] ) - 2*rev(slider))
-                                     ) & FileMask[i%8];        
-        printString2("verposs" ,verticalPossibilities);
+                                     ) & FileMask[i%8] & ~PIECES_W_CANT_CAPTURE;        
+//        printString2("verposs" ,verticalPossibilities);
         return (horizontalPossibilities | verticalPossibilities);
     }
     
@@ -268,28 +352,30 @@ public class Moves {
     {
         long slider = 1L << i;
         long fwdDiaPossibilities =(
-                                       ( ( OCCUPIEDSQ & ForwardDiagonalMask[i/8 + i%8 - 7] ) - 2*slider ) 
-                                ^ rev(rev( OCCUPIEDSQ & ForwardDiagonalMask[i/8 + i%8 - 7] ) - 2*rev(slider))
-                                  ) & ForwardDiagonalMask[i/8 + i%8 - 7];
+                                       ( ( OCCUPIEDSQ & ForwardDiagonalMask[ i/8 + 7-(i%8) ] ) - 2*slider ) 
+                                ^ rev(rev( OCCUPIEDSQ & ForwardDiagonalMask[ i/8 + 7-(i%8) ] ) - 2*rev(slider))
+                                  ) & ForwardDiagonalMask[ i/8 + 7-(i%8) ]  & ~PIECES_W_CANT_CAPTURE;
+//        printString2("fwdDiaposs" ,fwdDiaPossibilities);
         long backDiaPossibilities =(
                                        ( ( OCCUPIEDSQ & BackDiagonalMask[i/8 + i%8] ) - 2*slider ) 
                                 ^ rev(rev( OCCUPIEDSQ & BackDiagonalMask[i/8 + i%8] ) - 2*rev(slider))
-                                   ) & BackDiagonalMask[i/8 + i%8];
+                                   ) & BackDiagonalMask[i/8 + i%8]  & ~PIECES_W_CANT_CAPTURE;
+//        printString2("backDiaposs" ,backDiaPossibilities);
         return (fwdDiaPossibilities | backDiaPossibilities);
     }
 
     /*******
      * 
-     * This method takes position (from 0 to 63) as input and returns corresponding binary string
-     * by placing 1 at position th bit from left and 0s at remaining bits
+     * This method takes position (from 0 to 63) as input and returns corresponding bitboard
+     * by placing 1 at position th bit in binString 0s on remaining 63 positions.
      * 
-     * @param position
-     * @return String for populating bitboards
+     * @param position : bit position in a long that needs to be changed to 1
+     * @return long: bitboard corresponding to position
      */
-    private static String getBinString(int position)
+    private static long getBitBoardCorrespondingTo(int position)
     {
         String binString = "0000000000000000000000000000000000000000000000000000000000000000";                
         binString = binString.substring(0,63-position) + "1" + binString.substring(64-position);
-        return binString;
+        return Long.parseUnsignedLong(binString, 2);
     }
 }
