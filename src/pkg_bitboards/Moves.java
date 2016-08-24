@@ -38,7 +38,7 @@ public class Moves {
         list += possibleWR();        
         list += possibleWB();
         list += possibleWQ();
-        
+        list += possibleWN();
         System.out.println("movelist: " +  list);
     }
   
@@ -114,6 +114,15 @@ public class Moves {
         return list;
     }
     
+    private static String possibleWN()
+    {
+        String list = "";
+        printString2("knight: ", WN);
+        list += getMoveListFromBitBoards(WN, 'N', "knight");
+        System.out.println(list);
+        return list;
+    }
+    
     /**
      * This method returns horizontal or vertical moves according to the choice ('H' or 'D')
      * (oldRow, oldCol, newRow, newCol) is the move format that we will follow for our movelist
@@ -126,53 +135,73 @@ public class Moves {
         String list = "";
         long moves = PIECE_BB;
         long newmoves;
-        int newRow, newCol, oldRow, oldCol;        
+        int newRow, newCol, oldRow, oldCol, oldposition;        
         
-        if(choice == 'H'){
-            while(moves != 0)
-            {
-                int trailingzeros = Long.numberOfTrailingZeros(moves);
-                newmoves = HandVMoves(trailingzeros);                    
-                printString2( piece+"MOVES: ", newmoves);
-                oldRow = trailingzeros / 8;
-                oldCol = trailingzeros % 8 ;            
-
-                while(newmoves != 0)
-                {                 
-                    trailingzeros = Long.numberOfTrailingZeros(newmoves);
-                    newRow = trailingzeros / 8;
-                    newCol = trailingzeros % 8 ;                                    
-                    list += " " + oldRow + oldCol + newRow + newCol;
-                    newmoves = newmoves & (newmoves-1);
-                }
-
-                moves = moves & (moves-1);
-            }
+        switch (choice) {
+            case 'H':
+                while(moves != 0)
+                {
+                    oldposition = Long.numberOfTrailingZeros(moves);
+                    oldRow = oldposition / 8;
+                    oldCol = oldposition % 8 ;
+                    newmoves = HandVMoves(oldposition);
+                    printString2( piece+"MOVES: ", newmoves);
+                    
+                    while(newmoves != 0)
+                    {
+                        oldposition = Long.numberOfTrailingZeros(newmoves);
+                        newRow = oldposition / 8;
+                        newCol = oldposition % 8 ;
+                        list += " " + oldRow + oldCol + newRow + newCol;
+                        newmoves = newmoves & (newmoves-1);
+                    }
+                    
+                    moves = moves & (moves-1);
+                }   break;
+            case 'D':
+                while(moves != 0)
+                {
+                    oldposition = Long.numberOfTrailingZeros(moves);
+                    oldRow = oldposition / 8;
+                    oldCol = oldposition % 8 ;
+                    newmoves = DiagonalMoves(oldposition);
+                    printString2( piece+"MOVES: ", newmoves);                    
+                    
+                    while(newmoves != 0)
+                    {
+                        oldposition = Long.numberOfTrailingZeros(newmoves);
+                        newRow = oldposition / 8;
+                        newCol = oldposition % 8 ;
+                        list += " " + oldRow + oldCol + newRow + newCol;
+                        newmoves = newmoves & (newmoves-1);
+                    }
+                    
+                    moves = moves & (moves-1);
+                }   break;
+            case 'N':
+                while(moves != 0)
+                {
+                    oldposition = Long.numberOfTrailingZeros(moves);
+                    oldRow = oldposition / 8;
+                    oldCol = oldposition % 8 ;
+                    newmoves = KnightMoves(oldposition);                    
+                    printString2( piece+"MOVES: ", newmoves);                    
+                    
+                    while(newmoves != 0)
+                    {
+                        oldposition = Long.numberOfTrailingZeros(newmoves);
+                        newRow = oldposition / 8;
+                        newCol = oldposition % 8 ;
+                        list += " " + oldRow + oldCol + newRow + newCol;
+                        newmoves = newmoves & (newmoves-1);
+                    }
+                    
+                    moves = moves & (moves-1);
+                }   break;
+            default:
+                break;
         }
-        else if(choice == 'D'){
-            while(moves != 0)
-            {
-                int trailingzeros = Long.numberOfTrailingZeros(moves);
-                newmoves = DiagonalMoves(trailingzeros);                    
-                printString2( piece+"MOVES: ", newmoves);
-                oldRow = trailingzeros / 8;
-                oldCol = trailingzeros % 8 ;            
-
-                while(newmoves != 0)
-                {                 
-                    trailingzeros = Long.numberOfTrailingZeros(newmoves);
-                    newRow = trailingzeros / 8;
-                    newCol = trailingzeros % 8 ;                                    
-                    list += " " + oldRow + oldCol + newRow + newCol;
-                    newmoves = newmoves & (newmoves-1);
-                }
-
-                moves = moves & (moves-1);
-            }
-        }
         
-        
-                
         return list;
     }      
     
@@ -364,6 +393,22 @@ public class Moves {
         return (fwdDiaPossibilities | backDiaPossibilities);
     }
 
+    private static long KnightMoves(int oldposition) {
+        long newmoves;
+        if(oldposition > 18)        
+            newmoves = (KnightMask << (oldposition-18));        
+        else
+            newmoves = (KnightMask >> (18-oldposition));
+
+        if(oldposition%8 < 4)
+            newmoves = newmoves & ~(FILE_G | FILE_H);
+        else
+            newmoves = newmoves & ~(FILE_A | FILE_B);
+        
+        newmoves = newmoves & ~PIECES_W_CANT_CAPTURE;
+        return newmoves;
+    }
+    
     /*******
      * 
      * This method takes position (from 0 to 63) as input and returns corresponding bitboard
@@ -378,4 +423,5 @@ public class Moves {
         binString = binString.substring(0,63-position) + "1" + binString.substring(64-position);
         return Long.parseUnsignedLong(binString, 2);
     }
+    
 }

@@ -97,6 +97,7 @@ public class Constants {
         0x4040404040404040L,   
         0x8080808080808080L
     };
+    public static long KnightMask = 0xA1100110AL;
     
     public static long RANK_1 = 0xFFL;
     public static long RANK_2 = 0xFF00L;
