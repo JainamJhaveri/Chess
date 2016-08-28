@@ -19,10 +19,13 @@ import static pkg_bitboards.Constants.*;
 public class Moves {
     static long WP = 0L, WR = 0L, WN = 0L, WB = 0L, WQ = 0L, WK = 0L, BP = 0L, BR = 0L, BN = 0L, BB = 0L, BQ = 0L, BK = 0L; // 12 bitboards    
     static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, OCCUPIEDSQ;                    
-        
+    private static final char IAMWHITE = 'W';
+    private static final char IAMBLACK = 'B';    
     /*************************************************************************************************************************        
-        * possibleWMoves() finds all possible LEGAL moves for white constants like PIECES_W_CANT_CAPTURE. 
-        * They need to be recalculated here because bitboards may change after every move.
+    * possibleWMoves() finds all possible LEGAL moves for white constants like PIECES_W_CANT_CAPTURE. 
+    * They need to be recalculated here because bitboards may change after every move.
+    * (oldRow, oldCol, newRow, newCol) is the move format that we will follow for our movelist
+    * (oldCol, newCol, PromotionTo, Pawn) will be followed for promotion
     *********************************************************************************/
     public static void possibleWMoves()
     {    
@@ -33,22 +36,26 @@ public class Moves {
         OCCUPIEDSQ = (WP|WR|WN|WB|WQ|WK|BP|BR|BN|BB|BQ|BK);
         
 //        printMasks();
-        String list = "";
-        list += possibleWP();
-        list += possibleWR();        
-        list += possibleWB();
-        list += possibleWQ();
-        list += possibleWN();
-        list += possibleWK();
-        System.out.println("movelist: " +  list);
+        String wlist = "";        
+        wlist += possibleWP();        
+        wlist += possibleR(WR, IAMWHITE);        
+        wlist += possibleB(WB, IAMWHITE);
+        wlist += possibleQ(WQ, IAMWHITE);
+        wlist += possibleN(WN, IAMWHITE);       
+        wlist += possibleK(WK, IAMWHITE);        
+        
+        String blist = "";
+        blist += possibleBP();
+        blist += possibleR(BR, IAMBLACK);        
+        blist += possibleB(BB, IAMBLACK);
+        blist += possibleQ(BQ, IAMBLACK);
+        blist += possibleN(BN, IAMBLACK);       
+        blist += possibleK(BK, IAMBLACK);
+        
+        System.out.println("white movelist: " +  wlist);
+        System.out.println("black movelist: " +  blist);
     }
   
-    /******************************************************************************************
-     * (oldRow, oldCol, newRow, newCol) is the move format that we will follow for our movelist
-     * (oldCol, newCol, PromotionTo, Pawn) will be followed for promotion
-     * This method returns legal moves for all White Pawns
-     * @return String list (which contains space separated moves as of now)
-     ******************************************************************************************/
     private static String possibleWP()
     {
         String list = "";
@@ -62,7 +69,7 @@ public class Moves {
         moves = (WP << 7) & CAPTURABLE_B & ~RANK_8 & ~FILE_H;
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, 1);
         System.out.println("After left cap: "+list);
-        /*  << 8 :: pawn can be pushed 1 position if it is not on rank 1 and there are no piece above its current rank */
+        /*  >> 8 :: pawn can be pushed 1 position if it doesn't go on rank 8 after push and there are no piece below its current rank */
         moves = (WP << 8) & ~RANK_8 & ~OCCUPIEDSQ;
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, 0);
         System.out.println("After pawn push 1: "+list);
@@ -87,48 +94,86 @@ public class Moves {
         return list;
     }
 
-    private static String possibleWR()
+    private static String possibleBP()
     {
         String list = "";
-        printString2("rook: ", WR);        
-        list += getMoveListFromBitBoards(WR, 'H', "rook");
+        long moves;
+        
+        /*  >> 9 :: black pawn can capture right if there is a capturable black piece and that piece is not on FILE_A */        
+        moves = (BP >> 9) & CAPTURABLE_W & ~RANK_1 & ~FILE_A;                
+        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 1, 1);
+        System.out.println("After right cap: "+list);
+        /*  >> 7 :: black pawn can capture left if there is a capturable black piece and that piece is not on FILE_H */
+        moves = (BP >> 7) & CAPTURABLE_W & ~RANK_1 & ~FILE_A;
+        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 1, -1);
+        System.out.println("After left cap: "+list);
+        /*  >> 8 :: pawn can be pushed 1 position if it doesn't go on rank 1 after push and there are no piece below its current rank */
+        moves = (BP >> 8) & ~RANK_1 & ~OCCUPIEDSQ;
+        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 1, 0);
+        System.out.println("After pawn push 1: "+list);
+        /*  >> 16 :: pawn can be pushed 2 positions if it is on rank 7 and there are no pieces on rank 5 or rank 6 for the corresponding pawn */
+        moves = ( (BP & RANK_7) >> 16 ) &  ~( (OCCUPIEDSQ & RANK_5) | ((OCCUPIEDSQ & RANK_6) >> 8) );
+        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 2, 0);
+        System.out.println("After pawn push 1: "+list);
+        
+        /*  >> 9 :: right capture + promotion */        
+        moves = (BP >> 9) & CAPTURABLE_W & RANK_1 & ~FILE_H;        
+        list += getPromotionPaths(moves, 1);
+        System.out.println("After right cap + promotion: "+list);
+        /*  >> 7 :: left capture + promotion */        
+        moves = (BP >> 7) & CAPTURABLE_W & RANK_1 & ~FILE_A;
+        list += getPromotionPaths(moves, -1);
+        System.out.println("After left cap + promotion: "+list);
+        /*  >> 8 :: simple promotion */        
+        moves = (BP >> 8) & RANK_1 & ~OCCUPIEDSQ;
+        list += getPromotionPaths(moves, 0);
+        System.out.println("After simple promotion: "+list);
+        System.out.println("\npawn movelist: " +  list);
+        return list;
+    }
+    
+    private static String possibleR(long ROOK, char whoAmI)
+    {
+        String list = "";
+        printString2("rook: ", ROOK);        
+        list += getMoveListFromBitBoards(ROOK, 'H', "rook", whoAmI);
         System.out.println("rook movelist: " +  list);
         return list;
     }
     
-    private static String possibleWB()
+    private static String possibleB(long BISHOP, char whoAmI)
     {
         String list = "";
-        printString2("bishop: ", WB);
-        list += getMoveListFromBitBoards(WB, 'D', "bishop");
+        printString2("bishop: ", BISHOP);
+        list += getMoveListFromBitBoards(BISHOP, 'D', "bishop", whoAmI);
         System.out.println("bishop movelist: " +  list);
         return list;
     }
     
-    private static String possibleWQ()
+    private static String possibleQ(long QUEEN, char whoAmI)
     {
         String list = "";
-        printString2("queen: ", WQ);        
-        list += getMoveListFromBitBoards(WQ, 'H', "queen");
-        list += getMoveListFromBitBoards(WQ, 'D', "queen");
+        printString2("queen: ", QUEEN);        
+        list += getMoveListFromBitBoards(QUEEN, 'H', "queen", whoAmI);
+        list += getMoveListFromBitBoards(QUEEN, 'D', "queen", whoAmI);
         System.out.println("queen movelist: " +  list);
         return list;
     }
     
-    private static String possibleWN()
+    private static String possibleN(long KNIGHT, char whoAmI)
     {
         String list = "";
-        printString2("knight: ", WN);
-        list += getMoveListFromBitBoards(WN, 'N', "knight");
+        printString2("knight: ", KNIGHT);
+        list += getMoveListFromBitBoards(KNIGHT, 'N', "knight", whoAmI);
         System.out.println(list);
         return list;
     }
     
-    private static String possibleWK()
+    private static String possibleK(long KING, char whoAmI)
     {
         String list = "";
-        printString2("king:", WK);
-        list += getMoveListFromBitBoards(WK, 'K', "king");
+        printString2("king:", KING);
+        list += getMoveListFromBitBoards(KING, 'K', "king", whoAmI);
         System.out.println(list);
         return list;
     }
@@ -140,7 +185,7 @@ public class Moves {
      * @param choice
      * @return String of movelist 
      */
-    private static String getMoveListFromBitBoards(long PIECE_BB, char choice, String piece)
+    private static String getMoveListFromBitBoards(long PIECE_BB, char choice, String piece, char whoAmI)
     {
         String list = "";
         long moves = PIECE_BB;
@@ -154,7 +199,7 @@ public class Moves {
                     oldposition = Long.numberOfTrailingZeros(moves);
                     oldRow = oldposition / 8;
                     oldCol = oldposition % 8 ;
-                    newmoves = HandVMoves(oldposition);
+                    newmoves = HandVMoves(oldposition, whoAmI);
                     printString2( piece+"MOVES: ", newmoves);
                     
                     while(newmoves != 0)
@@ -174,7 +219,7 @@ public class Moves {
                     oldposition = Long.numberOfTrailingZeros(moves);
                     oldRow = oldposition / 8;
                     oldCol = oldposition % 8 ;
-                    newmoves = DiagonalMoves(oldposition);
+                    newmoves = DiagonalMoves(oldposition, whoAmI);
                     printString2( piece+"MOVES: ", newmoves);                    
                     
                     while(newmoves != 0)
@@ -194,7 +239,7 @@ public class Moves {
                     oldposition = Long.numberOfTrailingZeros(moves);
                     oldRow = oldposition / 8;
                     oldCol = oldposition % 8 ;
-                    newmoves = KnightMoves(oldposition);                    
+                    newmoves = KnightMoves(oldposition, whoAmI);                    
                     printString2( piece+"MOVES: ", newmoves);                    
                     
                     while(newmoves != 0)
@@ -214,7 +259,7 @@ public class Moves {
                     oldposition = Long.numberOfTrailingZeros(moves);
                     oldRow = oldposition / 8;
                     oldCol = oldposition % 8 ;
-                    newmoves = KingMoves(oldposition);                    
+                    newmoves = KingMoves(oldposition, whoAmI);                    
                     printString2( piece+"MOVES: ", newmoves);                    
                                         
                     while(newmoves != 0)
@@ -388,43 +433,51 @@ public class Moves {
     }
     
        
-    private static long HandVMoves(int i)
+    private static long HandVMoves(int i, char whoAmI)
     {
         long slider = 1L << i;
-
+        long PIECES_I_CANT_CAPTURE;
+        if( whoAmI == IAMWHITE )  PIECES_I_CANT_CAPTURE = PIECES_W_CANT_CAPTURE;
+        else    PIECES_I_CANT_CAPTURE = PIECES_B_CANT_CAPTURE;
 //        printString2("Occupied", OCCUPIEDSQ);
 //        printString2("RankMask", RankMask[i/8]);
         long horizontalPossibilities =(
                                        ( ( OCCUPIEDSQ & RankMask[i/8] ) - 2*slider ) 
                                 ^ rev(rev( OCCUPIEDSQ & RankMask[i/8] ) - 2*rev(slider))
-                                      ) & RankMask[i/8] & ~PIECES_W_CANT_CAPTURE;
+                                      ) & RankMask[i/8] & ~PIECES_I_CANT_CAPTURE;
 //        printString2("horposs" ,horizontalPossibilities);
         long verticalPossibilities = (
                                        ( ( OCCUPIEDSQ & FileMask[i%8] ) - 2*slider ) 
                                 ^ rev(rev( OCCUPIEDSQ & FileMask[i%8] ) - 2*rev(slider))
-                                     ) & FileMask[i%8] & ~PIECES_W_CANT_CAPTURE;        
+                                     ) & FileMask[i%8] & ~PIECES_I_CANT_CAPTURE;        
 //        printString2("verposs" ,verticalPossibilities);
         return (horizontalPossibilities | verticalPossibilities);
     }
     
-    private static long DiagonalMoves(int i)
+    private static long DiagonalMoves(int i, char whoAmI)
     {
         long slider = 1L << i;
+        long PIECES_I_CANT_CAPTURE;
+        if( whoAmI == IAMWHITE )  PIECES_I_CANT_CAPTURE = PIECES_W_CANT_CAPTURE;
+        else    PIECES_I_CANT_CAPTURE = PIECES_B_CANT_CAPTURE;
         long fwdDiaPossibilities =(
                                        ( ( OCCUPIEDSQ & ForwardDiagonalMask[ i/8 + 7-(i%8) ] ) - 2*slider ) 
                                 ^ rev(rev( OCCUPIEDSQ & ForwardDiagonalMask[ i/8 + 7-(i%8) ] ) - 2*rev(slider))
-                                  ) & ForwardDiagonalMask[ i/8 + 7-(i%8) ]  & ~PIECES_W_CANT_CAPTURE;
+                                  ) & ForwardDiagonalMask[ i/8 + 7-(i%8) ]  & ~PIECES_I_CANT_CAPTURE;
 //        printString2("fwdDiaposs" ,fwdDiaPossibilities);
         long backDiaPossibilities =(
                                        ( ( OCCUPIEDSQ & BackDiagonalMask[i/8 + i%8] ) - 2*slider ) 
                                 ^ rev(rev( OCCUPIEDSQ & BackDiagonalMask[i/8 + i%8] ) - 2*rev(slider))
-                                   ) & BackDiagonalMask[i/8 + i%8]  & ~PIECES_W_CANT_CAPTURE;
+                                   ) & BackDiagonalMask[i/8 + i%8]  & ~PIECES_I_CANT_CAPTURE;
 //        printString2("backDiaposs" ,backDiaPossibilities);
         return (fwdDiaPossibilities | backDiaPossibilities);
     }
 
-    private static long KnightMoves(int oldposition) {
+    private static long KnightMoves(int oldposition, char whoAmI) {
         long newmoves;
+        long PIECES_I_CANT_CAPTURE;
+        if( whoAmI == IAMWHITE )  PIECES_I_CANT_CAPTURE = PIECES_W_CANT_CAPTURE;
+        else    PIECES_I_CANT_CAPTURE = PIECES_B_CANT_CAPTURE;
         if(oldposition > 18)        
             newmoves = (KnightMask << (oldposition-18));        
         else
@@ -435,12 +488,15 @@ public class Moves {
         else
             newmoves = newmoves & ~(FILE_A | FILE_B);
         
-        newmoves = newmoves & ~PIECES_W_CANT_CAPTURE;
+        newmoves = newmoves & ~PIECES_I_CANT_CAPTURE;
         return newmoves;
     }
     
-    private static long KingMoves(int oldposition) {
+    private static long KingMoves(int oldposition, char whoAmI) {
         long newmoves;
+        long PIECES_I_CANT_CAPTURE;
+        if( whoAmI == IAMWHITE )  PIECES_I_CANT_CAPTURE = PIECES_W_CANT_CAPTURE;
+        else    PIECES_I_CANT_CAPTURE = PIECES_B_CANT_CAPTURE;
         if(oldposition > 9)        
             newmoves = (KingMask << (oldposition-9));        
         else
@@ -451,7 +507,7 @@ public class Moves {
         else if(oldposition%8 == 7)
             newmoves = newmoves & ~FILE_A;
         
-        newmoves = newmoves & ~PIECES_W_CANT_CAPTURE;
+        newmoves = newmoves & ~PIECES_I_CANT_CAPTURE;
         return newmoves;
     }
     
