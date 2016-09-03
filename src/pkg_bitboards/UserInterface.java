@@ -3,23 +3,33 @@ package pkg_bitboards;
 import static pkg_bitboards.Constants.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.ImageFilter;
+import java.awt.image.ImageProducer;
+import java.awt.image.RGBImageFilter;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 class UserInterface extends JPanel implements MouseListener, MouseMotionListener{
-    Image img_board, img_green;
-    Image img_B, img_K, img_N, img_P, img_Q, img_R;
-    Image img_b, img_k, img_n, img_p, img_q, img_r;
-    static int base_x = 20, base_y = 40, disp = 53;
-    static char dispCB[][] = new char[8][8];
-    static int mouseX, mouseY, newMouseX, newMouseY;
-    static boolean click2 = false, listenerset = false;
-    static String movelist = "";
+    private final Image img_board, img_green;
+    private final Image img_B, img_K, img_N, img_P, img_Q, img_R;
+    private final Image img_b, img_k, img_n, img_p, img_q, img_r;
+    private final int base_x = 20, base_y = 40, disp = 53;
+    private char dispCB[][] = new char[8][8];
+    private int boardCol, boardRow;
+    private boolean click2 = false, listenerset = false;
+    private String movelist = "";
     
-    public UserInterface(char[][] initialCB) {
+    
+    public UserInterface(char[][] initialCB)  {
+                
         dispCB = initialCB;
         // image of board
         img_board = new ImageIcon(path_board).getImage();
-        img_green = new ImageIcon(path_greenSq).getImage();
+        img_green = makeTransparent(path_greenSq, 0x6F00FF00 );
         // images of white pieces 
         img_B = new ImageIcon(path_B).getImage();
         img_K = new ImageIcon(path_K).getImage();
@@ -34,46 +44,18 @@ class UserInterface extends JPanel implements MouseListener, MouseMotionListener
         img_p = new ImageIcon(path_p).getImage();
         img_q = new ImageIcon(path_q).getImage();
         img_r = new ImageIcon(path_r).getImage();
+        // adding mouselistener and mousemotionlisteners to JPanel
+        addMouseListener(this);
+        addMouseMotionListener(this);
     }
     
     
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        
-        if(listenerset==false){
-            this.addMouseListener(this);
-            this.addMouseMotionListener(this);
-            listenerset = true;
-        }
-        
-        
-        g.drawImage(img_board, base_x, base_y, this);        
-        
-        /*--------------------------------------------------------------------------------------------------------
-        Square Highlighting
-        ---------------------------------------------------------------------------------------------------------*/
-        if(click2 == true){
-            for(int i=0; i<movelist.length()/5; i++){
-                String temp = movelist.substring((i*5), (i*5)+5);
-                //if not pawn promotion
-                if(!Character.isLetter(temp.charAt(3))){
-                    int a = Character.getNumericValue(temp.charAt(3));
-                    int b = Character.getNumericValue(temp.charAt(4));
-                    g.drawImage(img_green, base_x+(b*disp), base_y+((7-a)*disp), this);
-                    System.out.println("Green Square Debugging - "+temp);
-                    System.out.println("Green Square Debugging - "+a+", "+b);
-                }
-                else{
-                    int b = Character.getNumericValue(temp.charAt(2));
-                    g.drawImage(img_green, base_x+(b*disp), base_y, this);
-                    System.out.println("Green Square Debugging - "+temp);
-                    System.out.println("Green Square Debugging - "+b);
-                }
-            }
-        }
-        
-        
+        super.paintComponent(g);      
+
+        g.drawImage(img_board, base_x, base_y, this);                
+        highlightSquares(g);
         
         /*--------------------------------------------------------------------------------------------------------
         img_piece is used as a reference pointer to the images iteratively. Following 'for' loop will populate 
@@ -83,32 +65,19 @@ class UserInterface extends JPanel implements MouseListener, MouseMotionListener
         for(int i=0; i<8; i++){
             for(int j=0; j<8; j++){
                 switch(dispCB[i][j]){
-                    case B_PAWN:    img_piece = img_p;
-                                    break;
-                    case B_KING:    img_piece = img_k;
-                                    break;
-                    case B_QUEEN:   img_piece = img_q;
-                                    break;
-                    case B_ROOK:    img_piece = img_r;
-                                    break;
-                    case B_BISHOP:  img_piece = img_b;
-                                    break;
-                    case B_KNIGHT:  img_piece = img_n;
-                                    break;
-                    case W_PAWN:    img_piece = img_P;
-                                    break;
-                    case W_KING:    img_piece = img_K;
-                                    break;
-                    case W_QUEEN:   img_piece = img_Q;
-                                    break;
-                    case W_ROOK:    img_piece = img_R;
-                                    break;
-                    case W_BISHOP:  img_piece = img_B;
-                                    break;
-                    case W_KNIGHT:  img_piece = img_N;
-                                    break;   
-                    default:        img_piece = null;
-                                    break;
+                    case B_PAWN:    img_piece = img_p;  break;
+                    case B_KING:    img_piece = img_k;  break;
+                    case B_QUEEN:   img_piece = img_q;  break;
+                    case B_ROOK:    img_piece = img_r;  break;
+                    case B_BISHOP:  img_piece = img_b;  break;
+                    case B_KNIGHT:  img_piece = img_n;  break;
+                    case W_PAWN:    img_piece = img_P;  break;
+                    case W_KING:    img_piece = img_K;  break;
+                    case W_QUEEN:   img_piece = img_Q;  break;
+                    case W_ROOK:    img_piece = img_R;  break;
+                    case W_BISHOP:  img_piece = img_B;  break;
+                    case W_KNIGHT:  img_piece = img_N;  break;   
+                    default:        img_piece = null;   break;
                 }
                 /*--------------------------------------------------------------------------------------------------------
                                 drawing images by displacing 'j' (with base_x as horizontal base) 
@@ -133,66 +102,46 @@ class UserInterface extends JPanel implements MouseListener, MouseMotionListener
     public void mouseReleased(MouseEvent e) {
         
         movelist = "";
-        
+        int x = e.getX();
+        int y = e.getY();
         if(click2 == false){                                  //Checks if first click
-            if((e.getX()-base_x)<(8*disp) && e.getX()>base_x 
-            && (e.getY()-base_y)<(8*disp) && e.getY()>base_y
-            && e.getButton()==MouseEvent.BUTTON1){      //Checks if click is inside the board
-                mouseX = (e.getX()-base_x)/disp;
-                mouseY = 7 - ((e.getY()-base_y)/disp);
+            if( ((x-base_x) < (8*disp))   &&   (x > base_x)//Checks if click is inside the board
+            &&  ((y-base_y) < (8*disp))   &&   (y > base_y)
+            &&  (e.getButton()  ==  MouseEvent.BUTTON1)   )        
+            {      
+                boardRow = 7 - ( (y-base_y)/disp );
+                boardCol = (x-base_x)/disp;                
                 
                 //Y moves vertically and thus covers all rows - Similarly, X covers all columns
-                String dispSq = ""+mouseY+", "+mouseX;
-                System.out.println(dispSq);
+                System.out.println(boardRow+", "+boardCol);
             
-                long position = Moves.getBitBoardCorrespondingTo((mouseY * 8) + mouseX);
+                long position = Moves.getBitBoardCorrespondingTo((boardRow * 8) + boardCol);
             
-                switch(dispCB[7 - mouseY][mouseX]){
-                        case B_PAWN:    movelist += Moves.possibleBP(position);
-                                        System.out.println(movelist);
-                                        break;
-                        case B_KING:    movelist += Moves.possibleK(position,IAMBLACK);
-                                        System.out.println(movelist);
-                                        break;
-                        case B_QUEEN:   movelist += Moves.possibleQ(position,IAMBLACK);
-                                        System.out.println(movelist);
-                                        break;
-                        case B_ROOK:    movelist += Moves.possibleR(position,IAMBLACK);
-                                        System.out.println(movelist);
-                                        break;
-                        case B_BISHOP:  movelist += Moves.possibleB(position,IAMBLACK);
-                                        System.out.println(movelist);
-                                        break;
-                        case B_KNIGHT:  movelist += Moves.possibleN(position,IAMBLACK);
-                                        System.out.println(movelist);
-                                        break;
-                        case W_PAWN:    movelist += Moves.possibleWP(position);
-                                        System.out.println(movelist);
-                                        break;
-                        case W_KING:    movelist += Moves.possibleK(position,IAMWHITE);
-                                        System.out.println(movelist);
-                                        break;
-                        case W_QUEEN:   movelist += Moves.possibleQ(position,IAMWHITE);
-                                        System.out.println(movelist);
-                                        break;
-                        case W_ROOK:    movelist += Moves.possibleR(position,IAMWHITE);
-                                        System.out.println(movelist);
-                                        break;
-                        case W_BISHOP:  movelist += Moves.possibleB(position,IAMWHITE);
-                                        System.out.println(movelist);
-                                        break;
-                        case W_KNIGHT:  movelist += Moves.possibleN(position,IAMWHITE);
-                                        System.out.println(movelist);
-                                        break;   
-                        default:        
-                                        break;
+                switch(dispCB[7 - boardRow][boardCol]){
+                        case B_PAWN:    movelist = Moves.possibleBP(position);  break;
+                        case B_KING:    movelist = Moves.possibleK(position,IAMBLACK);  break;
+                        case B_QUEEN:   movelist = Moves.possibleQ(position,IAMBLACK);  break;
+                        case B_ROOK:    movelist = Moves.possibleR(position,IAMBLACK);  break;
+                        case B_BISHOP:  movelist = Moves.possibleB(position,IAMBLACK);  break;
+                        case B_KNIGHT:  movelist = Moves.possibleN(position,IAMBLACK);  break;
+                        
+                        case W_PAWN:    movelist = Moves.possibleWP(position);  break;
+                        case W_KING:    movelist = Moves.possibleK(position,IAMWHITE);  break;
+                        case W_QUEEN:   movelist = Moves.possibleQ(position,IAMWHITE);  break;
+                        case W_ROOK:    movelist = Moves.possibleR(position,IAMWHITE);  break;
+                        case W_BISHOP:  movelist = Moves.possibleB(position,IAMWHITE);  break;
+                        case W_KNIGHT:  movelist = Moves.possibleN(position,IAMWHITE);  break;   
+                        
+                        default:        break;
                     }
+                System.out.println(movelist);
                 click2 = true;
-                repaint();
-            
+
+                repaint();            
             }
         }
-        else if(click2 == true){                                  //Checks if first click
+        else if(click2 == true)         //Checks if first click
+        {                                  
            click2 = false;
            repaint();
         }
@@ -218,4 +167,53 @@ class UserInterface extends JPanel implements MouseListener, MouseMotionListener
         
     }
 
+    private void highlightSquares(Graphics g) {
+        /*--------------------------------------------------------------------------------------------------------
+        Square Highlighting
+        ---------------------------------------------------------------------------------------------------------*/
+        int newRow, newCol;
+        if(click2 == true)
+        {
+            for(int i=0; i<movelist.length()/5; i++)
+            {
+                String temp = movelist.substring((i*5), (i*5)+5);
+                //if not pawn promotion
+                if(!Character.isLetter(temp.charAt(3)))
+                {
+                    newRow = Character.getNumericValue(temp.charAt(3));
+                    newCol = Character.getNumericValue(temp.charAt(4));
+                    g.drawImage(img_green, base_x + (newCol*disp), base_y + ( (7-newRow) * disp ), this);
+                    System.out.println("Green Square Debugging - " + temp + ": " + newRow+", "+newCol);
+                }
+                else
+                {
+                    newCol = Character.getNumericValue(temp.charAt(2));                    
+                    g.drawImage(img_green, base_x + (newCol*disp), base_y, this);                                         
+                }
+            }
+        }
+    }
+
+    private Image makeTransparent(String imagepath, int hexTransparency )
+    {
+        BufferedImage bufferedImage = null;
+        try {
+            bufferedImage = ImageIO.read(new File(imagepath));
+        } catch (IOException e) {
+            System.out.println("Image path " +imagepath+ " not found ");
+        }
+        
+        ImageFilter filter = new RGBImageFilter()
+        {
+          @Override
+          public final int filterRGB(int x, int y, int rgb)
+          {
+            return rgb & hexTransparency;
+          }
+        };
+
+        ImageProducer ip = new FilteredImageSource(bufferedImage.getSource(), filter);
+        return Toolkit.getDefaultToolkit().createImage(ip);
+    }        
+    
 }

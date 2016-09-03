@@ -17,9 +17,9 @@ import static pkg_bitboards.Constants.*;
     where 1 indicates the position where white pawns are currently present        
 **************************************************************************************************************************/                
 public class Moves {
-    static long WP = 0L, WR = 0L, WN = 0L, WB = 0L, WQ = 0L, WK = 0L, BP = 0L, BR = 0L, BN = 0L, BB = 0L, BQ = 0L, BK = 0L; // 12 bitboards    
-    static long WK2 = 0L, WP1 = 0L, WP2 = 0L; //For Testing Of Individual Piece Movelist
-    static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, OCCUPIEDSQ;                    
+    private static long WP = 0L, WR = 0L, WN = 0L, WB = 0L, WQ = 0L, WK = 0L, BP = 0L, BR = 0L, BN = 0L, BB = 0L, BQ = 0L, BK = 0L; // 12 bitboards    
+    private static long WK2 = 0L, WP1 = 0L, WP2 = 0L; //For Testing Of Individual Piece Movelist
+    private static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, OCCUPIEDSQ;                    
     
     /*************************************************************************************************************************        
     * possibleWMoves() finds all possible LEGAL moves for white constants like PIECES_W_CANT_CAPTURE. 
