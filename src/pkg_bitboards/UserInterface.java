@@ -20,7 +20,7 @@ class UserInterface extends JPanel implements MouseListener, MouseMotionListener
     private final int base_x = 20, base_y = 40, disp = 53;
     private char dispCB[][] = new char[8][8];
     private int boardCol, boardRow;
-    private boolean click2 = false, listenerset = false;
+    private boolean click2 = false;
     private String movelist = "";
     
     
@@ -56,6 +56,7 @@ class UserInterface extends JPanel implements MouseListener, MouseMotionListener
 
         g.drawImage(img_board, base_x, base_y, this);                
         highlightSquares(g);
+//        highlightSquares(g, Moves.unsafeForWhite());
         
         /*--------------------------------------------------------------------------------------------------------
         img_piece is used as a reference pointer to the images iteratively. Following 'for' loop will populate 
@@ -168,15 +169,36 @@ class UserInterface extends JPanel implements MouseListener, MouseMotionListener
     }
 
     private void highlightSquares(Graphics g) {
-        /*--------------------------------------------------------------------------------------------------------
-        Square Highlighting
-        ---------------------------------------------------------------------------------------------------------*/
         int newRow, newCol;
         if(click2 == true)
         {
             for(int i=0; i<movelist.length()/5; i++)
             {
                 String temp = movelist.substring((i*5), (i*5)+5);
+                //if not pawn promotion
+                if(!Character.isLetter(temp.charAt(3)))
+                {
+                    newRow = Character.getNumericValue(temp.charAt(3));
+                    newCol = Character.getNumericValue(temp.charAt(4));
+                    g.drawImage(img_green, base_x + (newCol*disp), base_y + ( (7-newRow) * disp ), this);
+                    System.out.println("Green Square Debugging - " + temp + ": " + newRow+", "+newCol);
+                }
+                else
+                {
+                    newCol = Character.getNumericValue(temp.charAt(2));                    
+                    g.drawImage(img_green, base_x + (newCol*disp), base_y, this);                                         
+                }
+            }
+        }
+    }
+    
+    private void highlightSquares(Graphics g, String mymovelist) {
+        int newRow, newCol;
+        if(click2 == true)
+        {
+            for(int i=0; i<mymovelist.length()/5; i++)
+            {
+                String temp = mymovelist.substring((i*5), (i*5)+5);
                 //if not pawn promotion
                 if(!Character.isLetter(temp.charAt(3)))
                 {
