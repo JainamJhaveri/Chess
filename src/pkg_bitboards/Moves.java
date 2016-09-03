@@ -18,9 +18,9 @@ import static pkg_bitboards.Constants.*;
 **************************************************************************************************************************/                
 public class Moves {
     static long WP = 0L, WR = 0L, WN = 0L, WB = 0L, WQ = 0L, WK = 0L, BP = 0L, BR = 0L, BN = 0L, BB = 0L, BQ = 0L, BK = 0L; // 12 bitboards    
+    static long WK2 = 0L, WP1 = 0L, WP2 = 0L; //For Testing Of Individual Piece Movelist
     static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, OCCUPIEDSQ;                    
-    private static final char IAMWHITE = 'W';
-    private static final char IAMBLACK = 'B';    
+    
     /*************************************************************************************************************************        
     * possibleWMoves() finds all possible LEGAL moves for white constants like PIECES_W_CANT_CAPTURE. 
     * They need to be recalculated here because bitboards may change after every move.
@@ -43,6 +43,7 @@ public class Moves {
         wlist += possibleQ(WQ, IAMWHITE);
         wlist += possibleN(WN, IAMWHITE);       
         wlist += possibleK(WK, IAMWHITE);        
+        wlist += possibleCastleW();
         
         String blist = "";
         blist += possibleBP();
@@ -51,9 +52,26 @@ public class Moves {
         blist += possibleQ(BQ, IAMBLACK);
         blist += possibleN(BN, IAMBLACK);       
         blist += possibleK(BK, IAMBLACK);
+        blist += possibleCastleB();
+        
+        WK2 = getBitBoardCorrespondingTo(6);
+        WP1 = getBitBoardCorrespondingTo(40);
+        WP2 = getBitBoardCorrespondingTo(50);
+        
+        String wk2list = "";
+        wk2list += possibleN(WK2, IAMWHITE);
+        
+        String wp1list = "";
+        wp1list += possibleWP(WP1);
+        
+        String wp2list = "";
+        wp2list += possibleWP(WP2);
         
         System.out.println("white movelist: " +  wlist);
         System.out.println("black movelist: " +  blist);
+        System.out.println("movelist for g1 white knight: " +  wk2list);
+        System.out.println("movelist for a6 white pawn: " +  wp1list);
+        System.out.println("movelist for c7 white pawn: " +  wp2list);
     }
   
     private static String possibleWP()
@@ -61,11 +79,11 @@ public class Moves {
         String list = "";
         long moves;
         
-        /*  << 9 :: white pawn can capture right if there is a capturable black piece and that piece is not on FILE_A */        
+        /*  << 9 :: white pawn can capture right if there is a capturable black piece and that piece is not on FILE_A after shift */        
         moves = (WP << 9) & CAPTURABLE_B & ~RANK_8 & ~FILE_A;                
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, -1);
         System.out.println("After right cap: "+list);
-        /*  << 7 :: white pawn can capture left if there is a capturable black piece and that piece is not on FILE_H */
+        /*  << 7 :: white pawn can capture left if there is a capturable black piece and that piece is not on FILE_H after shift */
         moves = (WP << 7) & CAPTURABLE_B & ~RANK_8 & ~FILE_H;
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, 1);
         System.out.println("After left cap: "+list);
@@ -94,16 +112,90 @@ public class Moves {
         return list;
     }
 
+    
+    public static String possibleCastleW()
+    {
+        String list = "";        
+        
+        if (CASTLEW_QSIDE && ((WR & CASTLE_ROOKS[0])!= 0) )
+        {
+            list += " 0402";
+        }
+        if (CASTLEW_KSIDE && ((WR & CASTLE_ROOKS[1])!= 0) )
+        {
+            list += " 0406";
+        }
+        
+        System.out.println("whitecastle movelist: " +  list);
+        return list;
+    }
+    
+    public static String possibleCastleB()
+    {
+        String list = "";        
+        
+        if (CASTLEB_QSIDE && ((BR & CASTLE_ROOKS[2])!= 0) )
+        {
+            list += " 7472";
+        }
+        if (CASTLEB_KSIDE && ((BR & CASTLE_ROOKS[3])!= 0) )
+        {
+            list += " 7476";
+        }
+        
+        System.out.println("blackcastle movelist: " +  list);
+        return list;
+    }
+    
+    
+    static String possibleWP(long pawnpos)
+    {
+        String list = "";
+        long moves;
+        
+        /*  << 9 :: white pawn can capture right if there is a capturable black piece and that piece is not on FILE_A after shift */        
+        moves = (pawnpos << 9) & CAPTURABLE_B & ~RANK_8 & ~FILE_A;                
+        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, -1);
+        System.out.println("After right cap: "+list);
+        /*  << 7 :: white pawn can capture left if there is a capturable black piece and that piece is not on FILE_H after shift */
+        moves = (pawnpos << 7) & CAPTURABLE_B & ~RANK_8 & ~FILE_H;
+        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, 1);
+        System.out.println("After left cap: "+list);
+        /*  >> 8 :: pawn can be pushed 1 position if it doesn't go on rank 8 after push and there are no piece below its current rank */
+        moves = (pawnpos << 8) & ~RANK_8 & ~OCCUPIEDSQ;
+        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, 0);
+        System.out.println("After pawn push 1: "+list);
+        /*  << 16 :: pawn can be pushed 2 positions if it is on rank 2 and there are no pieces on rank 4 or rank 3 for the corresponding pawn */
+        moves = ( (pawnpos & RANK_2) << 16 ) &  ~( (OCCUPIEDSQ & RANK_4) | ((OCCUPIEDSQ & RANK_3) << 8) );
+        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -2, 0);
+        System.out.println("After pawn push 1: "+list);
+        
+        /*  << 9 :: right capture + promotion */        
+        moves = (pawnpos << 9) & CAPTURABLE_B & RANK_8 & ~FILE_A;        
+        list += getPromotionPaths(moves, -1);
+        System.out.println("After right cap + promotion: "+list);
+        /*  << 7 :: left capture + promotion */        
+        moves = (pawnpos << 7) & CAPTURABLE_B & RANK_8 & ~FILE_H;
+        list += getPromotionPaths(moves, 1);
+        System.out.println("After left cap + promotion: "+list);
+        /*  << 8 :: simple promotion */        
+        moves = (pawnpos << 8) & RANK_8 & ~OCCUPIEDSQ;
+        list += getPromotionPaths(moves, 0);
+        System.out.println("After simple promotion: "+list);
+        System.out.println("\npawn movelist: " +  list);
+        return list;
+    }
+    
     private static String possibleBP()
     {
         String list = "";
         long moves;
         
-        /*  >> 9 :: black pawn can capture right if there is a capturable black piece and that piece is not on FILE_A */        
-        moves = (BP >> 9) & CAPTURABLE_W & ~RANK_1 & ~FILE_A;                
+        /*  >> 9 :: black pawn can capture right if there is a capturable black piece and that piece is not on FILE_H after shift */        
+        moves = (BP >> 9) & CAPTURABLE_W & ~RANK_1 & ~FILE_H;                
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 1, 1);
         System.out.println("After right cap: "+list);
-        /*  >> 7 :: black pawn can capture left if there is a capturable black piece and that piece is not on FILE_H */
+        /*  >> 7 :: black pawn can capture left if there is a capturable black piece and that piece is not on FILE_A after shift */
         moves = (BP >> 7) & CAPTURABLE_W & ~RANK_1 & ~FILE_A;
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 1, -1);
         System.out.println("After left cap: "+list);
@@ -132,7 +224,45 @@ public class Moves {
         return list;
     }
     
-    private static String possibleR(long ROOK, char whoAmI)
+    static String possibleBP(long pawnpos)
+    {
+        String list = "";
+        long moves;
+        
+        /*  >> 9 :: black pawn can capture right if there is a capturable black piece and that piece is not on FILE_H after shift */        
+        moves = (pawnpos >> 9) & CAPTURABLE_W & ~RANK_1 & ~FILE_H;                
+        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 1, 1);
+        System.out.println("After right cap: "+list);
+        /*  >> 7 :: black pawn can capture left if there is a capturable black piece and that piece is not on FILE_A after shift */
+        moves = (pawnpos >> 7) & CAPTURABLE_W & ~RANK_1 & ~FILE_A;
+        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 1, -1);
+        System.out.println("After left cap: "+list);
+        /*  >> 8 :: pawn can be pushed 1 position if it doesn't go on rank 1 after push and there are no piece below its current rank */
+        moves = (pawnpos >> 8) & ~RANK_1 & ~OCCUPIEDSQ;
+        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 1, 0);
+        System.out.println("After pawn push 1: "+list);
+        /*  >> 16 :: pawn can be pushed 2 positions if it is on rank 7 and there are no pieces on rank 5 or rank 6 for the corresponding pawn */
+        moves = ( (pawnpos & RANK_7) >> 16 ) &  ~( (OCCUPIEDSQ & RANK_5) | ((OCCUPIEDSQ & RANK_6) >> 8) );
+        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 2, 0);
+        System.out.println("After pawn push 1: "+list);
+        
+        /*  >> 9 :: right capture + promotion */        
+        moves = (pawnpos >> 9) & CAPTURABLE_W & RANK_1 & ~FILE_H;        
+        list += getPromotionPaths(moves, 1);
+        System.out.println("After right cap + promotion: "+list);
+        /*  >> 7 :: left capture + promotion */        
+        moves = (pawnpos >> 7) & CAPTURABLE_W & RANK_1 & ~FILE_A;
+        list += getPromotionPaths(moves, -1);
+        System.out.println("After left cap + promotion: "+list);
+        /*  >> 8 :: simple promotion */        
+        moves = (pawnpos >> 8) & RANK_1 & ~OCCUPIEDSQ;
+        list += getPromotionPaths(moves, 0);
+        System.out.println("After simple promotion: "+list);
+        System.out.println("\npawn movelist: " +  list);
+        return list;
+    }
+    
+    static String possibleR(long ROOK, char whoAmI)
     {
         String list = "";
         printString2("rook: ", ROOK);        
@@ -141,7 +271,7 @@ public class Moves {
         return list;
     }
     
-    private static String possibleB(long BISHOP, char whoAmI)
+    static String possibleB(long BISHOP, char whoAmI)
     {
         String list = "";
         printString2("bishop: ", BISHOP);
@@ -150,7 +280,8 @@ public class Moves {
         return list;
     }
     
-    private static String possibleQ(long QUEEN, char whoAmI)
+    
+    static String possibleQ(long QUEEN, char whoAmI)
     {
         String list = "";
         printString2("queen: ", QUEEN);        
@@ -160,7 +291,7 @@ public class Moves {
         return list;
     }
     
-    private static String possibleN(long KNIGHT, char whoAmI)
+    static String possibleN(long KNIGHT, char whoAmI)
     {
         String list = "";
         printString2("knight: ", KNIGHT);
@@ -169,7 +300,7 @@ public class Moves {
         return list;
     }
     
-    private static String possibleK(long KING, char whoAmI)
+    static String possibleK(long KING, char whoAmI)
     {
         String list = "";
         printString2("king:", KING);
@@ -177,6 +308,7 @@ public class Moves {
         System.out.println(list);
         return list;
     }
+    
     
     /**
      * This method returns horizontal or vertical moves according to the choice ('H' or 'D')
@@ -519,7 +651,7 @@ public class Moves {
      * @param position : bit position in a long that needs to be changed to 1
      * @return long: bitboard corresponding to position
      */
-    private static long getBitBoardCorrespondingTo(int position)
+    static long getBitBoardCorrespondingTo(int position)
     {
         String binString = "0000000000000000000000000000000000000000000000000000000000000000";                
         binString = binString.substring(0,63-position) + "1" + binString.substring(64-position);
