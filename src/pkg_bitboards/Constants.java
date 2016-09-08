@@ -1,7 +1,7 @@
 package pkg_bitboards;
 
 public class Constants {
-    public static final String basepath = "C:\\Users\\jaina_000\\Documents\\Chess\\";
+    public static final String basepath = "C:\\Users\\Sony\\Documents\\NetBeansProjects\\Chess\\";
 //    public static final String black_basepath = basepath + "CP\\B\\";
 //    public static final String white_basepath = basepath + "CP\\W\\";
     public static final String black_basepath = basepath + "CP\\blackpcs\\";

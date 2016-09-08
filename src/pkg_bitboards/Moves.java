@@ -17,8 +17,8 @@ import static pkg_bitboards.Constants.*;
     where 1 indicates the position where white pawns are currently present        
 **/                
 public class Moves {
-    private static long WP = 0L, WR = 0L, WN = 0L, WB = 0L, WQ = 0L, WK = 0L, BP = 0L, BR = 0L, BN = 0L, BB = 0L, BQ = 0L, BK = 0L; // 12 bitboards        
-    private static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, OCCUPIEDSQ;                    
+    static long WP = 0L, WR = 0L, WN = 0L, WB = 0L, WQ = 0L, WK = 0L, BP = 0L, BR = 0L, BN = 0L, BB = 0L, BQ = 0L, BK = 0L; // 12 bitboards        
+    static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, OCCUPIEDSQ;                    
     
     /**
     * possibleWMoves() finds all possible LEGAL moves for white constants like PIECES_W_CANT_CAPTURE. 
@@ -28,11 +28,7 @@ public class Moves {
     **/
     public static void possibleWMoves()
     {    
-        PIECES_W_CANT_CAPTURE = (WP|WR|WN|WB|WQ|WK|BK);
-        CAPTURABLE_B = (BP|BR|BN|BB|BQ);
-        PIECES_B_CANT_CAPTURE = (BP|BR|BN|BB|BQ|BK|WK);
-        CAPTURABLE_W = (WP|WR|WN|WB|WQ);
-        OCCUPIEDSQ = (WP|WR|WN|WB|WQ|WK|BP|BR|BN|BB|BQ|BK);
+        UpdateCap();
         
 //        printMasks();
         String wlist = "";        
@@ -194,7 +190,15 @@ public class Moves {
         printString2("UNSAFE MOVES", unsafemoves);
         return unsafemoves;        
     }
-     
+    
+    static String possibleP(long pawnpos, char whoAmI){
+        if(whoAmI == IAMWHITE){
+            return possibleWP(pawnpos);
+        }
+        else{
+            return possibleBP(pawnpos);
+        }
+    }
     
     private static String possibleWP()
     {
@@ -405,6 +409,8 @@ public class Moves {
      */
     private static String getMoveListFromBitBoards(long PIECE_BB, char choice, String piece, char whoAmI)
     {
+        //UpdateCap();
+        
         String list = "";
         long moves = PIECE_BB;
         long newmoves;
@@ -637,7 +643,7 @@ public class Moves {
      * @param pc name of piece whose bitboard is to be printed
      * @param piece bitboard
      */
-    private static void printString2(String pc, long piece) 
+    static void printString2(String pc, long piece) 
     {
         System.out.println("\n"+pc +": ");
         String a = Long.toBinaryString(piece);        
@@ -725,6 +731,14 @@ public class Moves {
             newmoves = newmoves & ~FILE_A;
                 
         return newmoves;
+    }
+    
+    static void UpdateCap () {
+        PIECES_W_CANT_CAPTURE = (WP|WR|WN|WB|WQ|WK|BK);
+        CAPTURABLE_B = (BP|BR|BN|BB|BQ);
+        PIECES_B_CANT_CAPTURE = (BP|BR|BN|BB|BQ|BK|WK);
+        CAPTURABLE_W = (WP|WR|WN|WB|WQ);
+        OCCUPIEDSQ = (WP|WR|WN|WB|WQ|WK|BP|BR|BN|BB|BQ|BK);
     }
     
 }

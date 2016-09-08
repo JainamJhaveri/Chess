@@ -19,8 +19,8 @@ class UserInterface extends JPanel implements MouseListener, MouseMotionListener
     private final Image img_b, img_k, img_n, img_p, img_q, img_r;
     private final int base_x = 20, base_y = 40, disp = 53;
     private char dispCB[][] = new char[8][8];
-    private int boardCol, boardRow;
-    private boolean click2 = false;
+    private int oldCol = 0, oldRow = 0;
+    private boolean click2 = false, moveW = true;
     private String movelist = "";
     
     
@@ -85,7 +85,8 @@ class UserInterface extends JPanel implements MouseListener, MouseMotionListener
                 ---------------------------------------------------------------------------------------------------------*/
                 g.drawImage(img_piece, base_x + j * disp, base_y + i * disp, this);
             }
-        }                
+        }
+        System.out.println("Movelist is - "+movelist);
     }
 
     @Override
@@ -100,32 +101,24 @@ class UserInterface extends JPanel implements MouseListener, MouseMotionListener
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        
-        movelist = "";
         int x = e.getX();
         int y = e.getY();
-        if(click2 == false){                                  //Checks if first click
-            if( ((x-base_x) < (8*disp))   &&   (x > base_x)//Checks if click is inside the board
+        if(click2 == false){                                    //Checks if first click
+            movelist = "";
+            if( ((x-base_x) < (8*disp))   &&   (x > base_x)     
             &&  ((y-base_y) < (8*disp))   &&   (y > base_y)
-            &&  (e.getButton()  ==  MouseEvent.BUTTON1)   )        
-            {      
-                boardRow = 7 - ( (y-base_y)/disp );
-                boardCol = (x-base_x)/disp;                
+            &&  (e.getButton()  ==  MouseEvent.BUTTON1)   )     
+            {                                                   //Checks if click is leftclick and inside the board        
+                oldRow = 7 - ( (y-base_y)/disp );
+                oldCol = (x-base_x)/disp;                
                 
                 //Y moves vertically and thus covers all rows - Similarly, X covers all columns
-                System.out.println(boardRow+", "+boardCol);
+                System.out.println(oldRow+", "+oldCol);
             
-                long position = Moves.getBitBoardCorrespondingTo((boardRow * 8) + boardCol);
-            
-                switch(dispCB[7 - boardRow][boardCol]){
-                        case B_PAWN:    movelist = Moves.possibleBP(position);  break;
-                        case B_KING:    movelist = Moves.possibleK(position,IAMBLACK);  break;
-                        case B_QUEEN:   movelist = Moves.possibleQ(position,IAMBLACK);  break;
-                        case B_ROOK:    movelist = Moves.possibleR(position,IAMBLACK);  break;
-                        case B_BISHOP:  movelist = Moves.possibleB(position,IAMBLACK);  break;
-                        case B_KNIGHT:  movelist = Moves.possibleN(position,IAMBLACK);  break;
-                        
-                        case W_PAWN:    movelist = Moves.possibleWP(position);  break;
+                long position = Moves.getBitBoardCorrespondingTo((oldRow * 8) + oldCol);
+                if(moveW == true){
+                    switch(dispCB[7 - oldRow][oldCol]){
+                        case W_PAWN:    movelist = Moves.possibleP(position,IAMWHITE);  break;
                         case W_KING:    movelist = Moves.possibleK(position,IAMWHITE);  break;
                         case W_QUEEN:   movelist = Moves.possibleQ(position,IAMWHITE);  break;
                         case W_ROOK:    movelist = Moves.possibleR(position,IAMWHITE);  break;
@@ -134,17 +127,88 @@ class UserInterface extends JPanel implements MouseListener, MouseMotionListener
                         
                         default:        break;
                     }
-                System.out.println(movelist);
-                click2 = true;
+                }
+                else{
+                    switch(dispCB[7 - oldRow][oldCol]){
+                        case B_PAWN:    movelist = Moves.possibleP(position,IAMBLACK);  break;
+                        case B_KING:    movelist = Moves.possibleK(position,IAMBLACK);  break;
+                        case B_QUEEN:   movelist = Moves.possibleQ(position,IAMBLACK);  break;
+                        case B_ROOK:    movelist = Moves.possibleR(position,IAMBLACK);  break;
+                        case B_BISHOP:  movelist = Moves.possibleB(position,IAMBLACK);  break;
+                        case B_KNIGHT:  movelist = Moves.possibleN(position,IAMBLACK);  break;
+                        
+                        default:        break;
+                    }
+                }
+                
+                if(movelist.length()>0){
+                    System.out.println(movelist);
+                    click2 = true;
+                }
+                else{
+                    System.out.println("Click On a Valid Piece!");
+                }
 
                 repaint();            
             }
         }
-        else if(click2 == true)         //Checks if first click
+        else if(click2 == true)                                     //Checks if second click
         {                                  
-           click2 = false;
-           repaint();
+            if( ((x-base_x) < (8*disp))   &&   (x > base_x)     
+            &&  ((y-base_y) < (8*disp))   &&   (y > base_y)
+            &&  (e.getButton()  ==  MouseEvent.BUTTON1)   )
+            {                                                       //Checks if click is leftclick and inside the board        
+                int newRow, newCol;
+                boolean moveTrue = false;
+                newRow = 7 - ( (y-base_y)/disp );
+                newCol = (x-base_x)/disp;
+                System.out.println("Movelist Length = "+movelist.length()/5);
+                for(int i=0; i<movelist.length()/5; i++){
+                    
+                    String temp = movelist.substring((i*5), (i*5)+5);
+                    //if pawn promotion
+                    if((oldRow==6 && dispCB[7 - oldRow][oldCol]==W_PAWN)
+                    || (oldRow==1 && dispCB[7 - oldRow][oldCol]==B_PAWN))
+                    {
+                        if(newCol==Character.getNumericValue(temp.charAt(2))){
+                            //Found Move
+                            moveTrue = true;
+                            break;
+                        }
+                        //
+                    }
+                    else
+                    {
+                        if(newRow == Character.getNumericValue(temp.charAt(3)) &&
+                        newCol == Character.getNumericValue(temp.charAt(4))){
+                            //Found Move
+                            moveTrue = true;
+                            break;
+                        }
+                    }
+                }
+                System.out.println("Square Clicked Is - "+newRow+", "+newCol);
+                System.out.println("Moves Selected is "+moveTrue);
+                if(moveTrue == true){
+                                        
+                    //Update Display Array
+                    char pieceCap = updateDisplayArray(oldRow, oldCol, newRow, newCol);
+                    
+                    //Update Bitboard
+                    long capPos = updateBitBoard(oldRow, oldCol, newRow, newCol);
+                    
+                    //Update Bitboard for Captured Piece
+                    updateCapBitBoard(capPos, pieceCap);
+                    
+                    //Update Current Player
+                    moveW = moveW != true;
+                }
+            }
+            click2 = false;
+            repaint();
         }
+        Moves.UpdateCap();
+        Moves.printString2("Pieces Black Cannot Capture", Moves.PIECES_B_CANT_CAPTURE);
     }
 
     @Override
@@ -167,6 +231,111 @@ class UserInterface extends JPanel implements MouseListener, MouseMotionListener
         
     }
 
+    private char updateDisplayArray(int oldRow, int oldCol, int newRow, int newCol) {
+        System.out.println("Updating Display Array: "+(7-newRow)+", "+newCol
+                                        +" is now"+dispCB[7 - oldRow][oldCol]+" While: "
+                                        +(7-oldRow)+", "+oldCol+" is now BLANK");
+        char temp = dispCB[7 - newRow][newCol];
+        dispCB[7 - newRow][newCol] = dispCB[7 - oldRow][oldCol];
+        dispCB[7 - oldRow][oldCol] = BLANK;
+        return temp;
+    }
+
+    private long updateBitBoard(int oldRow, int oldCol, int newRow, int newCol) {
+        long oldPos = Moves.getBitBoardCorrespondingTo((oldRow * 8) + oldCol);
+        long newPos = Moves.getBitBoardCorrespondingTo((newRow * 8) + newCol);
+                    
+        if(moveW == true){
+            switch(dispCB[7 - newRow][newCol]){
+                case W_PAWN:    Moves.WP = Moves.WP & (~oldPos);
+                                Moves.WP = Moves.WP | newPos;
+                                break;
+                case W_KING:    Moves.WK = Moves.WK & (~oldPos);
+                                Moves.WK = Moves.WK | newPos;
+                                break;
+                case W_QUEEN:   Moves.WQ = Moves.WQ & (~oldPos);
+                                Moves.WQ = Moves.WQ | newPos;
+                                break;
+                case W_ROOK:    Moves.WR = Moves.WR & (~oldPos);
+                                Moves.WR = Moves.WR | newPos;
+                                break;
+                case W_BISHOP:  Moves.WB = Moves.WB & (~oldPos);
+                                Moves.WB = Moves.WB | newPos;
+                                break;
+                case W_KNIGHT:  Moves.WN = Moves.WN & (~oldPos);
+                                Moves.WN = Moves.WN | newPos;
+                                break;
+
+                default:        break;
+            }
+        }
+        else{
+            System.out.println("Black Move Bitboard Update!!!!!!!!!!");
+            switch(dispCB[7 - newRow][newCol]){
+                case B_PAWN:    Moves.BP = Moves.BP & (~oldPos);
+                                Moves.BP = Moves.BP | newPos;
+                                break;
+                case B_KING:    Moves.BK = Moves.BK & (~oldPos);
+                                Moves.BK = Moves.BK | newPos;
+                                break;
+                case B_QUEEN:   Moves.BQ = Moves.BQ & (~oldPos);
+                                Moves.BQ = Moves.BQ | newPos;
+                                break;
+                case B_ROOK:    Moves.BR = Moves.BR & (~oldPos);
+                                Moves.BR = Moves.BR | newPos;
+                                break;
+                case B_BISHOP:  Moves.BB = Moves.BB & (~oldPos);
+                                Moves.BB = Moves.BB | newPos;
+                                break;
+                case B_KNIGHT:  Moves.BN = Moves.BN & (~oldPos);
+                                Moves.BN = Moves.BN | newPos;
+                                break;
+
+                default:        break;
+            }
+        }
+        return newPos;
+    }
+
+    private void updateCapBitBoard(long pos, char pieceCap) {
+        if(moveW == false){
+            switch(pieceCap){
+                case W_PAWN:    Moves.WP = Moves.WP & (~pos);
+                                break;
+                case W_KING:    Moves.WK = Moves.WK & (~pos);
+                                break;
+                case W_QUEEN:   Moves.WQ = Moves.WQ & (~pos);
+                                break;
+                case W_ROOK:    Moves.WR = Moves.WR & (~pos);
+                                break;
+                case W_BISHOP:  Moves.WB = Moves.WB & (~pos);
+                                break;
+                case W_KNIGHT:  Moves.WN = Moves.WN & (~pos);
+                                break;
+
+                default:        break;
+            }
+        }
+        else{
+            switch(pieceCap){
+                case B_PAWN:    Moves.BP = Moves.BP & (~pos);
+                                break;
+                case B_KING:    Moves.BK = Moves.BK & (~pos);
+                                break;
+                case B_QUEEN:   Moves.BQ = Moves.BQ & (~pos);
+                                break;
+                case B_ROOK:    Moves.BR = Moves.BR & (~pos);
+                                break;
+                case B_BISHOP:  Moves.BB = Moves.BB & (~pos);
+                                break;
+                case B_KNIGHT:  Moves.BN = Moves.BN & (~pos);
+                                break;
+
+                default:        break;
+            }
+        }
+    }
+    
     private void highlightSquares(Graphics g) {
         int newRow, newCol;
         if(click2 == true)
@@ -211,6 +380,7 @@ class UserInterface extends JPanel implements MouseListener, MouseMotionListener
 
         ImageProducer ip = new FilteredImageSource(bufferedImage.getSource(), filter);
         return Toolkit.getDefaultToolkit().createImage(ip);
-    }        
+    }
     
 }
+
