@@ -38,7 +38,7 @@ public class Moves {
         wlist += possibleQ(WQ, IAMWHITE);
         wlist += possibleN(WN, IAMWHITE);       
         wlist += possibleK(WK, IAMWHITE);        
-        wlist += possibleCastleW();
+        wlist += possibleCastle(IAMWHITE);
         
         String blist = "";
         blist += possibleBP();
@@ -47,46 +47,34 @@ public class Moves {
         blist += possibleQ(BQ, IAMBLACK);
         blist += possibleN(BN, IAMBLACK);       
         blist += possibleK(BK, IAMBLACK);
-        blist += possibleCastleB();
+        blist += possibleCastle(IAMBLACK);
               
 //        System.out.println("unsafeMovesForWhite: "+ unsafeForWhite());
 //        System.out.println("unsafeMovesForBlack: "+ unsafeForBlack());
     }
             
-    public static String possibleCastleW()
+    public static String possibleCastle(char whoAmI)
     {
         String list = "";        
-        
-        if (CASTLEW_QSIDE && ((WR & CASTLE_ROOKS[0])!= 0) )
+        if( whoAmI == IAMWHITE)
         {
-            list += " 0402";
+            if (CASTLEW_QSIDE && ( (WR & CASTLE_ROOKS[0])!= 0) )
+                list += " 0402";
+            if (CASTLEW_KSIDE && ( (WR & CASTLE_ROOKS[1])!= 0) )
+                list += " 0406";
         }
-        if (CASTLEW_KSIDE && ((WR & CASTLE_ROOKS[1])!= 0) )
+        else
         {
-            list += " 0406";
+            if (CASTLEB_QSIDE && ( (BR & CASTLE_ROOKS[2])!= 0) )
+                list += " 7472";
+            if (CASTLEB_KSIDE && ( (BR & CASTLE_ROOKS[3])!= 0) )
+                list += " 7476";
         }
         
-        System.out.println("whitecastle movelist: " +  list);
+        System.out.println(whoAmI+" castle movelist: " +  list);
         return list;
     }
-    
-    public static String possibleCastleB()
-    {
-        String list = "";        
-        
-        if (CASTLEB_QSIDE && ((BR & CASTLE_ROOKS[2])!= 0) )
-        {
-            list += " 7472";
-        }
-        if (CASTLEB_KSIDE && ((BR & CASTLE_ROOKS[3])!= 0) )
-        {
-            list += " 7476";
-        }
-        
-        System.out.println("blackcastle movelist: " +  list);
-        return list;
-    }
-    
+           
     private static long unsafeForWhite()
     {
         long unsafemoves, piecepositions;        
@@ -737,7 +725,7 @@ public class Moves {
      * This method updates bitboards which are used to determine capturable and non-capturable pieces
      * It also updates the bitboard of occupied squares. 
      */
-    static void UpdateCap () 
+    static void UpdateCap() 
     {
         PIECES_W_CANT_CAPTURE = (WP|WR|WN|WB|WQ|WK|BK);
         CAPTURABLE_B = (BP|BR|BN|BB|BQ);

@@ -1,6 +1,7 @@
 package pkg_bitboards;
 
 import static pkg_bitboards.Constants.*;
+import static pkg_bitboards.Moves.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -90,7 +91,6 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                 g.drawImage(img_piece, base_x + j * disp, base_y + i * disp, this);
             }
         }
-        System.out.println("Movelist is - "+movelist);
     }
 
     @Override
@@ -141,30 +141,36 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
      */
     private long updateBitBoard(int oldRow, int oldCol, int newRow, int newCol) 
     {
-        long oldPos = Moves.getBitBoardCorrespondingTo((oldRow * 8) + oldCol);
-        long newPos = Moves.getBitBoardCorrespondingTo((newRow * 8) + newCol);
+        long oldPos = getBitBoardCorrespondingTo((oldRow * 8) + oldCol);
+        long newPos = getBitBoardCorrespondingTo((newRow * 8) + newCol);
                     
         if(moveW == true)
         {
             switch(dispCB[7 - newRow][newCol])
             {
-                case W_PAWN:    Moves.WP = Moves.WP & ~oldPos;
-                                Moves.WP = Moves.WP | newPos;
+                case W_PAWN:    WP = WP & ~oldPos;
+                                WP = WP | newPos;
                                 break;
-                case W_KING:    Moves.WK = Moves.WK & ~oldPos;
-                                Moves.WK = Moves.WK | newPos;
+                case W_KING:    WK = WK & ~oldPos;
+                                WK = WK | newPos;
+                                CASTLEW_KSIDE = false;
+                                CASTLEW_QSIDE = false;
                                 break;
-                case W_QUEEN:   Moves.WQ = Moves.WQ & ~oldPos;
-                                Moves.WQ = Moves.WQ | newPos;
+                case W_QUEEN:   WQ = WQ & ~oldPos;
+                                WQ = WQ | newPos;
                                 break;
-                case W_ROOK:    Moves.WR = Moves.WR & ~oldPos;
-                                Moves.WR = Moves.WR | newPos;
+                case W_ROOK:    WR = WR & ~oldPos;
+                                WR = WR | newPos;
+                                if (CASTLEW_KSIDE && ( (WR & CASTLE_ROOKS[1]) == 0) )
+                                    CASTLEW_KSIDE = false;
+                                else if(CASTLEW_QSIDE && ( (WR & CASTLE_ROOKS[0]) == 0) )
+                                    CASTLEW_QSIDE = false;
                                 break;
-                case W_BISHOP:  Moves.WB = Moves.WB & ~oldPos;
-                                Moves.WB = Moves.WB | newPos;
+                case W_BISHOP:  WB = WB & ~oldPos;
+                                WB = WB | newPos;
                                 break;
-                case W_KNIGHT:  Moves.WN = Moves.WN & ~oldPos;
-                                Moves.WN = Moves.WN | newPos;
+                case W_KNIGHT:  WN = WN & ~oldPos;
+                                WN = WN | newPos;
                                 break;
 
                 default:        break;
@@ -174,23 +180,27 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         {
             switch(dispCB[7 - newRow][newCol])
             {
-                case B_PAWN:    Moves.BP = Moves.BP & ~oldPos;
-                                Moves.BP = Moves.BP | newPos;
+                case B_PAWN:    BP = BP & ~oldPos;
+                                BP = BP | newPos;
                                 break;
-                case B_KING:    Moves.BK = Moves.BK & ~oldPos;
-                                Moves.BK = Moves.BK | newPos;
+                case B_KING:    BK = BK & ~oldPos;
+                                BK = BK | newPos;
                                 break;
-                case B_QUEEN:   Moves.BQ = Moves.BQ & ~oldPos;
-                                Moves.BQ = Moves.BQ | newPos;
+                case B_QUEEN:   BQ = BQ & ~oldPos;
+                                BQ = BQ | newPos;
                                 break;
-                case B_ROOK:    Moves.BR = Moves.BR & ~oldPos;
-                                Moves.BR = Moves.BR | newPos;
+                case B_ROOK:    BR = BR & ~oldPos;
+                                BR = BR | newPos;
+                                if (CASTLEB_KSIDE && ( (BR & CASTLE_ROOKS[3]) == 0) )
+                                    CASTLEB_KSIDE = false;
+                                else if(CASTLEB_QSIDE && ( (BR & CASTLE_ROOKS[2]) == 0) )
+                                    CASTLEB_QSIDE = false;
                                 break;
-                case B_BISHOP:  Moves.BB = Moves.BB & ~oldPos;
-                                Moves.BB = Moves.BB | newPos;
+                case B_BISHOP:  BB = BB & ~oldPos;
+                                BB = BB | newPos;
                                 break;
-                case B_KNIGHT:  Moves.BN = Moves.BN & ~oldPos;
-                                Moves.BN = Moves.BN | newPos;
+                case B_KNIGHT:  BN = BN & ~oldPos;
+                                BN = BN | newPos;
                                 break;
 
                 default:        break;
@@ -215,12 +225,12 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         {
             switch(pieceCap)
             {
-                case W_PAWN:    Moves.WP = Moves.WP & ~pos; break;
-                case W_KING:    Moves.WK = Moves.WK & ~pos; break;
-                case W_QUEEN:   Moves.WQ = Moves.WQ & ~pos; break;
-                case W_ROOK:    Moves.WR = Moves.WR & ~pos; break;
-                case W_BISHOP:  Moves.WB = Moves.WB & ~pos; break;
-                case W_KNIGHT:  Moves.WN = Moves.WN & ~pos; break;
+                case W_PAWN:    WP = WP & ~pos; break;
+                case W_KING:    WK = WK & ~pos; break;
+                case W_QUEEN:   WQ = WQ & ~pos; break;
+                case W_ROOK:    WR = WR & ~pos; break;
+                case W_BISHOP:  WB = WB & ~pos; break;
+                case W_KNIGHT:  WN = WN & ~pos; break;
 
                 default:        break;
             }
@@ -229,12 +239,12 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         {
             switch(pieceCap)
             {
-                case B_PAWN:    Moves.BP = Moves.BP & ~pos; break;
-                case B_KING:    Moves.BK = Moves.BK & ~pos; break;
-                case B_QUEEN:   Moves.BQ = Moves.BQ & ~pos; break;
-                case B_ROOK:    Moves.BR = Moves.BR & ~pos; break;
-                case B_BISHOP:  Moves.BB = Moves.BB & ~pos; break;
-                case B_KNIGHT:  Moves.BN = Moves.BN & ~pos; break;
+                case B_PAWN:    BP = BP & ~pos; break;
+                case B_KING:    BK = BK & ~pos; break;
+                case B_QUEEN:   BQ = BQ & ~pos; break;
+                case B_ROOK:    BR = BR & ~pos; break;
+                case B_BISHOP:  BB = BB & ~pos; break;
+                case B_KNIGHT:  BN = BN & ~pos; break;
 
                 default:        break;
             }
@@ -256,24 +266,24 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         
         if( moveW )
         {
-            Moves.WP = Moves.WP & ~pos;
+            WP = WP & ~pos;
             switch( choice )
             {
-                case 1: Moves.WQ = Moves.WQ | pos;
+                case 1: WQ = WQ | pos;
                         piece = W_QUEEN;
-                        Moves.printString2("WQueen", Moves.WQ);
+                        printString2("WQueen", WQ);
                         break;
-                case 2: Moves.WR = Moves.WR | pos;
+                case 2: WR = WR | pos;
                         piece = W_ROOK;
-                        Moves.printString2("WRook", Moves.WR);
+                        printString2("WRook", WR);
                         break;
-                case 3: Moves.WB = Moves.WB | pos;
+                case 3: WB = WB | pos;
                         piece = W_BISHOP;
-                        Moves.printString2("WBishop", Moves.WB);
+                        printString2("WBishop", WB);
                         break;
-                case 4: Moves.WN = Moves.WN | pos;
+                case 4: WN = WN | pos;
                         piece = W_KNIGHT;
-                        Moves.printString2("WKnight", Moves.WN);
+                        printString2("WKnight", WN);
                         break;
                 default:    System.out.println("Warning! Invalid Pawn Promotion Chosen! Program Should Never Reach Here");
                             break;
@@ -281,24 +291,24 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         }
         else
         {
-            Moves.BP = Moves.BP & ~pos;
+            BP = BP & ~pos;
             switch(choice)
             {
-                case 1: Moves.BQ = Moves.BQ | pos;
+                case 1: BQ = BQ | pos;
                         piece = B_QUEEN;
-                        Moves.printString2("BQueen", Moves.BQ);
+                        printString2("BQueen", BQ);
                         break;
-                case 2: Moves.BR = Moves.BR | pos;
+                case 2: BR = BR | pos;
                         piece = B_ROOK;
-                        Moves.printString2("BRook", Moves.BR);
+                        printString2("BRook", BR);
                         break;
-                case 3: Moves.BB = Moves.BB | pos;
+                case 3: BB = BB | pos;
                         piece = B_BISHOP;
-                        Moves.printString2("BBishop", Moves.BB);
+                        printString2("BBishop", BB);
                         break;
-                case 4: Moves.BN = Moves.BN | pos;
+                case 4: BN = BN | pos;
                         piece = B_KNIGHT;
-                        Moves.printString2("BKnight", Moves.BN);
+                        printString2("BKnight", BN);
                         break;
                 default:    System.out.println("Warning! Invalid Pawn Promotion Chosen! Program Should Never Reach Here");
                             break;
@@ -321,12 +331,12 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                     newRow = Character.getNumericValue(temp.charAt(3));
                     newCol = Character.getNumericValue(temp.charAt(4));
                     g.drawImage(img_green, base_x + (newCol * disp), base_y + ( (7-newRow) * disp ), this);
-                    System.out.println("Green Square Debugging - " + temp + ": " + newRow+", "+newCol);
+//                    System.out.println("Green Square Debugging - " + temp + ": " + newRow+", "+newCol);
                 }
                 else
                 {
                     newCol = Character.getNumericValue(temp.charAt(2));                    
-                    System.out.println("Green Square Debugging: " + temp );
+//                    System.out.println("Green Square Debugging: " + temp );
                     if( moveW ){
                         g.drawImage(img_green, base_x + (newCol * disp), base_y, this);
                     }
@@ -395,7 +405,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         {                                                   
             oldRow = 7 - ( (y - base_y)/disp );
             oldCol = (x - base_x)/disp;                
-            long position = Moves.getBitBoardCorrespondingTo((oldRow * 8) + oldCol);
+            long position = getBitBoardCorrespondingTo((oldRow * 8) + oldCol);
             
             System.out.println(oldRow+", "+oldCol);
 
@@ -403,12 +413,12 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
             {
                 switch(dispCB[7 - oldRow][oldCol])
                 {
-                    case W_PAWN:    movelist = Moves.possibleP(position,IAMWHITE);  break;
-                    case W_KING:    movelist = Moves.possibleK(position,IAMWHITE);  break;
-                    case W_QUEEN:   movelist = Moves.possibleQ(position,IAMWHITE);  break;
-                    case W_ROOK:    movelist = Moves.possibleR(position,IAMWHITE);  break;
-                    case W_BISHOP:  movelist = Moves.possibleB(position,IAMWHITE);  break;
-                    case W_KNIGHT:  movelist = Moves.possibleN(position,IAMWHITE);  break;   
+                    case W_PAWN:    movelist = possibleP(position,IAMWHITE);  break;
+                    case W_KING:    movelist = possibleK(position,IAMWHITE) + possibleCastle(IAMWHITE);  break;
+                    case W_QUEEN:   movelist = possibleQ(position,IAMWHITE);  break;
+                    case W_ROOK:    movelist = possibleR(position,IAMWHITE);  break;
+                    case W_BISHOP:  movelist = possibleB(position,IAMWHITE);  break;
+                    case W_KNIGHT:  movelist = possibleN(position,IAMWHITE);  break;   
 
                     default:        break;
                 }
@@ -417,12 +427,12 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
             {
                 switch(dispCB[7 - oldRow][oldCol])
                 {
-                    case B_PAWN:    movelist = Moves.possibleP(position,IAMBLACK);  break;
-                    case B_KING:    movelist = Moves.possibleK(position,IAMBLACK);  break;
-                    case B_QUEEN:   movelist = Moves.possibleQ(position,IAMBLACK);  break;
-                    case B_ROOK:    movelist = Moves.possibleR(position,IAMBLACK);  break;
-                    case B_BISHOP:  movelist = Moves.possibleB(position,IAMBLACK);  break;
-                    case B_KNIGHT:  movelist = Moves.possibleN(position,IAMBLACK);  break;
+                    case B_PAWN:    movelist = possibleP(position,IAMBLACK);  break;
+                    case B_KING:    movelist = possibleK(position,IAMBLACK) + possibleCastle(IAMBLACK);  break;
+                    case B_QUEEN:   movelist = possibleQ(position,IAMBLACK);  break;
+                    case B_ROOK:    movelist = possibleR(position,IAMBLACK);  break;
+                    case B_BISHOP:  movelist = possibleB(position,IAMBLACK);  break;
+                    case B_KNIGHT:  movelist = possibleN(position,IAMBLACK);  break;
 
                     default:        break;
                 }
@@ -459,9 +469,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
 
                 if( isPromotionMove(temp, newRow, newCol) )                        
                 {
-                    System.out.println("checking temp: " +temp);                        
-                    // Selected one of the highlighted moves, hence move can be played. 
-                    // Moreover, it is a promotion move
+                    System.out.println("promotion move temp: " +temp);                                                                
                     canMove = true;
 
                     char capPiece = updateDisplayArray(oldRow, oldCol, newRow, newCol);
@@ -472,14 +480,45 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                     dispCB[7 - newRow][newCol] = piecePromotedTo;
 
                     moveW = !moveW;
-                    Moves.UpdateCap();
+                    UpdateCap();
 
                     break;
 
                 }
+                else if( isCastleMove(temp, newCol, newRow) )
+                {
+                    System.out.println("castle move temp: " +temp);                        
+                    canMove = true;
+                    
+                    // update kings bitboard and disp array
+                    updateDisplayArray(oldRow, oldCol, newRow, newCol);
+                    updateBitBoard(oldRow, oldCol, newRow, newCol);
+                    UpdateCap();                    
+                    
+                    int rook_oldCol;
+                    int rook_newCol;
+                    if( newCol == 6 )
+                    {
+                        rook_oldCol = 7;
+                        rook_newCol = 5;                            
+                    }
+
+                    else
+                    {
+                        rook_oldCol = 0;
+                        rook_newCol = 3;                            
+                    }                            
+
+                    // update rooks bitboard and disp array
+                    updateDisplayArray(oldRow, rook_oldCol, newRow, rook_newCol);
+                    updateBitBoard(oldRow, rook_oldCol, newRow, rook_newCol);
+                    
+                    moveW = !moveW;
+                    UpdateCap();
+                }
                 else if( isGeneralMove(temp, newCol, newRow) )
                 {
-                    // Selected one of the highlighted moves, hence move can be played
+                    System.out.println("general move temp: " +temp);                                                           
                     canMove = true;
 
                     char capPiece = updateDisplayArray(oldRow, oldCol, newRow, newCol);
@@ -487,10 +526,11 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                     updateCapBitBoard(capPos, capPiece);
 
                     moveW = !moveW;
-                    Moves.UpdateCap();
+                    UpdateCap();
 
                     break;
                 }
+                
 
             }
 
@@ -499,7 +539,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
 
         }
             click2 = false;            
-//            Moves.UpdateCap();
+//            UpdateCap();
             repaint();
     }
 
@@ -520,12 +560,43 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                          || (newRow == 0 && dispCB[7 - oldRow][oldCol] == B_PAWN));
     }
 
-    private boolean isGeneralMove(String temp, int newCol, int newRow) 
+    private boolean isGeneralMove(String move, int newCol, int newRow) 
     {
-        return     newRow == Character.getNumericValue(temp.charAt(3)) 
-                && newCol == Character.getNumericValue(temp.charAt(4));
+        return     newRow == Character.getNumericValue(move.charAt(3)) 
+                && newCol == Character.getNumericValue(move.charAt(4));
     }    
+
+    private boolean isCastleMove(String move, int newCol, int newRow) {
+        
+        if( moveW )
+        {
+            if( ( CASTLEW_KSIDE && move.equals(" 0406") && (oldRow == 0 && oldCol == 4) && (newRow == 0 && newCol == 6) )
+              ||( CASTLEW_QSIDE && move.equals(" 0402") && (oldRow == 0 && oldCol == 4) && (newRow == 0 && newCol == 2) )   )
+                    return true;
+        }
+        else
+        {
+            if( ( CASTLEB_KSIDE && move.equals(" 7476") && (oldRow == 7 && oldCol == 4) && (newRow == 7 && newCol == 6) )
+              ||( CASTLEB_QSIDE && move.equals(" 7472") && (oldRow == 7 && oldCol == 4) && (newRow == 7 && newCol == 2) )   )
+                    return true;
+        }        
+//        if( moveW )
+//        {
+//            if( ( CASTLEW_KSIDE && (oldRow == 0 && oldCol == 4) && (newRow == 0 && newCol == 6) )
+//              ||( CASTLEW_QSIDE && (oldRow == 0 && oldCol == 4) && (newRow == 0 && newCol == 2) )   )
+//            {
+//                System.err.println(move);
+//                return true;
+//            }            
+//        }
+//        else
+//        {
+//            if( ( CASTLEB_KSIDE && (oldRow == 7 && oldCol == 4) && (newRow == 7 && newCol == 6) )
+//              ||( CASTLEB_QSIDE && (oldRow == 7 && oldCol == 4) && (newRow == 7 && newCol == 2) )   )
+//                    return true;
+//        }  
+        return false;
+    }
     
     
 }
-
