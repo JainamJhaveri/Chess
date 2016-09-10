@@ -132,4 +132,11 @@ public class Constants {
     
     public static final char IAMWHITE = 'W';
     public static final char IAMBLACK = 'B';
+    
+    public static final long CASTLE_CHECK[] = {
+        0x1CL,
+        0x70L,      
+        0x1C00000000000000L,
+        0x7000000000000000L
+    };
 }

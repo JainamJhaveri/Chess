@@ -49,7 +49,7 @@ public class Moves {
         blist += possibleK(BK, IAMBLACK);
         blist += possibleCastle(IAMBLACK);
               
-//        System.out.println("unsafeMovesForWhite: "+ unsafeForWhite());
+        System.out.println("unsafeMovesForWhite: "+ unsafeForWhite());
 //        System.out.println("unsafeMovesForBlack: "+ unsafeForBlack());
     }
             
@@ -58,16 +58,22 @@ public class Moves {
         String list = "";        
         if( whoAmI == IAMWHITE)
         {
-            if (CASTLEW_QSIDE && ( (WR & CASTLE_ROOKS[0])!= 0) )
-                list += " 0402";
-            if (CASTLEW_KSIDE && ( (WR & CASTLE_ROOKS[1])!= 0) )
-                list += " 0406";
+            if ( ( CASTLEW_QSIDE && ((WR & CASTLE_ROOKS[0])!= 0) )            
+              && ( (unsafeForWhite() & CASTLE_CHECK[0]) == 0 )     )
+                    list += " 0402";
+            
+                
+            if (  ( CASTLEW_KSIDE && ((WR & CASTLE_ROOKS[1])!= 0) )
+               && ( (unsafeForWhite() & CASTLE_CHECK[1]) == 0 )     )
+                    list += " 0406";
         }
         else
         {
-            if (CASTLEB_QSIDE && ( (BR & CASTLE_ROOKS[2])!= 0) )
-                list += " 7472";
-            if (CASTLEB_KSIDE && ( (BR & CASTLE_ROOKS[3])!= 0) )
+            if (  ( CASTLEB_QSIDE && ((BR & CASTLE_ROOKS[2])!= 0) )
+               && ( (unsafeForBlack()& CASTLE_CHECK[2]) == 0 )     )
+                    list += " 7472";
+            if (   ( CASTLEB_KSIDE && ((BR & CASTLE_ROOKS[3])!= 0) )
+                && ( (unsafeForBlack()& CASTLE_CHECK[3]) == 0 )     )
                 list += " 7476";
         }
         
@@ -473,7 +479,8 @@ public class Moves {
                     oldposition = Long.numberOfTrailingZeros(moves);
                     oldRow = oldposition / 8;
                     oldCol = oldposition % 8 ;
-                    newmoves = KingMoves(oldposition) & ~PIECES_I_CANT_CAPTURE;
+                    long unsafeMoves = ( whoAmI == IAMWHITE )  ?   unsafeForWhite() :  unsafeForBlack();
+                    newmoves = KingMoves(oldposition) & ~PIECES_I_CANT_CAPTURE & ~unsafeMoves;
                     printString2( piece+"MOVES: ", newmoves);                    
                                         
                     while(newmoves != 0)

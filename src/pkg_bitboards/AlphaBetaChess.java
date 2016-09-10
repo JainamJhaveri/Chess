@@ -30,10 +30,10 @@ public class AlphaBetaChess
             {B_ROOK,    BLANK,   BLANK,   BLANK,    B_KING,     BLANK,   BLANK,   B_ROOK},
             {B_PAWN,    B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN,     B_PAWN},
             {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},
+            {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      B_ROOK,      B_ROOK,      BLANK},
             {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},
             {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},
-            {BLANK,     BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK,      BLANK},
-            {W_PAWN,    W_PAWN,     W_PAWN,     W_PAWN,    W_PAWN,     W_PAWN,     W_PAWN,     W_PAWN},
+            {W_PAWN,    W_PAWN,     W_PAWN,     W_PAWN,    BLANK,     BLANK,     W_PAWN,     W_PAWN},
             {W_ROOK,    BLANK,   BLANK,   BLANK,    W_KING,     BLANK,   BLANK,   W_ROOK}
         };       
         /*

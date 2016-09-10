@@ -161,10 +161,11 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                                 break;
                 case W_ROOK:    WR = WR & ~oldPos;
                                 WR = WR | newPos;
-                                if (CASTLEW_KSIDE && ( (WR & CASTLE_ROOKS[1]) == 0) )
-                                    CASTLEW_KSIDE = false;
-                                else if(CASTLEW_QSIDE && ( (WR & CASTLE_ROOKS[0]) == 0) )
+                                if( CASTLEW_QSIDE && ((WR & CASTLE_ROOKS[0]) == 0) )
                                     CASTLEW_QSIDE = false;
+                                else if ( CASTLEW_KSIDE && ( (WR & CASTLE_ROOKS[1]) == 0) )
+                                    CASTLEW_KSIDE = false;
+                                
                                 break;
                 case W_BISHOP:  WB = WB & ~oldPos;
                                 WB = WB | newPos;
@@ -191,10 +192,10 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                                 break;
                 case B_ROOK:    BR = BR & ~oldPos;
                                 BR = BR | newPos;
-                                if (CASTLEB_KSIDE && ( (BR & CASTLE_ROOKS[3]) == 0) )
-                                    CASTLEB_KSIDE = false;
-                                else if(CASTLEB_QSIDE && ( (BR & CASTLE_ROOKS[2]) == 0) )
+                                if( CASTLEB_QSIDE && ((BR & CASTLE_ROOKS[2]) == 0) )
                                     CASTLEB_QSIDE = false;
+                                else if ( CASTLEB_KSIDE && ((BR & CASTLE_ROOKS[3]) == 0) )
+                                    CASTLEB_KSIDE = false;                                
                                 break;
                 case B_BISHOP:  BB = BB & ~oldPos;
                                 BB = BB | newPos;
@@ -580,21 +581,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
               ||( CASTLEB_QSIDE && move.equals(" 7472") && (oldRow == 7 && oldCol == 4) && (newRow == 7 && newCol == 2) )   )
                     return true;
         }        
-//        if( moveW )
-//        {
-//            if( ( CASTLEW_KSIDE && (oldRow == 0 && oldCol == 4) && (newRow == 0 && newCol == 6) )
-//              ||( CASTLEW_QSIDE && (oldRow == 0 && oldCol == 4) && (newRow == 0 && newCol == 2) )   )
-//            {
-//                System.err.println(move);
-//                return true;
-//            }            
-//        }
-//        else
-//        {
-//            if( ( CASTLEB_KSIDE && (oldRow == 7 && oldCol == 4) && (newRow == 7 && newCol == 6) )
-//              ||( CASTLEB_QSIDE && (oldRow == 7 && oldCol == 4) && (newRow == 7 && newCol == 2) )   )
-//                    return true;
-//        }  
+        
         return false;
     }
     
