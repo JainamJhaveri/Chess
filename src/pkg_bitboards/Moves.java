@@ -49,8 +49,8 @@ public class Moves {
         blist += possibleK(BK, IAMBLACK);
         blist += possibleCastleB();
               
-        System.out.println("unsafeMovesForWhite: "+ unsafeForWhite());
-        System.out.println("unsafeMovesForBlack: "+ unsafeForBlack());
+//        System.out.println("unsafeMovesForWhite: "+ unsafeForWhite());
+//        System.out.println("unsafeMovesForBlack: "+ unsafeForBlack());
     }
             
     public static String possibleCastleW()
@@ -733,7 +733,12 @@ public class Moves {
         return newmoves;
     }
     
-    static void UpdateCap () {
+    /**
+     * This method updates bitboards which are used to determine capturable and non-capturable pieces
+     * It also updates the bitboard of occupied squares. 
+     */
+    static void UpdateCap () 
+    {
         PIECES_W_CANT_CAPTURE = (WP|WR|WN|WB|WQ|WK|BK);
         CAPTURABLE_B = (BP|BR|BN|BB|BQ);
         PIECES_B_CANT_CAPTURE = (BP|BR|BN|BB|BQ|BK|WK);
