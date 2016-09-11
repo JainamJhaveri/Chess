@@ -19,7 +19,8 @@ import static pkg_bitboards.Constants.*;
 public class Moves {
     static long WP = 0L, WR = 0L, WN = 0L, WB = 0L, WQ = 0L, WK = 0L, BP = 0L, BR = 0L, BN = 0L, BB = 0L, BQ = 0L, BK = 0L; // 12 bitboards        
     static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, OCCUPIEDSQ;                    
-    
+    static String history = "";
+//    static boolean EP = false;
     /**
     * possibleWMoves() finds all possible LEGAL moves for white constants like PIECES_W_CANT_CAPTURE. 
     * They need to be recalculated here because bitboards may change after every move.
@@ -32,7 +33,7 @@ public class Moves {
         
 //        printMasks();
         String wlist = "";        
-        wlist += possibleWP();        
+        wlist += possibleP(WP, IAMWHITE);        
         wlist += possibleR(WR, IAMWHITE);        
         wlist += possibleB(WB, IAMWHITE);
         wlist += possibleQ(WQ, IAMWHITE);
@@ -41,7 +42,7 @@ public class Moves {
         wlist += possibleCastle(IAMWHITE);
         
         String blist = "";
-        blist += possibleBP();
+        blist += possibleP(BP, IAMBLACK);
         blist += possibleR(BR, IAMBLACK);        
         blist += possibleB(BB, IAMBLACK);
         blist += possibleQ(BQ, IAMBLACK);
@@ -52,8 +53,60 @@ public class Moves {
         System.out.println("unsafeMovesForWhite: "+ unsafeForWhite());
 //        System.out.println("unsafeMovesForBlack: "+ unsafeForBlack());
     }
+
+    static String possibleEnPass(long pawnpos, char whoAmI)
+    {
+        if( history.length() == 0 ) return "";
+        String list = "";
+        byte hist_oldRow = Byte.parseByte(history.substring(0,1));
+        byte hist_oldCol = Byte.parseByte(history.substring(1,2));
+        byte hist_newRow = Byte.parseByte(history.substring(2,3));
+        byte hist_newCol = Byte.parseByte(history.substring(3,4));
+        byte histPos = (byte) (hist_newRow * 8 + hist_newCol);
+        
+        byte oldCol, newCol;
+        if( (Math.abs(hist_oldRow - hist_newRow) == 2) &&
+            (hist_oldCol == hist_newCol) )      // if last move was (y+2)x(y)x
+        {
             
-    public static String possibleCastle(char whoAmI)
+            if ( whoAmI == IAMWHITE )  // if black pawn was moved in the last move
+            {
+                // if black pawn was on left of white pawn                
+                if ( ((pawnpos << 1) & BP & ~FILE_A & getBitBoardCorrespondingTo(histPos)) != 0 )
+                {
+                    oldCol = (byte) (hist_oldCol - 1);                
+                    newCol = hist_oldCol;
+                    list = " " + oldCol + newCol+" E";
+                }                
+                else if( ((pawnpos >> 1) & BP & ~FILE_H & getBitBoardCorrespondingTo(histPos)) != 0 )
+                {
+                    oldCol = (byte) (hist_oldCol + 1);
+                    newCol = hist_oldCol;
+                    list = " " + oldCol + newCol+" E";
+                }                                                    
+            }
+            else
+            {
+                if ( ((pawnpos << 1) & WP & ~FILE_A & getBitBoardCorrespondingTo(histPos)) != 0 )
+                {
+                    oldCol = (byte) (hist_oldCol - 1);                
+                    newCol = hist_oldCol;
+                    list = " " + oldCol + newCol+" E";
+                }                    
+                else if( ((pawnpos >> 1) & WP & ~FILE_H & getBitBoardCorrespondingTo(histPos)) != 0 )
+                {                    
+                    oldCol = (byte) (hist_oldCol + 1);
+                    newCol = hist_oldCol;
+                    list = " " + oldCol + newCol+" E";
+                }                                                                    
+            }
+            
+        }
+        System.out.println("movelist from enpass method : " +list);
+        return list;
+    }
+    
+    static String possibleCastle(char whoAmI)
     {
         String list = "";        
         if( whoAmI == IAMWHITE)
@@ -185,54 +238,19 @@ public class Moves {
         return unsafemoves;        
     }
     
-    static String possibleP(long pawnpos, char whoAmI){
-        if(whoAmI == IAMWHITE){
-            return possibleWP(pawnpos);
-        }
-        else{
-            return possibleBP(pawnpos);
-        }
-    }
-    
-    private static String possibleWP()
-    {
-        String list = "";
-        long moves;
+    static String possibleP(long pawnpos, char whoAmI)
+    {        
+        String list;
         
-        /*  << 9 :: white pawn can capture right if there is a capturable black piece and that piece is not on FILE_A after shift */        
-        moves = (WP << 9) & CAPTURABLE_B & ~RANK_8 & ~FILE_A;                
-        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, -1);
-        System.out.println("After right cap: "+list);
-        /*  << 7 :: white pawn can capture left if there is a capturable black piece and that piece is not on FILE_H after shift */
-        moves = (WP << 7) & CAPTURABLE_B & ~RANK_8 & ~FILE_H;
-        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, 1);
-        System.out.println("After left cap: "+list);
-        /*  >> 8 :: pawn can be pushed 1 position if it doesn't go on rank 8 after push and there are no piece below its current rank */
-        moves = (WP << 8) & ~RANK_8 & ~OCCUPIEDSQ;
-        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, 0);
-        System.out.println("After pawn push 1: "+list);
-        /*  << 16 :: pawn can be pushed 2 positions if it is on rank 2 and there are no pieces on rank 4 or rank 3 for the corresponding pawn */
-        moves = ( (WP & RANK_2) << 16 ) &  ~( (OCCUPIEDSQ & RANK_4) | ((OCCUPIEDSQ & RANK_3) << 8) );
-        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -2, 0);
-        System.out.println("After pawn push 1: "+list);
-        
-        /*  << 9 :: right capture + promotion */        
-        moves = (WP << 9) & CAPTURABLE_B & RANK_8 & ~FILE_A;        
-        list += getPromotionPaths(moves, -1);
-        System.out.println("After right cap + promotion: "+list);
-        /*  << 7 :: left capture + promotion */        
-        moves = (WP << 7) & CAPTURABLE_B & RANK_8 & ~FILE_H;
-        list += getPromotionPaths(moves, 1);
-        System.out.println("After left cap + promotion: "+list);
-        /*  << 8 :: simple promotion */        
-        moves = (WP << 8) & RANK_8 & ~OCCUPIEDSQ;
-        list += getPromotionPaths(moves, 0);
-        System.out.println("After simple promotion: "+list);
-        System.out.println("\npawn movelist: " +  list);
+        if(whoAmI == IAMWHITE)
+            list = possibleWP(pawnpos) + possibleEnPass(pawnpos, whoAmI);
+        else
+            list = possibleBP(pawnpos) + possibleEnPass(pawnpos, whoAmI);
+                
         return list;
     }
-
-    static String possibleWP(long pawnpos)
+        
+    private static String possibleWP(long pawnpos)
     {
         String list = "";
         long moves;
@@ -269,46 +287,8 @@ public class Moves {
         System.out.println("\npawn movelist: " +  list);
         return list;
     }
-    
-    private static String possibleBP()
-    {
-        String list = "";
-        long moves;
         
-        /*  >> 9 :: black pawn can capture right if there is a capturable black piece and that piece is not on FILE_H after shift */        
-        moves = (BP >> 9) & CAPTURABLE_W & ~RANK_1 & ~FILE_H;                
-        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 1, 1);
-        System.out.println("After right cap: "+list);
-        /*  >> 7 :: black pawn can capture left if there is a capturable black piece and that piece is not on FILE_A after shift */
-        moves = (BP >> 7) & CAPTURABLE_W & ~RANK_1 & ~FILE_A;
-        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 1, -1);
-        System.out.println("After left cap: "+list);
-        /*  >> 8 :: pawn can be pushed 1 position if it doesn't go on rank 1 after push and there are no piece below its current rank */
-        moves = (BP >> 8) & ~RANK_1 & ~OCCUPIEDSQ;
-        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 1, 0);
-        System.out.println("After pawn push 1: "+list);
-        /*  >> 16 :: pawn can be pushed 2 positions if it is on rank 7 and there are no pieces on rank 5 or rank 6 for the corresponding pawn */
-        moves = ( (BP & RANK_7) >> 16 ) &  ~( (OCCUPIEDSQ & RANK_5) | ((OCCUPIEDSQ & RANK_6) >> 8) );
-        list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 2, 0);
-        System.out.println("After pawn push 1: "+list);
-        
-        /*  >> 9 :: right capture + promotion */        
-        moves = (BP >> 9) & CAPTURABLE_W & RANK_1 & ~FILE_H;        
-        list += getPromotionPaths(moves, 1);
-        System.out.println("After right cap + promotion: "+list);
-        /*  >> 7 :: left capture + promotion */        
-        moves = (BP >> 7) & CAPTURABLE_W & RANK_1 & ~FILE_A;
-        list += getPromotionPaths(moves, -1);
-        System.out.println("After left cap + promotion: "+list);
-        /*  >> 8 :: simple promotion */        
-        moves = (BP >> 8) & RANK_1 & ~OCCUPIEDSQ;
-        list += getPromotionPaths(moves, 0);
-        System.out.println("After simple promotion: "+list);
-        System.out.println("\npawn movelist: " +  list);
-        return list;
-    }
-    
-    static String possibleBP(long pawnpos)
+    private static String possibleBP(long pawnpos)
     {
         String list = "";
         long moves;
@@ -506,7 +486,7 @@ public class Moves {
      * In our bitboards, leftmost bit is 7,7(63: h8) and rightmost bit 0,0 (0: a1)
      * @param initialChessBoard        
     **/
-    public static void setBitBoardsFrom(char initialChessBoard[][])
+    static void setBitBoardsFrom(char initialChessBoard[][])
     {
         int position = 0;
         for(byte i=0; i<8; i++)
@@ -537,6 +517,7 @@ public class Moves {
                 }
             }
         }
+        UpdateCap();
     }
 
     /**
@@ -601,7 +582,7 @@ public class Moves {
         * populates myBitBoard array with corresponding piece.
      * @return char array
     **/
-    public static char[][] getDisplayBoard() 
+    static char[][] getDisplayBoard() 
     {
 //        printString2("WP", WP);
         byte shifts;

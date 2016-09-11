@@ -52,8 +52,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         addMouseListener(this);
         addMouseMotionListener(this);
     }
-    
-    
+        
     @Override
     protected void paintComponent(Graphics g) 
     {
@@ -126,7 +125,8 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                                                     +(7-oldRow)+", "+oldCol+" is now BLANK");
         char temp = dispCB[7 - newRow][newCol];
         dispCB[7 - newRow][newCol] = dispCB[7 - oldRow][oldCol];
-        dispCB[7 - oldRow][oldCol] = BLANK;
+        dispCB[7 - oldRow][oldCol] = BLANK;                
+        
         return temp;
     }
 
@@ -149,7 +149,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
             switch(dispCB[7 - newRow][newCol])
             {
                 case W_PAWN:    WP = WP & ~oldPos;
-                                WP = WP | newPos;
+                                WP = WP | newPos;                                
                                 break;
                 case W_KING:    WK = WK & ~oldPos;
                                 WK = WK | newPos;
@@ -207,6 +207,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                 default:        break;
             }
         }
+        history = ""+ oldRow + oldCol + newRow + newCol;
         return newPos;
     }
 
@@ -326,24 +327,34 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
             for(int i=0; i<movelist.length()/5; i++)
             {
                 String temp = movelist.substring((i*5), (i*5)+5);
-                //if not pawn promotion
-                if(!Character.isLetter(temp.charAt(3)))
+                System.out.println(temp+ ": " + temp.charAt(4));
+                                                
+                //if not pawn promotion                
+                if( Character.isDigit(temp.charAt(3)) )
                 {
                     newRow = Character.getNumericValue(temp.charAt(3));
                     newCol = Character.getNumericValue(temp.charAt(4));
                     g.drawImage(img_green, base_x + (newCol * disp), base_y + ( (7-newRow) * disp ), this);
 //                    System.out.println("Green Square Debugging - " + temp + ": " + newRow+", "+newCol);
-                }
-                else
+                }    
+                // if pawn promotion
+                else if( temp.charAt(4) == 'P' )
                 {
                     newCol = Character.getNumericValue(temp.charAt(2));                    
 //                    System.out.println("Green Square Debugging: " + temp );
-                    if( moveW ){
-                        g.drawImage(img_green, base_x + (newCol * disp), base_y, this);
-                    }
-                    else{
-                        g.drawImage(img_green, base_x + (newCol * disp), base_y + (7 * disp), this);
-                    }
+                    if( moveW )
+                        g.drawImage(img_green, base_x + (newCol * disp), base_y, this);                    
+                    else
+                        g.drawImage(img_green, base_x + (newCol * disp), base_y + (7 * disp), this);                    
+                }
+//                // if enpass move
+                else if( temp.charAt(4) == 'E')
+                {
+                    newCol = Character.getNumericValue(temp.charAt(2));
+                    if( moveW )
+                        g.drawImage(img_green, base_x + (newCol * disp), base_y + (2 * disp), this);
+                    else
+                        g.drawImage(img_green, base_x + (newCol * disp), base_y + (5 * disp), this);
                 }
             }
         }
@@ -438,10 +449,10 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                     default:        break;
                 }
             }
-
+            
             if(movelist.length() > 0)
             {
-                System.out.println(movelist);
+                System.out.println("handleFirstClick: " +movelist);
                 click2 = true;
                 repaint();
             }
@@ -517,6 +528,33 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                     moveW = !moveW;
                     UpdateCap();
                 }
+                else if( isEnpassMove(temp, newCol)  )
+                {
+                    System.out.println("castle move temp: " +temp);                        
+                    canMove = true;
+                    
+                    updateDisplayArray(oldRow, oldCol, newRow, newCol);                    
+                    updateBitBoard(oldRow, oldCol, newRow, newCol);
+                    char pawn;
+                    int capRow;
+                    if( moveW )
+                    {
+                        pawn = B_PAWN;
+                        capRow = newRow - 1;                        
+                    }
+                    else
+                    {
+                        pawn = W_PAWN;
+                        capRow = newRow + 1;
+                    }
+                    updateDisplayArray(oldRow, oldCol, capRow, newCol);
+                    updateCapBitBoard(getBitBoardCorrespondingTo( (capRow * 8) + newCol), pawn);
+                    
+                    moveW = !moveW;
+                    UpdateCap();
+                    
+                    break;
+                }
                 else if( isGeneralMove(temp, newCol, newRow) )
                 {
                     System.out.println("general move temp: " +temp);                                                           
@@ -530,18 +568,15 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                     UpdateCap();
 
                     break;
-                }
-                
-
+                }                
             }
 
             System.out.println("New Square Clicked Is - "+newRow+", "+newCol);
             System.out.println("Selected Move is " +canMove);
 
         }
-            click2 = false;            
-//            UpdateCap();
-            repaint();
+        click2 = false;            
+        repaint();
     }
 
 
@@ -555,10 +590,11 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
      */
     private boolean isPromotionMove(String move, int newRow, int newCol) 
     {
-        return            Character.isLetter(move.charAt(3))
+        return            move.charAt(4) == 'P'
                     &&    newCol == Character.getNumericValue(move.charAt(2)) 
                     &&  (   (newRow == 7 && dispCB[7 - oldRow][oldCol] == W_PAWN)
                          || (newRow == 0 && dispCB[7 - oldRow][oldCol] == B_PAWN));
+        
     }
 
     private boolean isGeneralMove(String move, int newCol, int newRow) 
@@ -567,7 +603,8 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                 && newCol == Character.getNumericValue(move.charAt(4));
     }    
 
-    private boolean isCastleMove(String move, int newCol, int newRow) {
+    private boolean isCastleMove(String move, int newCol, int newRow) 
+    {
         
         if( moveW )
         {
@@ -584,6 +621,13 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         
         return false;
     }
-    
-    
+
+    private boolean isEnpassMove(String move, int newCol) 
+    {
+        System.out.println(move + " " +oldCol + newCol);
+        return          move.charAt(4) == 'E'
+                     && oldCol == Character.getNumericValue(move.charAt(1))
+                     && newCol == Character.getNumericValue(move.charAt(2)) ;
+    }
+        
 }
