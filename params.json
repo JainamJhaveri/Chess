@@ -1,0 +1,6 @@
+{
+  "name": "Chess",
+  "tagline": "Making chess with AI in Java ",
+  "body": "# Chess\r\nMinor Project: Chess With AI (7th Semester)\r\n\r\nLanguage: Java\r\n\r\nIDE: Netbeans\r\n\r\nBasically, we are planning to make 1P vs 1CPU chess game. \r\n\r\nCPU will be using the very famous *Minimax algorithm* to calculate the possible moves from a particular position and *alpha-beta pruning* to eliminate traversing the trees whose alpha-beta values are not favourable till 2 levels.\r\n\r\nAdditionally, we plan to \r\n\r\n1. show moves log\r\n\r\n2. undo moves\r\n\r\n3. save games\r\n\r\n4. load any game stored in portable game notation(PGN) format\r\n\r\n\r\nChess graphics are used from *chess.com*\r\n\r\nFor example: For white bishop, the link is\r\nhttp://images.chesscomfiles.com/chess-themes/pieces/classic/53/wb.png\r\n\r\n\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
