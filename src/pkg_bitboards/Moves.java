@@ -109,24 +109,29 @@ public class Moves {
     static String possibleCastle(char whoAmI)
     {
         String list = "";        
+        printString2("OCCUPIEDSQ", OCCUPIEDSQ);
         if( whoAmI == IAMWHITE)
         {
             if ( ( CASTLEW_QSIDE && ((WR & CASTLE_ROOKS[0])!= 0) )            
-              && ( (unsafeForWhite() & CASTLE_CHECK[0]) == 0 )     )
+               && ( (unsafeForWhite() & CASTLE_CHECK[0])  == 0 )      
+               && ( (OCCUPIEDSQ & CASTLE_CHECK[0] & ~WK) == 0  )      )
                     list += " 0402";
             
                 
             if (  ( CASTLEW_KSIDE && ((WR & CASTLE_ROOKS[1])!= 0) )
-               && ( (unsafeForWhite() & CASTLE_CHECK[1]) == 0 )     )
+               && ( (unsafeForWhite() & CASTLE_CHECK[1]) == 0 )     
+               && ( (OCCUPIEDSQ & CASTLE_CHECK[1] & ~WK) == 0  )      )
                     list += " 0406";
         }
         else
         {
             if (  ( CASTLEB_QSIDE && ((BR & CASTLE_ROOKS[2])!= 0) )
-               && ( (unsafeForBlack()& CASTLE_CHECK[2]) == 0 )     )
+               && ( (unsafeForBlack()& CASTLE_CHECK[2]) == 0 )
+               && ( (OCCUPIEDSQ & CASTLE_CHECK[2] & ~BK) == 0  )      )
                     list += " 7472";
             if (   ( CASTLEB_KSIDE && ((BR & CASTLE_ROOKS[3])!= 0) )
-                && ( (unsafeForBlack()& CASTLE_CHECK[3]) == 0 )     )
+                && ( (unsafeForBlack()& CASTLE_CHECK[3]) == 0 )
+                && ( (OCCUPIEDSQ & CASTLE_CHECK[3] & ~BK) == 0  )      )
                 list += " 7476";
         }
         
