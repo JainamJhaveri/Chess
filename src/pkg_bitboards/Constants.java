@@ -1,16 +1,25 @@
 package pkg_bitboards;
 
 public class Constants {
+
+// --- Linux specific constants begin ---
+    public static final String basepath = "/home/jainu/IdeaProjects/Chess/";
+    public static final String black_basepath = basepath + "CP/blackpcs/";
+    public static final String white_basepath = basepath + "CP/whitepcs/";
+    public static final String path_board = basepath + "CP/chessboard.png";
+    public static final String path_greenSq = basepath + "CP/green.png";
+// --- Linux specific constants end --
+
+// --- Windows specific constants begin --
 //    public static final String basepath = "C:\\Users\\Sony\\Documents\\NetBeansProjects\\Chess\\";
-    public static final String basepath = "C:\\Users\\jaina_000\\Documents\\Chess\\";
 //    public static final String black_basepath = basepath + "CP\\B\\";
 //    public static final String white_basepath = basepath + "CP\\W\\";
-    public static final String black_basepath = basepath + "CP\\blackpcs\\";
-    public static final String white_basepath = basepath + "CP\\whitepcs\\";
-    
-    public static final String path_board = basepath + "CP\\chessboard.png";    
-    public static final String path_greenSq = basepath + "CP\\green.png";
-    
+//    public static final String black_basepath = basepath + "CP\\blackpcs\\";
+//    public static final String white_basepath = basepath + "CP\\whitepcs\\";
+//    public static final String path_board = basepath + "CP\\chessboard.png";
+//    public static final String path_greenSq = basepath + "CP\\green.png";
+// --- Windows specific constants end ---
+
     public static final String path_B = white_basepath + "B.png";
     public static final String path_K = white_basepath + "K.png";
     public static final String path_N = white_basepath + "N.png";

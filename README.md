@@ -3,7 +3,7 @@ Minor Project: Chess With AI (7th Semester)
 
 Language: Java
 
-IDE: Netbeans
+IDE: IntelliJ IDEA
 
 Basically, we are planning to make 1P vs 1CPU chess game. 
 
