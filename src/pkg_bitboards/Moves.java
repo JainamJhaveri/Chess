@@ -794,6 +794,7 @@ class Moves {
                 }
                 System.out.println("possible move from oldposition: "+oldRow+oldCol+ " to "+newCol+newRow);
                 return true;
+
             
         }
 
