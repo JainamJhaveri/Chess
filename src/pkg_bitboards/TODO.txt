@@ -1,3 +1,6 @@
-1. moves for each piece should be such that it's king is safe after it performs the move
+1. King Safety for every move {
+-> For every piece, pass bitboard and piece char to check all moves of that bitboard (piece specific check)
+-> Update movelist with concat of all 6 bb's
+}
 2. checkmate
 3. stalemate
