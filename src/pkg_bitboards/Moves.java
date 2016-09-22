@@ -236,7 +236,7 @@ public class Moves {
             int oldposition = Long.numberOfTrailingZeros(piecepositions);            
             long newmoves = KnightMoves(oldposition);            
             unsafemoves |= newmoves;
-            piecepositions = piecepositions & (piecepositions-1);   
+            piecepositions = piecepositions & (piecepositions-1);
         }
         
         printString2("UNSAFE MOVES", unsafemoves);
