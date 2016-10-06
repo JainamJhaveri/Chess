@@ -469,7 +469,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
      * @return returns bit board of new position to which our piece moved. This bitboard corresponding to new position
      *  can be used to update bitboard of captured piece
      */
-    public static long updateBitBoard(int oldRow, int oldCol, int newRow, int newCol)
+    private static long updateBitBoard(int oldRow, int oldCol, int newRow, int newCol)
     {
         long oldPos = getBitBoardCorrespondingTo((oldRow * 8) + oldCol);
         long newPos = getBitBoardCorrespondingTo((newRow * 8) + newCol);
@@ -548,7 +548,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
      * @param pos position which should be removed from bitboard of captured piece
      * @param pieceCap char piece whose bitboard needs to be updated
      */
-    public static void updateCapBitBoard(long pos, char pieceCap)
+    private static void updateCapBitBoard(long pos, char pieceCap)
     {
         // If no piece was captured, we can safely return without checking any case as no bitboard needs to be updated
         if( pieceCap == BLANK ) return;

@@ -110,7 +110,7 @@ class Moves {
         return list;
     }
 
-    static long unsafeForWhite()
+    private static long unsafeForWhite()
     {
         long unsafemoves, piecepositions;
 
@@ -221,7 +221,7 @@ class Moves {
         if(whoAmI == IAMWHITE)
         {
             list = possibleWP(pawnpos) + possibleEnPass(pawnpos, whoAmI);
-//            list = TempMoves.getSafeMovesFrom(list, W_PAWN);
+            list = TempMoves.getSafeMovesFrom(list, W_PAWN);
             System.out.println( "actual possible moves: " +list );
 
         }
@@ -394,7 +394,7 @@ class Moves {
                         list += " " + oldRow + oldCol + newRow + newCol;
                         newmoves = newmoves & (newmoves-1);
                     }
-//                    getSafeMovesFor(list, whoAmI);
+
                     moves = moves & (moves-1);
                 }   break;
             case 'D':
@@ -461,8 +461,6 @@ class Moves {
             default:
                 break;
         }
-
-//        list
 
         return list;
     }
@@ -597,7 +595,7 @@ class Moves {
     }
 
 
-    private static long HVMoves(int i) {
+    static long HVMoves(int i) {
         long slider = 1L << i;
         long horizontalPossibilities =(
                                ( ( OCCUPIEDSQ & RankMask[i/8] ) - 2*slider )
@@ -611,7 +609,7 @@ class Moves {
         return (horizontalPossibilities|verticalPossibilities);
     }
 
-    private static long DiagonalMoves(int i) {
+    static long DiagonalMoves(int i) {
         long slider = 1L << i;
 
         long fwdDiaPossibilities =(
@@ -627,7 +625,7 @@ class Moves {
         return (fwdDiaPossibilities | backDiaPossibilities);
     }
 
-    private static long KnightMoves(int oldposition) {
+    static long KnightMoves(int oldposition) {
         long newmoves;
         if(oldposition > 18)
             newmoves = (KnightMask << (oldposition-18));
@@ -642,7 +640,7 @@ class Moves {
         return newmoves;
     }
 
-    private static long KingMoves(int oldposition) {
+    static long KingMoves(int oldposition) {
         long newmoves;
         if(oldposition > 9)
             newmoves = (KingMask << (oldposition-9));

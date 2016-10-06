@@ -2,113 +2,129 @@ package pkg_bitboards;
 
 import static pkg_bitboards.Constants.*;
 import static pkg_bitboards.MethodUtils.*;
-import static pkg_bitboards.Moves.*;
 
-public class TempMoves
-{
-    private static long
-            tempWP = 0L, tempWR = 0L, tempWN = 0L, tempWB = 0L, tempWQ = 0L, tempWK = 0L,
-            tempBP = 0L, tempBR = 0L, tempBN = 0L, tempBB = 0L, tempBQ = 0L, tempBK = 0L; // 12 bitboards
-    private static long tempPIECES_W_CANT_CAPTURE, tempCAPTURABLE_W, tempPIECES_B_CANT_CAPTURE, tempCAPTURABLE_B, tempOCCUPIEDSQ;
-    private static String tempHistory = "";
+public class TempMoves {
 
-
-    private static void setTempBitBoards()
+    public static String getSafeMovesFrom(String movelist, char piece)
     {
-        tempWP = WP; tempWR = WR; tempWN = WN; tempWB = WB; tempWQ = WQ; tempWK = WK;
-        tempBP = BP; tempBR = BR; tempBN = BN; tempBB = BB; tempBQ = BQ; tempBK = BK;
-        tempPIECES_W_CANT_CAPTURE = PIECES_W_CANT_CAPTURE; tempCAPTURABLE_W = CAPTURABLE_W;
-        tempPIECES_B_CANT_CAPTURE = PIECES_B_CANT_CAPTURE; tempCAPTURABLE_B = CAPTURABLE_B; tempOCCUPIEDSQ = OCCUPIEDSQ;
-        tempHistory = history;
-    }
+        BBStruct bbstruct;
+        String safelist = "";
 
-    private static void updateTempBB()
-    {
-        tempPIECES_W_CANT_CAPTURE = (tempWP|tempWR|tempWN|tempWB|tempWQ|tempWK|tempBK);
-        tempCAPTURABLE_B = (tempBP|tempBR|tempBN|tempBB|tempBQ);
-        tempPIECES_B_CANT_CAPTURE = (tempBP|tempBR|tempBN|tempBB|tempBQ|tempBK|tempWK);
-        tempCAPTURABLE_W = (tempWP|tempWR|tempWN|tempWB|tempWQ);
-        tempOCCUPIEDSQ = (tempWP|tempWR|tempWN|tempWB|tempWQ|tempWK|tempBP|tempBR|tempBN|tempBB|tempBQ|tempBK);
-    }
-/*
-    public static String getSafeMovesFrom(String possibleMoves, char piece)
-    {
-        setTempBitBoards();
-        String list = "";
-
-        for(int i=0; i < possibleMoves.length()/5; i++)
+        for (int i = 0; i < movelist.length() / 5; i++)
         {
-            String move = possibleMoves.substring((i * 5), (i * 5) + 5);
+            bbstruct = new BBStruct(); // setting global bitboards to local bitboards for each move
 
-            if( isPromotionMove(move) )
+            String temp = movelist.substring((i * 5), (i * 5) + 5);
+            int oldRow = 0, oldCol = 0, newRow = 0, newCol = 0;
+            
+            if( isPromotionMove(temp) )
             {
-                list += move;
-            }
-            else if( isCastleMove(move) )
-            {
-                list += move;
-            }
-            else if( isEnpassMove(move))
-            {
-                list += move;
-            }
-            if( isGeneralMove(move) )
-            {
-//                if( isMoveSafeOnBB(move, piece) )
-                list += move;
-            }
-        }
-        return list;
-    }
-*/
-    private static boolean isMoveSafeOnBB(String move, char piece)
-    {
-
-        int oldRow = Character.getNumericValue(move.charAt(1));
-        int oldCol = Character.getNumericValue(move.charAt(2));
-        int newRow = Character.getNumericValue(move.charAt(3));
-        int newCol = Character.getNumericValue(move.charAt(4));
-        int oldPosition = oldRow * 8 + oldCol;
-        int newPosition = newRow * 8 + newCol;
-        long newPositionBB = getBitBoardCorrespondingTo(newPosition);
-        long oldPositionBB = getBitBoardCorrespondingTo(oldPosition);
-
-        switch (piece)
-        {
-            case W_PAWN:
-                printString2("WP status", WP);
-                WP = WP | newPositionBB;
-                WP = WP & ~oldPositionBB;
-
-                if( (BB & newPositionBB) != 0  ) {    BB = BB & ~newPositionBB; }
-                else if( (BQ & newPositionBB) != 0  ) {    BQ = BQ & ~newPositionBB; }
-
-                printString2("before WP", WP);
-                UpdateCap();
-                long unsafeMoves = unsafeForWhite();        // TODO: do something.. .unsafeForWhite() should not be called from here
-                WP = WP | oldPositionBB;
-                WP = WP & ~newPositionBB;
-                UpdateCap();
-                printString2("after WP", WP);
-                printString2("unsafe", unsafeMoves);
-
-                if( (unsafeMoves & WK) != 0)
+                System.out.println("promotion move temp: " +temp);
+                oldCol = Character.getNumericValue(temp.charAt(1));
+                newCol = Character.getNumericValue(temp.charAt(2));
+                if(moveW)
                 {
-                    System.out.println("move from oldposition: "+oldRow+oldCol+ " to "+newCol+newRow+ " is not possible");
-                    return false;
+                    oldRow = 6;
+                    newRow = 7;
                 }
-                System.out.println("possible move from oldposition: "+oldRow+oldCol+ " to "+newCol+newRow);
-                return true;
+                else
+                {
+                    oldRow = 1;
+                    newRow = 0;
+                }
+            }
+            else if( isCastleMove(temp) )
+            {
+                System.out.println("castle move temp: " +temp);
+                
+                
+            }
+            else if( isEnpassMove(temp)  )
+            {
+                
+            }
+            else    // is general move
+            {
+                System.out.println("general move temp: " +temp);
+                oldRow = Character.getNumericValue(temp.charAt(1));
+                oldCol = Character.getNumericValue(temp.charAt(2));
+                newRow = Character.getNumericValue(temp.charAt(3));
+                newCol = Character.getNumericValue(temp.charAt(4));
+            }
 
-
+            if( checkIfSafe(bbstruct, oldRow, oldCol, newRow, newCol) )
+                safelist += temp;
         }
-
-        return true;
+        return safelist;
     }
 
+    /**
+     * 1. if an opponents piece exists in new location where our piece is going from old location,
+     * then remove that piece's bit from its bb
+     * 2. remove our piece from its old location and add it to new location in its bitboard
+     * 3. update capturable bitboards
+     * 4. return true if my king is safe after operating this
+     * @param bbstruct
+     * @param oldRow
+     * @param oldCol
+     * @param newRow
+     * @param newCol
+     */
+    private static boolean checkIfSafe(BBStruct bbstruct, int oldRow, int oldCol, int newRow, int newCol)
+    {
+        long oldPos = getBitBoardCorrespondingTo((oldRow * 8) + oldCol);
+        long newPos = getBitBoardCorrespondingTo((newRow * 8) + newCol);
 
+        if( moveW )
+        {
+            if( (bbstruct.mBB & newPos) != 0)      bbstruct.mBB &= ~newPos;
+            else if( (bbstruct.mBN & newPos) != 0) bbstruct.mBN &= ~newPos;
+            else if( (bbstruct.mBP & newPos) != 0) bbstruct.mBP &= ~newPos;
+            else if( (bbstruct.mBQ & newPos) != 0) bbstruct.mBQ &= ~newPos;
+            else if( (bbstruct.mBR & newPos) != 0) bbstruct.mBR &= ~newPos;
+            else if( (bbstruct.mBK & newPos) != 0) bbstruct.mBK &= ~newPos;
+            else System.out.println("Blank square where your piece want to move");
+            
+            if( (bbstruct.mWB & oldPos) != 0)      { bbstruct.mWB &= ~oldPos; bbstruct.mWB |= newPos; }
+            else if( (bbstruct.mWN & oldPos) != 0) { bbstruct.mWN &= ~oldPos; bbstruct.mWN |= newPos; } 
+            else if( (bbstruct.mWP & oldPos) != 0) { bbstruct.mWP &= ~oldPos; bbstruct.mWP |= newPos; }
+            else if( (bbstruct.mWQ & oldPos) != 0) { bbstruct.mWQ &= ~oldPos; bbstruct.mWQ |= newPos; }
+            else if( (bbstruct.mWR & oldPos) != 0) { bbstruct.mWR &= ~oldPos; bbstruct.mWR |= newPos; }
+            else if( (bbstruct.mWK & oldPos) != 0) { bbstruct.mWK &= ~oldPos; bbstruct.mWK |= newPos; }
+            else System.out.println("some error");
+        }
+        else
+        {
+            if( (bbstruct.mWB & newPos) != 0)      bbstruct.mWB &= ~newPos;
+            else if( (bbstruct.mWN & newPos) != 0) bbstruct.mWN &= ~newPos;
+            else if( (bbstruct.mWP & newPos) != 0) bbstruct.mWP &= ~newPos;
+            else if( (bbstruct.mWQ & newPos) != 0) bbstruct.mWQ &= ~newPos;
+            else if( (bbstruct.mWR & newPos) != 0) bbstruct.mWR &= ~newPos;
+            else if( (bbstruct.mWK & newPos) != 0) bbstruct.mWK &= ~newPos;
+            else System.out.println("Blank piece where your piece want to move");
 
+            if( (bbstruct.mBB & oldPos) != 0)      { bbstruct.mBB &= ~oldPos; bbstruct.mBB |= newPos; }
+            else if( (bbstruct.mBN & oldPos) != 0) { bbstruct.mBN &= ~oldPos; bbstruct.mBN |= newPos; }
+            else if( (bbstruct.mBP & oldPos) != 0) { bbstruct.mBP &= ~oldPos; bbstruct.mBP |= newPos; }
+            else if( (bbstruct.mBQ & oldPos) != 0) { bbstruct.mBQ &= ~oldPos; bbstruct.mBQ |= newPos; }
+            else if( (bbstruct.mBR & oldPos) != 0) { bbstruct.mBR &= ~oldPos; bbstruct.mBR |= newPos; }
+            else if( (bbstruct.mBK & oldPos) != 0) { bbstruct.mBK &= ~oldPos; bbstruct.mBK |= newPos; }
+            else System.out.println("some error");
+        }
+        
+//        bbstruct.updateTempCap();
 
-
-
+        if(moveW)
+        {
+            if((bbstruct.unsafeForWhite() & bbstruct.mWK) == 0)
+                return true;
+            return false;
+        }
+        else
+        {
+            if((bbstruct.unsafeForBlack() & bbstruct.mBK) == 0)
+                return true;
+            return false;
+        }
+    }
 }

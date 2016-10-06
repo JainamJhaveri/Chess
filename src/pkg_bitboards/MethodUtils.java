@@ -48,6 +48,7 @@ public class MethodUtils
     }
 
 
+    // general methods for checking whether a type of move .. called from TempMoves.java
     /**
      * This method checks if the move is a promotion move from
      * newRow and newCol coordinates. Example: ( _23QP, 7, 3) return true
@@ -99,6 +100,37 @@ public class MethodUtils
                 && ( ( moveW && (newRow == 5) ) ||
                 ( !moveW && (newRow == 2) ) );
     }
-    
+
+    // general methods for checking whether a type of move .. called from TempMoves.java
+    public static boolean isPromotionMove(String move)
+    {
+        return move.charAt(4) == 'P';
+    }
+
+    public static boolean isCastleMove(String move)
+    {
+
+        if( moveW )
+        {
+            if( ( CASTLEW_KSIDE && move.equals(" 0406") )
+                    ||( CASTLEW_QSIDE && move.equals(" 0402") )   )
+                return true;
+        }
+        else
+        {
+            if( ( CASTLEB_KSIDE && move.equals(" 7476") )
+                    ||( CASTLEB_QSIDE && move.equals(" 7472") )   )
+                return true;
+        }
+
+        return false;
+    }
+
+    public static boolean isEnpassMove(String move)
+    {
+        return move.charAt(4) == 'E';
+    }
+
+
 
 }
