@@ -30,7 +30,7 @@ public class TempMoves
         tempCAPTURABLE_W = (tempWP|tempWR|tempWN|tempWB|tempWQ);
         tempOCCUPIEDSQ = (tempWP|tempWR|tempWN|tempWB|tempWQ|tempWK|tempBP|tempBR|tempBN|tempBB|tempBQ|tempBK);
     }
-
+/*
     public static String getSafeMovesFrom(String possibleMoves, char piece)
     {
         setTempBitBoards();
@@ -60,7 +60,7 @@ public class TempMoves
         }
         return list;
     }
-
+*/
     private static boolean isMoveSafeOnBB(String move, char piece)
     {
 
@@ -85,7 +85,7 @@ public class TempMoves
 
                 printString2("before WP", WP);
                 UpdateCap();
-                long unsafeMoves = unsafeForWhite();
+                long unsafeMoves = unsafeForWhite();        // TODO: do something.. .unsafeForWhite() should not be called from here
                 WP = WP | oldPositionBB;
                 WP = WP & ~newPositionBB;
                 UpdateCap();

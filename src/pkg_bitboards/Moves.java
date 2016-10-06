@@ -110,7 +110,7 @@ class Moves {
         return list;
     }
 
-    private static long unsafeForWhite()
+    static long unsafeForWhite()
     {
         long unsafemoves, piecepositions;
 
@@ -221,7 +221,7 @@ class Moves {
         if(whoAmI == IAMWHITE)
         {
             list = possibleWP(pawnpos) + possibleEnPass(pawnpos, whoAmI);
-            list = TempMoves.getSafeMovesFrom(list, W_PAWN);
+//            list = TempMoves.getSafeMovesFrom(list, W_PAWN);
             System.out.println( "actual possible moves: " +list );
 
         }

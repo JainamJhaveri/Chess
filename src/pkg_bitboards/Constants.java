@@ -12,8 +12,6 @@ public class Constants {
 
 // --- Windows specific constants begin --
 //    public static final String basepath = "C:\\Users\\Sony\\Documents\\NetBeansProjects\\Chess\\";
-//    public static final String black_basepath = basepath + "CP\\B\\";
-//    public static final String white_basepath = basepath + "CP\\W\\";
 //    public static final String black_basepath = basepath + "CP\\blackpcs\\";
 //    public static final String white_basepath = basepath + "CP\\whitepcs\\";
 //    public static final String path_board = basepath + "CP\\chessboard.png";
