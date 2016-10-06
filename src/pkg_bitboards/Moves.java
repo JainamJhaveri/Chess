@@ -1,10 +1,10 @@
 package pkg_bitboards;
 
 import static pkg_bitboards.Constants.*;
+import static pkg_bitboards.MethodUtils.*;
 
 
-    
-/**        
+/**
     for each of 64 squares, we check which piece is present on that particular square and 
     then we are setting up bitboards for corresponding piece from 12 possible pieces
     (WP, WR, WN, WB, WQ, WK, B..)
@@ -14,45 +14,16 @@ import static pkg_bitboards.Constants.*;
     Whereas in string, they can be represented as 1, 2, 4, 8, .. 
     Example: If there are 2 pawns on board, on a2 and b2, then long value of WP will be
     2^9  + 2^10 (0000000000000000000000000000000000000000000000000000001100000000)
-    where 1 indicates the position where white pawns are currently present        
+    where 1 indicates the position where white pawns are currently present
+
+    (oldRow, oldCol, newRow, newCol) is the move format that we will follow for our movelist
+    (oldCol, newCol, PromotionTo, Pawn) will be followed for promotion
 **/
 class Moves {
     static long WP = 0L, WR = 0L, WN = 0L, WB = 0L, WQ = 0L, WK = 0L, BP = 0L, BR = 0L, BN = 0L, BB = 0L, BQ = 0L, BK = 0L; // 12 bitboards
-    static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, OCCUPIEDSQ;                    
+    static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, OCCUPIEDSQ;
     static String history = "";
 //    static boolean EP = false;
-    /**
-    * possibleWMoves() finds all possible LEGAL moves for white constants like PIECES_W_CANT_CAPTURE. 
-    * They need to be recalculated here because bitboards may change after every move.
-    * (oldRow, oldCol, newRow, newCol) is the move format that we will follow for our movelist
-    * (oldCol, newCol, PromotionTo, Pawn) will be followed for promotion
-    **/
-    static void possibleWMoves()
-    {    
-        UpdateCap();
-
-//        printMasks();
-//        String wlist = "";
-//        wlist += possibleP(WP, IAMWHITE);
-//        wlist += possibleR(WR, IAMWHITE);
-//        wlist += possibleB(WB, IAMWHITE);
-//        wlist += possibleQ(WQ, IAMWHITE);
-//        wlist += possibleN(WN, IAMWHITE);
-//        wlist += possibleK(WK, IAMWHITE);
-//        wlist += possibleCastle(IAMWHITE);
-//
-//        String blist = "";
-//        blist += possibleP(BP, IAMBLACK);
-//        blist += possibleR(BR, IAMBLACK);
-//        blist += possibleB(BB, IAMBLACK);
-//        blist += possibleQ(BQ, IAMBLACK);
-//        blist += possibleN(BN, IAMBLACK);
-//        blist += possibleK(BK, IAMBLACK);
-//        blist += possibleCastle(IAMBLACK);
-
-        System.out.println("unsafeMovesForWhite: "+ unsafeForWhite());
-//        System.out.println("unsafeMovesForBlack: "+ unsafeForBlack());
-    }
 
     private static String possibleEnPass(long pawnpos, char whoAmI)
     {
@@ -250,7 +221,7 @@ class Moves {
         if(whoAmI == IAMWHITE)
         {
             list = possibleWP(pawnpos) + possibleEnPass(pawnpos, whoAmI);
-            list = getSafeMovesFrom(list, W_PAWN);
+            list = TempMoves.getSafeMovesFrom(list, W_PAWN);
             System.out.println( "actual possible moves: " +list );
 
         }
@@ -499,6 +470,11 @@ class Moves {
     /**
      * In initialChessboard[][] which is passed from AlphaBetaChess class, topleft is 0,0 and bottomright is 7,7
      * In our bitboards, leftmost bit is 7,7(63: h8) and rightmost bit 0,0 (0: a1)
+     * initialCB ==> bitBoardPosition : position
+      (7,7) => (0,7): 7
+      (0,0) => (7,0): 56
+      (7,0) => (0,0): 0
+      (0,7) => (7,7): 63
      * @param initialChessBoard
     **/
     static void setBitBoardsFrom(char initialChessBoard[][])
@@ -509,11 +485,6 @@ class Moves {
             for(byte j=0; j<8; j++)
             {
                 position = i*8 + j;  // positions from 0 to 63
-                // initialCB ==> bitBoardPosition : position
-                // (7,7) => (0,7): 7
-                // (0,0) => (7,0): 56
-                // (7,0) => (0,0): 0
-                // (0,7) => (7,7): 63
                 switch(initialChessBoard[7-i][j])
                 {
                     case W_PAWN:    WP += getBitBoardCorrespondingTo(position); break;
@@ -625,44 +596,6 @@ class Moves {
         return myBitBoard;
     }
 
-    private static long rev(long bitboard) {
-        return Long.reverse(bitboard);
-    }
-
-    /**
-     * Prints bitboard ( for debugging purpose )
-     * @param pc name of piece whose bitboard is to be printed
-     * @param piece bitboard
-     */
-    static void printString2(String pc, long piece)
-    {
-        System.out.println("\n"+pc +": ");
-        String a = Long.toBinaryString(piece);
-        for(byte i=0; i < Long.numberOfLeadingZeros(piece); i++)
-            a = '0' + a;
-        for(byte i = 0; i < 8; i++)
-        {
-            for(byte j = 7; j >= 0; j--)
-                System.out.print(" " + a.charAt( i * 8 +  j));
-            System.out.println();
-        }
-
-    }
-
-    /**
-     *
-     * This method takes position (from 0 to 63) as input and returns corresponding bitboard
-     * by placing 1 at position th bit in binString 0s on remaining 63 positions.
-     *
-     * @param position : bit position in a long that needs to be changed to 1
-     * @return long: bitboard corresponding to position
-     */
-    static long getBitBoardCorrespondingTo(int position)
-    {
-        String binString = "0000000000000000000000000000000000000000000000000000000000000000";
-        binString = binString.substring(0,63-position) + "1" + binString.substring(64-position);
-        return Long.parseUnsignedLong(binString, 2);
-    }
 
     private static long HVMoves(int i) {
         long slider = 1L << i;
@@ -737,88 +670,8 @@ class Moves {
         OCCUPIEDSQ = (WP|WR|WN|WB|WQ|WK|BP|BR|BN|BB|BQ|BK);
     }
 
-    private static String getSafeMovesFrom(String possibleMoves, char piece)
-    {
-        String list = "";
-
-        for(int i=0; i < possibleMoves.length()/5; i++)
-        {
-            String move = possibleMoves.substring((i * 5), (i * 5) + 5);
-
-            if( isGeneralMove(move) )
-            {
-                if( isMoveSafeOnBB(move, piece) )
-                    list += move;
-            }
-        }
-
-        return list;
-    }
 
 
-    private static boolean isMoveSafeOnBB(String move, char piece)
-    {
-
-        int oldRow = Character.getNumericValue(move.charAt(1));
-        int oldCol = Character.getNumericValue(move.charAt(2));
-        int newRow = Character.getNumericValue(move.charAt(3));
-        int newCol = Character.getNumericValue(move.charAt(4));
-        int oldPosition = oldRow * 8 + oldCol;
-        int newPosition = newRow * 8 + newCol;
-        long newPositionBB = getBitBoardCorrespondingTo(newPosition);
-        long oldPositionBB = getBitBoardCorrespondingTo(oldPosition);
-        
-        switch (piece)
-        {
-            case W_PAWN:
-                printString2("WP status", WP);
-                WP = WP | newPositionBB;
-                WP = WP & ~oldPositionBB;
-                
-                if( (BB & newPositionBB) != 0  ) {    BB = BB & ~newPositionBB; }
-                else if( (BQ & newPositionBB) != 0  ) {    BQ = BQ & ~newPositionBB; }
-                
-                printString2("before WP", WP);
-                UpdateCap();
-                long unsafeMoves = unsafeForWhite();
-                WP = WP | oldPositionBB;
-                WP = WP & ~newPositionBB;
-                UpdateCap();
-                printString2("after WP", WP);
-                printString2("unsafe", unsafeMoves);
-                
-                if( (unsafeMoves & WK) != 0)
-                {
-                    System.out.println("move from oldposition: "+oldRow+oldCol+ " to "+newCol+newRow+ " is not possible");
-                    return false;
-                }
-                System.out.println("possible move from oldposition: "+oldRow+oldCol+ " to "+newCol+newRow);
-                return true;
-
-            
-        }
-
-        return true;
-    }
-
-
-    private boolean isPromotionMove(String move)
-    {
-        System.out.println("isPromotionMove: "+move);
-        return move.charAt(4) == 'P';
-    }
-
-    private static boolean isGeneralMove(String move)
-    {
-        System.out.println("isGeneralMove: "+move);
-        return true;
-    }
-
-    private boolean isEnpassMove(String move)
-    {
-        System.out.println("isEnpassMove: "+move);
-        return move.charAt(4) == 'E';
-    }
 
     
 }

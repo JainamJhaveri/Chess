@@ -13,7 +13,6 @@ public class AlphaBetaChess
         setInitialBoard();
         
         Moves.setBitBoardsFrom(initialChessBoard);
-        Moves.possibleWMoves();        
         myBitBoard = Moves.getDisplayBoard();
         
         displayFrame();        

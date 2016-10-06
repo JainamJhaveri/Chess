@@ -3,7 +3,7 @@ package pkg_bitboards;
 public class Constants {
 
 // --- Linux specific constants begin ---
-    public static final String basepath = "/home/jainu/IdeaProjects/Chess/";
+    public static final String basepath = "/home/jainu/Projects/IdeaProjects/Chess/";
     public static final String black_basepath = basepath + "CP/blackpcs/";
     public static final String white_basepath = basepath + "CP/whitepcs/";
     public static final String path_board = basepath + "CP/chessboard.png";
@@ -148,4 +148,6 @@ public class Constants {
         0x1C00000000000000L,
         0x7000000000000000L
     };
+
+    public static boolean moveW = true;
 }
