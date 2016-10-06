@@ -5,7 +5,7 @@ import static pkg_bitboards.MethodUtils.*;
 
 public class TempMoves {
 
-    public static String getSafeMovesFrom(String movelist, char piece)
+    public static String getSafeMovesFrom(String movelist)
     {
         BBStruct bbstruct;
         String safelist = "";
@@ -33,15 +33,20 @@ public class TempMoves {
                     newRow = 0;
                 }
             }
-            else if( isCastleMove(temp) )
-            {
-                System.out.println("castle move temp: " +temp);
-                
-                
-            }
             else if( isEnpassMove(temp)  )
             {
-                
+                oldCol = Character.getNumericValue(temp.charAt(1));
+                newCol = Character.getNumericValue(temp.charAt(2));
+                if(moveW)
+                {
+                    oldRow = 4;
+                    newRow = 5;
+                }
+                else
+                {
+                    oldRow = 3;
+                    newRow = 2;
+                }
             }
             else    // is general move
             {
@@ -112,7 +117,7 @@ public class TempMoves {
             else System.out.println("some error");
         }
         
-//        bbstruct.updateTempCap();
+        bbstruct.updateTempCap();
 
         if(moveW)
         {

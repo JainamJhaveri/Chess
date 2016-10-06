@@ -3,6 +3,7 @@ package pkg_bitboards;
 
 import static pkg_bitboards.Constants.*;
 import static pkg_bitboards.MethodUtils.printString2;
+import static pkg_bitboards.MethodUtils.rev;
 import static pkg_bitboards.Moves.*;
 
 /**
@@ -74,7 +75,7 @@ public class BBStruct {
             while(piecepositions != 0)
             {
                 int oldposition = Long.numberOfTrailingZeros(piecepositions);
-                long newmoves = DiagonalMoves(oldposition);
+                long newmoves = mDiagonalMoves(oldposition);
                 unsafemoves |= newmoves;
                 piecepositions = piecepositions & (piecepositions-1);
             }
@@ -84,7 +85,7 @@ public class BBStruct {
             while(piecepositions != 0)
             {
                 int oldposition = Long.numberOfTrailingZeros(piecepositions);
-                long newmoves = HVMoves(oldposition);
+                long newmoves = mHVMoves(oldposition);
                 unsafemoves |= newmoves;
                 piecepositions = piecepositions & (piecepositions-1);
             }
@@ -94,7 +95,7 @@ public class BBStruct {
             while(piecepositions != 0)
             {
                 int oldposition = Long.numberOfTrailingZeros(piecepositions);
-                long newmoves = KingMoves(oldposition);
+                long newmoves = mKingMoves(oldposition);
                 unsafemoves |= newmoves;
                 piecepositions = piecepositions & (piecepositions-1);
             }
@@ -104,14 +105,16 @@ public class BBStruct {
             while(piecepositions != 0)
             {
                 int oldposition = Long.numberOfTrailingZeros(piecepositions);
-                long newmoves = KnightMoves(oldposition);
+                long newmoves = mKnightMoves(oldposition);
                 unsafemoves |= newmoves;
                 piecepositions = piecepositions & (piecepositions-1);
             }
-            printString2("unsafe moves from bbstruct", unsafemoves);
+
+            printString2("unsafe white moves from bbstruct", unsafemoves);
             return unsafemoves;
         }
     }
+
 
     public long unsafeForBlack()
     {
@@ -126,7 +129,7 @@ public class BBStruct {
         while(piecepositions != 0)
         {
             int oldposition = Long.numberOfTrailingZeros(piecepositions);
-            long newmoves = DiagonalMoves(oldposition);
+            long newmoves = mDiagonalMoves(oldposition);
             unsafemoves |= newmoves;
             piecepositions = piecepositions & (piecepositions-1);
         }
@@ -136,7 +139,7 @@ public class BBStruct {
         while(piecepositions != 0)
         {
             int oldposition = Long.numberOfTrailingZeros(piecepositions);
-            long newmoves = HVMoves(oldposition);
+            long newmoves = mHVMoves(oldposition);
             unsafemoves |= newmoves;
             piecepositions = piecepositions & (piecepositions-1);
         }
@@ -146,7 +149,7 @@ public class BBStruct {
         while(piecepositions != 0)
         {
             int oldposition = Long.numberOfTrailingZeros(piecepositions);
-            long newmoves = KingMoves(oldposition);
+            long newmoves = mKingMoves(oldposition);
             unsafemoves |= newmoves;
             piecepositions = piecepositions & (piecepositions-1);
         }
@@ -156,11 +159,77 @@ public class BBStruct {
         while(piecepositions != 0)
         {
             int oldposition = Long.numberOfTrailingZeros(piecepositions);
-            long newmoves = KnightMoves(oldposition);
+            long newmoves = mKnightMoves(oldposition);
             unsafemoves |= newmoves;
             piecepositions = piecepositions & (piecepositions-1);
         }
 
         return unsafemoves;
     }
+
+    private long mHVMoves(int i)
+    {
+        long slider = 1L << i;
+        long horizontalPossibilities =(
+                ( ( mOCCUPIEDSQ & RankMask[i/8] ) - 2*slider )
+                        ^ rev(rev( mOCCUPIEDSQ & RankMask[i/8] ) - 2*rev(slider))
+        ) & RankMask[i/8];
+
+        long verticalPossibilities = (
+                ( ( mOCCUPIEDSQ & FileMask[i%8] ) - 2*slider )
+                        ^ rev(rev( mOCCUPIEDSQ & FileMask[i%8] ) - 2*rev(slider))
+        ) & FileMask[i%8];
+        return (horizontalPossibilities|verticalPossibilities);
+    }
+
+    private long mDiagonalMoves(int i)
+    {
+        long slider = 1L << i;
+
+        long fwdDiaPossibilities =(
+                ( ( mOCCUPIEDSQ & ForwardDiagonalMask[ i/8 + 7-(i%8) ] ) - 2*slider )
+                        ^ rev(rev( mOCCUPIEDSQ & ForwardDiagonalMask[ i/8 + 7-(i%8) ] ) - 2*rev(slider))
+        ) & ForwardDiagonalMask[ i/8 + 7-(i%8) ];
+
+        long backDiaPossibilities =(
+                ( ( mOCCUPIEDSQ & BackDiagonalMask[i/8 + i%8] ) - 2*slider )
+                        ^ rev(rev( mOCCUPIEDSQ & BackDiagonalMask[i/8 + i%8] ) - 2*rev(slider))
+        ) & BackDiagonalMask[i/8 + i%8];
+
+        return (fwdDiaPossibilities | backDiaPossibilities);
+    }
+
+    private static long mKnightMoves(int oldposition)
+    {
+        long newmoves;
+        if(oldposition > 18)
+            newmoves = (KnightMask << (oldposition-18));
+        else
+            newmoves = (KnightMask >> (18-oldposition));
+
+        if(oldposition%8 < 4)
+            newmoves = newmoves & ~(FILE_G | FILE_H);
+        else
+            newmoves = newmoves & ~(FILE_A | FILE_B);
+
+        return newmoves;
+    }
+
+    private static long mKingMoves(int oldposition)
+    {
+        long newmoves;
+        if(oldposition > 9)
+            newmoves = (KingMask << (oldposition-9));
+        else
+            newmoves = (KingMask >> (9-oldposition));
+
+        if(oldposition%8 == 0)
+            newmoves = newmoves & ~FILE_H;
+        else if(oldposition%8 == 7)
+            newmoves = newmoves & ~FILE_A;
+
+        return newmoves;
+    }
+
+   
 }

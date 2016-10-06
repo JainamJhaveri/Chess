@@ -21,7 +21,7 @@ import static pkg_bitboards.MethodUtils.*;
 **/
 class Moves {
     static long WP = 0L, WR = 0L, WN = 0L, WB = 0L, WQ = 0L, WK = 0L, BP = 0L, BR = 0L, BN = 0L, BB = 0L, BQ = 0L, BK = 0L; // 12 bitboards
-    static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, OCCUPIEDSQ;
+    private static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, OCCUPIEDSQ;
     static String history = "";
 //    static boolean EP = false;
 
@@ -221,13 +221,15 @@ class Moves {
         if(whoAmI == IAMWHITE)
         {
             list = possibleWP(pawnpos) + possibleEnPass(pawnpos, whoAmI);
-            list = TempMoves.getSafeMovesFrom(list, W_PAWN);
+            list = TempMoves.getSafeMovesFrom(list);
             System.out.println( "actual possible moves: " +list );
 
         }
         else
         {
             list = possibleBP(pawnpos) + possibleEnPass(pawnpos, whoAmI);
+            list = TempMoves.getSafeMovesFrom(list);
+            System.out.println( "actual possible moves: " +list );
         }
 
 
@@ -316,6 +318,8 @@ class Moves {
         printString2("rook: ", ROOK);
         list += getMoveListFromBitBoards(ROOK, 'H', "rook", whoAmI);
         System.out.println("rook movelist: " +  list);
+        list = TempMoves.getSafeMovesFrom(list);
+        System.out.println( "actual possible moves: " +list );
         return list;
     }
 
@@ -325,6 +329,8 @@ class Moves {
         printString2("bishop: ", BISHOP);
         list += getMoveListFromBitBoards(BISHOP, 'D', "bishop", whoAmI);
         System.out.println("bishop movelist: " +  list);
+        list = TempMoves.getSafeMovesFrom(list);
+        System.out.println( "actual possible moves: " +list );
         return list;
     }
 
@@ -336,6 +342,8 @@ class Moves {
         list += getMoveListFromBitBoards(QUEEN, 'H', "queen", whoAmI);
         list += getMoveListFromBitBoards(QUEEN, 'D', "queen", whoAmI);
         System.out.println("queen movelist: " +  list);
+        list = TempMoves.getSafeMovesFrom(list);
+        System.out.println( "actual possible moves: " +list );
         return list;
     }
 
@@ -345,6 +353,8 @@ class Moves {
         printString2("knight: ", KNIGHT);
         list += getMoveListFromBitBoards(KNIGHT, 'N', "knight", whoAmI);
         System.out.println(list);
+        list = TempMoves.getSafeMovesFrom(list);
+        System.out.println( "actual possible moves: " +list );
         return list;
     }
 
@@ -354,6 +364,8 @@ class Moves {
         printString2("king:", KING);
         list += getMoveListFromBitBoards(KING, 'K', "king", whoAmI);
         System.out.println(list);
+        list = TempMoves.getSafeMovesFrom(list);
+        System.out.println( "actual possible moves: " +list );
         return list;
     }
 
@@ -595,7 +607,7 @@ class Moves {
     }
 
 
-    static long HVMoves(int i) {
+    private static long HVMoves(int i) {
         long slider = 1L << i;
         long horizontalPossibilities =(
                                ( ( OCCUPIEDSQ & RankMask[i/8] ) - 2*slider )
@@ -609,7 +621,7 @@ class Moves {
         return (horizontalPossibilities|verticalPossibilities);
     }
 
-    static long DiagonalMoves(int i) {
+    private static long DiagonalMoves(int i) {
         long slider = 1L << i;
 
         long fwdDiaPossibilities =(
@@ -625,7 +637,7 @@ class Moves {
         return (fwdDiaPossibilities | backDiaPossibilities);
     }
 
-    static long KnightMoves(int oldposition) {
+    private static long KnightMoves(int oldposition) {
         long newmoves;
         if(oldposition > 18)
             newmoves = (KnightMask << (oldposition-18));
@@ -640,7 +652,7 @@ class Moves {
         return newmoves;
     }
 
-    static long KingMoves(int oldposition) {
+    private static long KingMoves(int oldposition) {
         long newmoves;
         if(oldposition > 9)
             newmoves = (KingMask << (oldposition-9));
