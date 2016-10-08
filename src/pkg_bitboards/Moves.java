@@ -25,6 +25,16 @@ class Moves {
     static String history = "";
 //    static boolean EP = false;
 
+    public static String possibleWMoves()
+    {
+        return possibleB(WB|WQ, IAMWHITE) + possibleN(WN, IAMWHITE) + possibleR(WR|WQ, IAMWHITE) + possibleP(WP, IAMWHITE) + possibleK(WK, IAMWHITE);
+    }
+
+    public static String possibleBMoves()
+    {
+        return possibleB(BB|BQ, IAMBLACK) + possibleN(BN, IAMBLACK) + possibleR(BR|BQ, IAMBLACK) + possibleP(BP, IAMBLACK) + possibleK(BK, IAMBLACK);
+    }
+
     private static String possibleEnPass(long pawnpos, char whoAmI)
     {
         if( history.length() == 0 ) return "";
@@ -110,7 +120,7 @@ class Moves {
         return list;
     }
 
-    private static long unsafeForWhite()
+    public static long unsafeForWhite()
     {
         long unsafemoves, piecepositions;
 
@@ -162,7 +172,7 @@ class Moves {
         return unsafemoves;
     }
 
-    private static long unsafeForBlack()
+    public static long unsafeForBlack()
     {
         long unsafemoves, piecepositions;
 
