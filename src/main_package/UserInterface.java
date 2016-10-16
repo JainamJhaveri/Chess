@@ -1,5 +1,7 @@
 package main_package;
 
+import temp.BBStruct;
+
 import static utils.Constants.*;
 import static utils.MethodUtils.*;
 import static main_package.Moves.*;
@@ -91,6 +93,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                 g.drawImage(img_piece, base_x + j * disp, base_y + i * disp, this);
             }
         }
+
     }
 
     @Override
@@ -107,6 +110,12 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         else if( click2 )
         {
             handleSecondClick(x, y, e);
+
+            // if it is black's move then print minimax move for black
+            if(!moveW)
+            {
+                System.out.println(getMinimaxMoveForBlack());
+            }
         }
     }
 
@@ -146,21 +155,13 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
             WP = WP & ~pos;
             switch( choice )
             {
-                case 1: WQ = WQ | pos;
-                        piece = W_QUEEN;
-                        printString2("WQueen", WQ);
+                case 1: WQ = WQ | pos;  piece = W_QUEEN;
                         break;
-                case 2: WR = WR | pos;
-                        piece = W_ROOK;
-                        printString2("WRook", WR);
+                case 2: WR = WR | pos;  piece = W_ROOK;
                         break;
-                case 3: WB = WB | pos;
-                        piece = W_BISHOP;
-                        printString2("WBishop", WB);
+                case 3: WB = WB | pos;  piece = W_BISHOP;
                         break;
-                case 4: WN = WN | pos;
-                        piece = W_KNIGHT;
-                        printString2("WKnight", WN);
+                case 4: WN = WN | pos;  piece = W_KNIGHT;
                         break;
                 default:    System.out.println("Warning! Invalid Pawn Promotion Chosen! Program Should Never Reach Here");
                             break;
@@ -171,27 +172,19 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
             BP = BP & ~pos;
             switch(choice)
             {
-                case 1: BQ = BQ | pos;
-                        piece = B_QUEEN;
-                        printString2("BQueen", BQ);
+                case 1: BQ = BQ | pos;  piece = B_QUEEN;
                         break;
-                case 2: BR = BR | pos;
-                        piece = B_ROOK;
-                        printString2("BRook", BR);
+                case 2: BR = BR | pos;  piece = B_ROOK;
                         break;
-                case 3: BB = BB | pos;
-                        piece = B_BISHOP;
-                        printString2("BBishop", BB);
+                case 3: BB = BB | pos;  piece = B_BISHOP;
                         break;
-                case 4: BN = BN | pos;
-                        piece = B_KNIGHT;
-                        printString2("BKnight", BN);
+                case 4: BN = BN | pos;  piece = B_KNIGHT;
                         break;
                 default:    System.out.println("Warning! Invalid Pawn Promotion Chosen! Program Should Never Reach Here");
                             break;
             }
         }
-        UpdateCap();
+        updateCap();
         return piece;
     }
 
@@ -459,18 +452,18 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
      */
     private void isCheckmateStalemate()
     {
-        System.out.println("movelist from isCheckmateStalemate: " +movelist);
+//        System.out.println("movelist from isCheckmateStalemate: " +movelist);
 
         if(moveW)
         {
             if(possibleWMoves().length() != 0) return;
             if( (WK & unsafeForWhite()) != 0 )
             {
-                System.out.println("checkmate > > black wins");
+//                System.out.println("checkmate > > black wins");
             }
             else
             {
-                System.out.println("stalemate");
+//                System.out.println("stalemate");
             }
         }
 
@@ -479,11 +472,11 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
             if(possibleBMoves().length() != 0) return;
             if( (BK & unsafeForBlack()) != 0 )
             {
-                System.out.println("checkmate > > white wins");
+//                System.out.println("checkmate > > white wins");
             }
             else
             {
-                System.out.println("stalemate");
+//                System.out.println("stalemate");
             }
         }
         System.out.println("---- game over ----");
@@ -515,7 +508,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
             else if( (BQ & newPos) != 0) BQ &= ~newPos;
             else if( (BR & newPos) != 0) BR &= ~newPos;
             else if( (BK & newPos) != 0) BK &= ~newPos;
-            else System.out.println("updateBitBoard: Blank square where your piece want to move");
+            else System.out.println("UI.updateBitBoard: Blank square where your piece want to move");
 
             // removing mypiece from oldposition and moving to newposition
             if( (WB & oldPos) != 0)      { WB &= ~oldPos; WB |= newPos; }
@@ -530,7 +523,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
             else if( (WK & oldPos) != 0) { WK &= ~oldPos; WK |= newPos;
                                             CASTLEW_KSIDE = false;
                                             CASTLEW_QSIDE = false;  }
-            else System.out.println("shouldn't reach here!");
+            else System.out.println("UI.updateBitBoard: shouldn't reach here!");
         }
         else
         {
@@ -560,7 +553,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         }
 
         history = ""+ oldRow + oldCol + newRow + newCol;
-        UpdateCap();
+        updateCap();
     }
 
 
@@ -579,7 +572,70 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
             case W_PAWN:    WP &= ~pos; break;
             default: System.out.println("Shouldn't reach here !");
         }
-        UpdateCap();
+        updateCap();
     }
 
+
+
+
+/*  ----------  testing minimax ----------- */
+    private String minimaxmove = "";
+
+    private String getMinimaxMoveForBlack()
+    {
+        BBStruct currentBB = new BBStruct(); // initialize current bitboards in a BBStruct object
+        int ans = maxi(DEPTH, currentBB);    // perform minimax algorithm and get the best move till DEPTH
+        System.out.println( "Here: " + ans );
+        return minimaxmove;
+    }
+
+    private int maxi(int depth, BBStruct bb)
+    {
+        if( depth == 0 ) return bb.evaluate();
+
+        int max = Integer.MIN_VALUE;
+        String movelist = bb.getMoves();
+
+        for( int i=0; i<movelist.length()/5; i++ )
+        {
+            String move = movelist.substring((i*5), (i*5)+5);
+            BBStruct mybb = new BBStruct(bb);
+            mybb.makeMove(move);
+            int score = mini(depth-1, mybb);
+//            bb.unmakeMove(move);
+
+            if( score > max)
+            {
+                max = score;
+                minimaxmove = move;
+            }
+        }
+
+        return max;
+    }
+
+    private int mini(int depth, BBStruct bb)
+    {
+        if( depth == 0 ) return bb.evaluate();
+
+        int min = Integer.MAX_VALUE;
+        String movelist = bb.getMoves();
+
+        for( int i=0; i<movelist.length()/5; i++ )
+        {
+            String move = movelist.substring((i*5), (i*5)+5);
+
+            BBStruct mybb = new BBStruct(bb);
+            mybb.makeMove(move);
+            int score = maxi(depth-1, mybb);
+
+            if( score < min)
+            {
+                min = score;
+            }
+        }
+
+        return min;
+    }
+/*  ----------  testing minimax ----------- */
 }

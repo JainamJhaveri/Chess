@@ -24,7 +24,6 @@ public class TempMoves {
             
             if( isPromotionMove(temp) )
             {
-                System.out.println("promotion move temp: " +temp);
                 oldCol = Character.getNumericValue(temp.charAt(1));
                 newCol = Character.getNumericValue(temp.charAt(2));
                 if(moveW)
@@ -95,7 +94,7 @@ public class TempMoves {
             else if( (bbstruct.mBQ & newPos) != 0) bbstruct.mBQ &= ~newPos;
             else if( (bbstruct.mBR & newPos) != 0) bbstruct.mBR &= ~newPos;
             else if( (bbstruct.mBK & newPos) != 0) bbstruct.mBK &= ~newPos;
-            else System.out.println("Blank square where your piece want to move");
+            else System.out.println("TempMoves.checkIfSafe: Blank square where your piece want to move");
 
             // removing mypiece from oldposition and moving to newposition
             if( (bbstruct.mWB & oldPos) != 0)      { bbstruct.mWB &= ~oldPos; bbstruct.mWB |= newPos; }
@@ -104,7 +103,7 @@ public class TempMoves {
             else if( (bbstruct.mWQ & oldPos) != 0) { bbstruct.mWQ &= ~oldPos; bbstruct.mWQ |= newPos; }
             else if( (bbstruct.mWR & oldPos) != 0) { bbstruct.mWR &= ~oldPos; bbstruct.mWR |= newPos; }
             else if( (bbstruct.mWK & oldPos) != 0) { bbstruct.mWK &= ~oldPos; bbstruct.mWK |= newPos; }
-            else System.out.println("some error");
+            else System.out.println("TempMoves.checkIfSafe: some error");
         }
         else
         {

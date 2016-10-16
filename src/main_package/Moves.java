@@ -25,14 +25,13 @@ public class Moves {
     public static long WP = 0L, WR = 0L, WN = 0L, WB = 0L, WQ = 0L, WK = 0L, BP = 0L, BR = 0L, BN = 0L, BB = 0L, BQ = 0L, BK = 0L; // 12 bitboards
     private static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, OCCUPIEDSQ;
     static String history = "";
-//    static boolean EP = false;
 
-    public static String possibleWMoves()
+    static String possibleWMoves()
     {
         return possibleB(WB|WQ, IAMWHITE) + possibleN(WN, IAMWHITE) + possibleR(WR|WQ, IAMWHITE) + possibleP(WP, IAMWHITE) + possibleK(WK, IAMWHITE);
     }
 
-    public static String possibleBMoves()
+    static String possibleBMoves()
     {
         return possibleB(BB|BQ, IAMBLACK) + possibleN(BN, IAMBLACK) + possibleR(BR|BQ, IAMBLACK) + possibleP(BP, IAMBLACK) + possibleK(BK, IAMBLACK);
     }
@@ -122,7 +121,7 @@ public class Moves {
         return list;
     }
 
-    public static long unsafeForWhite()
+    static long unsafeForWhite()
     {
         long unsafemoves, piecepositions;
 
@@ -174,7 +173,7 @@ public class Moves {
         return unsafemoves;
     }
 
-    public static long unsafeForBlack()
+    static long unsafeForBlack()
     {
         long unsafemoves, piecepositions;
 
@@ -391,7 +390,6 @@ public class Moves {
      */
     private static String getMoveListFromBitBoards(long PIECE_BB, char choice, String piece, char whoAmI)
     {
-        //UpdateCap();
 
         String list = "";
         long moves = PIECE_BB;
@@ -525,61 +523,7 @@ public class Moves {
                 }
             }
         }
-        UpdateCap();
-    }
-
-    /**
-     * From the trailing zeros of the rightmost significant bit (rightmost 1), we calculate the position of (newRow, newCol)
-     * And from that we calculate (oldRow, oldCol).
-     * In our bitboards, leftmost bit is 7,7 and rightmost bit 0,0
-     * @param moves bitboard of new moves whose movelist needs to be generated as (oldRow, newCol, newRow, newCol).
-     * @param relativeRowDiff row difference of oldRow from newRow.
-     * @param relativeColDiff col difference of oldCol from newCol.
-     * @return String movelist as (oldRow, newCol, newRow, newCol). Each move in the list is space separated as of now.
-     **/
-    private static String getMovesWhereRelDifferenceFromNewCoordsIs(long moves, int relativeRowDiff, int relativeColDiff)
-    {
-
-        String list = "";
-        int trailingzeros, newRow, newCol, oldRow, oldCol;
-        while(moves != 0)
-        {
-            trailingzeros = Long.numberOfTrailingZeros(moves);
-            newRow = trailingzeros / 8;
-            newCol = trailingzeros % 8 ;
-            oldRow = newRow + relativeRowDiff;
-            oldCol = newCol + relativeColDiff;
-
-            list += " " + oldRow + oldCol + newRow + newCol;
-            moves = moves & (moves - 1);
-        }
-        return list;
-    }
-
-    /**
-     * From the trailing zeros of the rightmost significant bit (rightmost 1), we calculate the position of newCol
-     * And to newCol we add relativeColDiff and get oldCol.
-     * In our bitboards, leftmost bit is 7,7 and rightmost bit 0,0.
-     * @param moves bitboard of new moves whose movelist needs to be generated as (oldCol, newCol, PromotionTo, Pawn).
-     * @param relativeColDiff col difference of oldCol from newCol.
-     * @return String movelist as oldRow, newCol, newRow, newCol. Each move in the list is space separated as of now.
-     **/
-    private static String getPromotionPaths(long moves, int relativeColDiff)
-    {
-        String list = "";
-        int trailingzeros, newCol, oldCol;
-        while(moves != 0)
-        {
-            trailingzeros = Long.numberOfTrailingZeros(moves);
-            newCol = trailingzeros % 8 ;
-            oldCol = newCol + relativeColDiff;
-            for(int k=0; k<4; k++)
-            {
-                list += " " + oldCol + newCol + promotedTo[k] + W_PAWN;
-            }
-            moves = moves & (moves - 1);
-        }
-        return list;
+        updateCap();
     }
 
     /**
@@ -683,7 +627,7 @@ public class Moves {
      * This method updates bitboards which are used to determine capturable and non-capturable pieces
      * It also updates the bitboard of occupied squares.
      */
-    static void UpdateCap()
+    static void updateCap()
     {
         PIECES_W_CANT_CAPTURE = (WP|WR|WN|WB|WQ|WK|BK);
         CAPTURABLE_B = (BP|BR|BN|BB|BQ);
@@ -691,9 +635,6 @@ public class Moves {
         CAPTURABLE_W = (WP|WR|WN|WB|WQ);
         OCCUPIEDSQ = (WP|WR|WN|WB|WQ|WK|BP|BR|BN|BB|BQ|BK);
     }
-
-
-
 
     
 }

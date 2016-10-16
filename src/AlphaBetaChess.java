@@ -1,12 +1,15 @@
 import main_package.Moves;
 import main_package.UserInterface;
+import sun.misc.DoubleConsts;
+import temp.BBStruct;
+import utils.Constants;
 
 import static utils.Constants.*;
 import javax.swing.JFrame;
 
 public class AlphaBetaChess 
 {
-//    private static char myBitBoard[][];
+    //    private static char myBitBoard[][];
     private static char initialChessBoard[][];
     
     public static void main(String[] args) 
@@ -63,4 +66,5 @@ public class AlphaBetaChess
         f.setBounds( initial_x, initial_y, framewidth, frameheight);       
         f.setVisible(true);
     }
+
 }

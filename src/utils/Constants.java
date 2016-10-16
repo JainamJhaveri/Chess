@@ -148,4 +148,13 @@ public class Constants {
     };
 
     public static boolean moveW = true;
+
+    public static final int VAL_PAWN = 1;
+    public static final int VAL_BISHOP = 3;
+    public static final int VAL_KNIGHT = 3;
+    public static final int VAL_QUEEN = 9;
+    public static final int VAL_ROOK = 5;
+
+    public static final int DEPTH = 4;
+
 }

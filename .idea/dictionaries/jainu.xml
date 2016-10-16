@@ -2,6 +2,7 @@
   <dictionary name="jainu">
     <words>
       <w>bitboard</w>
+      <w>minimax</w>
     </words>
   </dictionary>
 </component>
