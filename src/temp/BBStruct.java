@@ -1,18 +1,17 @@
-package pkg_bitboards;
+package temp;
 
 
-import static pkg_bitboards.Constants.*;
-import static pkg_bitboards.MethodUtils.printString2;
-import static pkg_bitboards.MethodUtils.rev;
-import static pkg_bitboards.Moves.*;
+import static utils.Constants.*;
+import static utils.MethodUtils.printString2;
+import static utils.MethodUtils.rev;
+import static main_package.Moves.*;
 
 /**
  * Created by jainu on 6/10/16.
  */
-public class BBStruct {
-    public long
-        mWP = 0L, mWR = 0L, mWN = 0L, mWB = 0L, mWQ = 0L, mWK = 0L,
-        mBP = 0L, mBR = 0L, mBN = 0L, mBB = 0L, mBQ = 0L, mBK = 0L;
+class BBStruct {
+    long    mWP = 0L, mWR = 0L, mWN = 0L, mWB = 0L, mWQ = 0L, mWK = 0L,
+            mBP = 0L, mBR = 0L, mBN = 0L, mBB = 0L, mBQ = 0L, mBK = 0L;
 
     private long mPIECES_W_CANT_CAPTURE, mCAPTURABLE_W, mPIECES_B_CANT_CAPTURE, mCAPTURABLE_B, mOCCUPIEDSQ;
     private String mHistory = "";

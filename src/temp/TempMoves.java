@@ -1,10 +1,15 @@
-package pkg_bitboards;
+package temp;
 
-import static pkg_bitboards.Constants.*;
-import static pkg_bitboards.MethodUtils.*;
+import static utils.Constants.*;
+import static utils.MethodUtils.*;
 
 public class TempMoves {
 
+    /**
+     * returns a safemovelist from a given movelist
+     * @param movelist
+     * @return String of safe movelist from a given movelist
+     */
     public static String getSafeMovesFrom(String movelist)
     {
         BBStruct bbstruct;
@@ -15,7 +20,7 @@ public class TempMoves {
             bbstruct = new BBStruct(); // setting global bitboards to local bitboards for each move
 
             String temp = movelist.substring((i * 5), (i * 5) + 5);
-            int oldRow = 0, oldCol = 0, newRow = 0, newCol = 0;
+            int oldRow, oldCol, newRow, newCol;
             
             if( isPromotionMove(temp) )
             {
@@ -80,8 +85,10 @@ public class TempMoves {
         long oldPos = getBitBoardCorrespondingTo((oldRow * 8) + oldCol);
         long newPos = getBitBoardCorrespondingTo((newRow * 8) + newCol);
 
+
         if( moveW )
         {
+            // removing opponent's piece if it existed on newposition where mypiece is going to be moved
             if( (bbstruct.mBB & newPos) != 0)      bbstruct.mBB &= ~newPos;
             else if( (bbstruct.mBN & newPos) != 0) bbstruct.mBN &= ~newPos;
             else if( (bbstruct.mBP & newPos) != 0) bbstruct.mBP &= ~newPos;
@@ -89,7 +96,8 @@ public class TempMoves {
             else if( (bbstruct.mBR & newPos) != 0) bbstruct.mBR &= ~newPos;
             else if( (bbstruct.mBK & newPos) != 0) bbstruct.mBK &= ~newPos;
             else System.out.println("Blank square where your piece want to move");
-            
+
+            // removing mypiece from oldposition and moving to newposition
             if( (bbstruct.mWB & oldPos) != 0)      { bbstruct.mWB &= ~oldPos; bbstruct.mWB |= newPos; }
             else if( (bbstruct.mWN & oldPos) != 0) { bbstruct.mWN &= ~oldPos; bbstruct.mWN |= newPos; } 
             else if( (bbstruct.mWP & oldPos) != 0) { bbstruct.mWP &= ~oldPos; bbstruct.mWP |= newPos; }
@@ -100,6 +108,7 @@ public class TempMoves {
         }
         else
         {
+            // removing opponent's piece if it existed on newposition where mypiece is going to be moved
             if( (bbstruct.mWB & newPos) != 0)      bbstruct.mWB &= ~newPos;
             else if( (bbstruct.mWN & newPos) != 0) bbstruct.mWN &= ~newPos;
             else if( (bbstruct.mWP & newPos) != 0) bbstruct.mWP &= ~newPos;
@@ -108,6 +117,7 @@ public class TempMoves {
             else if( (bbstruct.mWK & newPos) != 0) bbstruct.mWK &= ~newPos;
             else System.out.println("Blank piece where your piece want to move");
 
+            // removing mypiece from oldposition and moving to newposition
             if( (bbstruct.mBB & oldPos) != 0)      { bbstruct.mBB &= ~oldPos; bbstruct.mBB |= newPos; }
             else if( (bbstruct.mBN & oldPos) != 0) { bbstruct.mBN &= ~oldPos; bbstruct.mBN |= newPos; }
             else if( (bbstruct.mBP & oldPos) != 0) { bbstruct.mBP &= ~oldPos; bbstruct.mBP |= newPos; }
@@ -121,15 +131,11 @@ public class TempMoves {
 
         if(moveW)
         {
-            if((bbstruct.unsafeForWhite() & bbstruct.mWK) == 0)
-                return true;
-            return false;
+            return (bbstruct.unsafeForWhite() & bbstruct.mWK) == 0;
         }
         else
         {
-            if((bbstruct.unsafeForBlack() & bbstruct.mBK) == 0)
-                return true;
-            return false;
+            return (bbstruct.unsafeForBlack() & bbstruct.mBK) == 0;
         }
     }
 }

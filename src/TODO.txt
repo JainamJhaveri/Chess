@@ -1,0 +1,7 @@
+TODO: 1. minimax algorithm
+TODO: 2. alpha-beta pruning
+TODO: 3. evaluation function
+TODO: 4. popup for promotion instead of choice in terminal
+
+TODO: load game from FENString and PGN
+TODO: make timer based 2 player game

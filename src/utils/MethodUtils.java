@@ -1,11 +1,5 @@
-package pkg_bitboards;
+package utils;
 
-import static pkg_bitboards.Constants.*;
-import static pkg_bitboards.Moves.*;
-
-/**
- * Created by jainu on 5/10/16.
- */
 public class MethodUtils
 {
     /**
@@ -48,7 +42,7 @@ public class MethodUtils
     }
 
 
-    // general methods for checking whether a type of move .. called from TempMoves.java
+    // general methods for checking whether a type of move .. called from UserInterface.java
     /**
      * This method checks if the move is a promotion move from
      * newRow and newCol coordinates. Example: ( _23QP, 7, 3) return true
@@ -61,8 +55,8 @@ public class MethodUtils
     {
         return            move.charAt(4) == 'P'
                 &&    newCol == Character.getNumericValue(move.charAt(2))
-                &&  (   (newRow == 7 && moveW)
-                || (newRow == 0 && !moveW));
+                &&  (   (newRow == 7 && Constants.moveW)
+                || (newRow == 0 && !Constants.moveW));
 
     }
 
@@ -75,16 +69,16 @@ public class MethodUtils
     public static boolean isCastleMove(String move, int newCol, int newRow, int oldRow, int oldCol)
     {
 
-        if( moveW )
+        if( Constants.moveW )
         {
-            if( ( CASTLEW_KSIDE && move.equals(" 0406") && (oldRow == 0 && oldCol == 4) && (newRow == 0 && newCol == 6) )
-                    ||( CASTLEW_QSIDE && move.equals(" 0402") && (oldRow == 0 && oldCol == 4) && (newRow == 0 && newCol == 2) )   )
+            if( ( Constants.CASTLEW_KSIDE && move.equals(" 0406") && (oldRow == 0 && oldCol == 4) && (newRow == 0 && newCol == 6) )
+                    ||( Constants.CASTLEW_QSIDE && move.equals(" 0402") && (oldRow == 0 && oldCol == 4) && (newRow == 0 && newCol == 2) )   )
                 return true;
         }
         else
         {
-            if( ( CASTLEB_KSIDE && move.equals(" 7476") && (oldRow == 7 && oldCol == 4) && (newRow == 7 && newCol == 6) )
-                    ||( CASTLEB_QSIDE && move.equals(" 7472") && (oldRow == 7 && oldCol == 4) && (newRow == 7 && newCol == 2) )   )
+            if( ( Constants.CASTLEB_KSIDE && move.equals(" 7476") && (oldRow == 7 && oldCol == 4) && (newRow == 7 && newCol == 6) )
+                    ||( Constants.CASTLEB_QSIDE && move.equals(" 7472") && (oldRow == 7 && oldCol == 4) && (newRow == 7 && newCol == 2) )   )
                 return true;
         }
 
@@ -97,8 +91,8 @@ public class MethodUtils
         return          move.charAt(4) == 'E'
                 && oldCol == Character.getNumericValue(move.charAt(1))
                 && newCol == Character.getNumericValue(move.charAt(2))
-                && ( ( moveW && (newRow == 5) ) ||
-                ( !moveW && (newRow == 2) ) );
+                && ( ( Constants.moveW && (newRow == 5) ) ||
+                ( !Constants.moveW && (newRow == 2) ) );
     }
 
     // general methods for checking whether a type of move .. called from TempMoves.java
@@ -110,16 +104,16 @@ public class MethodUtils
     public static boolean isCastleMove(String move)
     {
 
-        if( moveW )
+        if( Constants.moveW )
         {
-            if( ( CASTLEW_KSIDE && move.equals(" 0406") )
-                    ||( CASTLEW_QSIDE && move.equals(" 0402") )   )
+            if( ( Constants.CASTLEW_KSIDE && move.equals(" 0406") )
+                    ||( Constants.CASTLEW_QSIDE && move.equals(" 0402") )   )
                 return true;
         }
         else
         {
-            if( ( CASTLEB_KSIDE && move.equals(" 7476") )
-                    ||( CASTLEB_QSIDE && move.equals(" 7472") )   )
+            if( ( Constants.CASTLEB_KSIDE && move.equals(" 7476") )
+                    ||( Constants.CASTLEB_QSIDE && move.equals(" 7472") )   )
                 return true;
         }
 
