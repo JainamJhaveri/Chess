@@ -457,18 +457,18 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
      */
     private void isCheckmateStalemate()
     {
-//        System.out.println("movelist from isCheckmateStalemate: " +movelist);
+        System.out.println("movelist from isCheckmateStalemate: " +movelist);
 
         if(moveW)
         {
             if(possibleWMoves().length() != 0) return;
             if( (WK & unsafeForWhite()) != 0 )
             {
-//                System.out.println("checkmate > > black wins");
+                System.out.println("checkmate > > black wins");
             }
             else
             {
-//                System.out.println("stalemate");
+                System.out.println("stalemate");
             }
         }
 
@@ -477,11 +477,11 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
             if(possibleBMoves().length() != 0) return;
             if( (BK & unsafeForBlack()) != 0 )
             {
-//                System.out.println("checkmate > > white wins");
+                System.out.println("checkmate > > white wins");
             }
             else
             {
-//                System.out.println("stalemate");
+                System.out.println("stalemate");
             }
         }
         System.out.println("---- game over ----");

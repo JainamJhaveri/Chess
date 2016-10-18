@@ -266,7 +266,6 @@ public class BBStruct {
     public int evaluate() {
         int ws = getWhiteScore();
         int bs = getBlackScore();
-//        System.out.println( "score: "+  ws + ", "+ bs  );
         return bs - ws;
     }
 

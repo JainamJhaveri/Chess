@@ -34,7 +34,6 @@ class Minimax
             BBStruct mybb = new BBStruct(bb);
             mybb.makeMove(move);
             int score = mini(depth-1, mybb);
-//            bb.unmakeMove(move);
 
             if( score > max)
             {
@@ -68,8 +67,6 @@ class Minimax
                 min = score;
             }
 
-//            if(depth == DEPTH-1)
-//                minimaxmove = move;         // TODO: return proper move
         }
 
         return min;
