@@ -56,6 +56,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         addMouseMotionListener(this);
     }
 
+
     @Override
     protected void paintComponent(Graphics g)
     {
@@ -93,7 +94,6 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                 g.drawImage(img_piece, base_x + j * disp, base_y + i * disp, this);
             }
         }
-
     }
 
     @Override
@@ -107,14 +107,19 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         {
             handleFirstClick(x, y, e);
         }
-        else if( click2 )
+        else
         {
             handleSecondClick(x, y, e);
-
             // if it is black's move then print minimax move for black
-            if(!moveW)
+            if( !moveW )
             {
-                System.out.println(getMinimaxMoveForBlack());
+
+                long starttime = System.currentTimeMillis();
+                Minimax mm = new Minimax();
+                System.out.println( mm.getMinimaxMoveForBlack() );
+                long endtime = System.currentTimeMillis();
+
+                System.out.println("eval time: "+(endtime-starttime) + " ms");
             }
         }
     }
@@ -576,66 +581,4 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
     }
 
 
-
-
-/*  ----------  testing minimax ----------- */
-    private String minimaxmove = "";
-
-    private String getMinimaxMoveForBlack()
-    {
-        BBStruct currentBB = new BBStruct(); // initialize current bitboards in a BBStruct object
-        int ans = maxi(DEPTH, currentBB);    // perform minimax algorithm and get the best move till DEPTH
-        System.out.println( "Here: " + ans );
-        return minimaxmove;
-    }
-
-    private int maxi(int depth, BBStruct bb)
-    {
-        if( depth == 0 ) return bb.evaluate();
-
-        int max = Integer.MIN_VALUE;
-        String movelist = bb.getMoves();
-
-        for( int i=0; i<movelist.length()/5; i++ )
-        {
-            String move = movelist.substring((i*5), (i*5)+5);
-            BBStruct mybb = new BBStruct(bb);
-            mybb.makeMove(move);
-            int score = mini(depth-1, mybb);
-//            bb.unmakeMove(move);
-
-            if( score > max)
-            {
-                max = score;
-                minimaxmove = move;
-            }
-        }
-
-        return max;
-    }
-
-    private int mini(int depth, BBStruct bb)
-    {
-        if( depth == 0 ) return bb.evaluate();
-
-        int min = Integer.MAX_VALUE;
-        String movelist = bb.getMoves();
-
-        for( int i=0; i<movelist.length()/5; i++ )
-        {
-            String move = movelist.substring((i*5), (i*5)+5);
-
-            BBStruct mybb = new BBStruct(bb);
-            mybb.makeMove(move);
-            int score = maxi(depth-1, mybb);
-
-            if( score < min)
-            {
-                min = score;
-            }
-        }
-
-        return min;
-    }
-/*  ----------  testing minimax ----------- */
 }

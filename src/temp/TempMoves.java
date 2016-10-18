@@ -94,7 +94,6 @@ public class TempMoves {
             else if( (bbstruct.mBQ & newPos) != 0) bbstruct.mBQ &= ~newPos;
             else if( (bbstruct.mBR & newPos) != 0) bbstruct.mBR &= ~newPos;
             else if( (bbstruct.mBK & newPos) != 0) bbstruct.mBK &= ~newPos;
-            else System.out.println("TempMoves.checkIfSafe: Blank square where your piece want to move");
 
             // removing mypiece from oldposition and moving to newposition
             if( (bbstruct.mWB & oldPos) != 0)      { bbstruct.mWB &= ~oldPos; bbstruct.mWB |= newPos; }
@@ -114,7 +113,6 @@ public class TempMoves {
             else if( (bbstruct.mWQ & newPos) != 0) bbstruct.mWQ &= ~newPos;
             else if( (bbstruct.mWR & newPos) != 0) bbstruct.mWR &= ~newPos;
             else if( (bbstruct.mWK & newPos) != 0) bbstruct.mWK &= ~newPos;
-            else System.out.println("Blank piece where your piece want to move");
 
             // removing mypiece from oldposition and moving to newposition
             if( (bbstruct.mBB & oldPos) != 0)      { bbstruct.mBB &= ~oldPos; bbstruct.mBB |= newPos; }
@@ -123,7 +121,7 @@ public class TempMoves {
             else if( (bbstruct.mBQ & oldPos) != 0) { bbstruct.mBQ &= ~oldPos; bbstruct.mBQ |= newPos; }
             else if( (bbstruct.mBR & oldPos) != 0) { bbstruct.mBR &= ~oldPos; bbstruct.mBR |= newPos; }
             else if( (bbstruct.mBK & oldPos) != 0) { bbstruct.mBK &= ~oldPos; bbstruct.mBK |= newPos; }
-            else System.out.println("some error");
+            else System.out.println("TempMoves.checkIfSafe: some error");
         }
         
         bbstruct.updateTempCap();

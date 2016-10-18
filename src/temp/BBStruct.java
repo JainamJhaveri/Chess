@@ -267,7 +267,7 @@ public class BBStruct {
         int ws = getWhiteScore();
         int bs = getBlackScore();
 //        System.out.println( "score: "+  ws + ", "+ bs  );
-        return ws - bs;
+        return bs - ws;
     }
 
 
@@ -334,65 +334,65 @@ public class BBStruct {
 
         if( isPromotionMove(move) )
         {
-//            oldCol = Character.getNumericValue(move.charAt(1));
-//            newCol = Character.getNumericValue(move.charAt(2));
-//            char promotionPiece = move.charAt(3);
-//            if(mmoveW)
-//            {
-//                oldRow = 6;
-//                newRow = 7;
-//            }
-//            else
-//            {
-//                oldRow = 1;
-//                newRow = 0;
-//            }
-//            updateBitBoard(oldRow, oldCol, newRow, newCol);
-//            promotePawnTo(getBitBoardCorrespondingTo((newRow * 8) + newCol), promotionPiece);
+            oldCol = Character.getNumericValue(move.charAt(1));
+            newCol = Character.getNumericValue(move.charAt(2));
+            char promotionPiece = move.charAt(3);
+            if(mmoveW)
+            {
+                oldRow = 6;
+                newRow = 7;
+            }
+            else
+            {
+                oldRow = 1;
+                newRow = 0;
+            }
+            updateBitBoard(oldRow, oldCol, newRow, newCol);
+            promotePawnTo(getBitBoardCorrespondingTo((newRow * 8) + newCol), promotionPiece);
         }
         else if( isEnpassMove(move)  )
         {
-//
-//            oldCol = Character.getNumericValue(move.charAt(1));
-//            newCol = Character.getNumericValue(move.charAt(2));
-//            if(mmoveW)
-//            {
-//                oldRow = 4;
-//                newRow = 5;
-//            }
-//            else
-//            {
-//                oldRow = 3;
-//                newRow = 2;
-//            }
-//
-//            updateBitBoard(oldRow, oldCol, newRow, newCol);
-//            updatePawnCapBitBoard( getBitBoardCorrespondingTo((oldRow * 8) + newCol) );
+
+            oldCol = Character.getNumericValue(move.charAt(1));
+            newCol = Character.getNumericValue(move.charAt(2));
+            if(mmoveW)
+            {
+                oldRow = 4;
+                newRow = 5;
+            }
+            else
+            {
+                oldRow = 3;
+                newRow = 2;
+            }
+
+            updateBitBoard(oldRow, oldCol, newRow, newCol);
+            updatePawnCapBitBoard( getBitBoardCorrespondingTo((oldRow * 8) + newCol) );
 
         }
         else if( isBBCastleMove(move))
         {
-//            oldRow = Character.getNumericValue(move.charAt(1));
-//            oldCol = Character.getNumericValue(move.charAt(2));
-//            newRow = Character.getNumericValue(move.charAt(3));
-//            newCol = Character.getNumericValue(move.charAt(4));
-//
-//            updateBitBoard(oldRow, oldCol, newRow, newCol);
-//
-//            int rook_oldCol;
-//            int rook_newCol;
-//            if( newCol == 6 )
-//            {
-//                rook_oldCol = 7;
-//                rook_newCol = 5;
-//            }
-//            else
-//            {
-//                rook_oldCol = 0;
-//                rook_newCol = 3;
-//            }
-//
-//            updateBitBoard(oldRow, rook_oldCol, newRow, rook_newCol);
+            oldRow = Character.getNumericValue(move.charAt(1));
+            oldCol = Character.getNumericValue(move.charAt(2));
+            newRow = Character.getNumericValue(move.charAt(3));
+            newCol = Character.getNumericValue(move.charAt(4));
+
+            updateBitBoard(oldRow, oldCol, newRow, newCol);
+
+            int rook_oldCol;
+            int rook_newCol;
+            if( newCol == 6 )
+            {
+                rook_oldCol = 7;
+                rook_newCol = 5;
+            }
+            else
+            {
+                rook_oldCol = 0;
+                rook_newCol = 3;
+            }
+
+            updateBitBoard(oldRow, rook_oldCol, newRow, rook_newCol);
         }
         else    // is general move
         {
@@ -516,13 +516,13 @@ public class BBStruct {
             if ( whoAmI == IAMWHITE )  // if black pawn was moved in the last move
             {
                 // if black pawn was on left of white pawn
-                if ( ((pawnpos << 1) & BP & ~FILE_A & getBitBoardCorrespondingTo(histPos)) != 0 )
+                if ( ((pawnpos << 1) & mBP & ~FILE_A & getBitBoardCorrespondingTo(histPos)) != 0 )
                 {
                     oldCol = (byte) (hist_oldCol - 1);
                     newCol = hist_oldCol;
                     list = " " + oldCol + newCol+" E";
                 }
-                else if( ((pawnpos >> 1) & BP & ~FILE_H & getBitBoardCorrespondingTo(histPos)) != 0 )
+                else if( ((pawnpos >> 1) & mBP & ~FILE_H & getBitBoardCorrespondingTo(histPos)) != 0 )
                 {
                     oldCol = (byte) (hist_oldCol + 1);
                     newCol = hist_oldCol;
@@ -531,13 +531,13 @@ public class BBStruct {
             }
             else
             {
-                if ( ((pawnpos << 1) & WP & ~FILE_A & getBitBoardCorrespondingTo(histPos)) != 0 )
+                if ( ((pawnpos << 1) & mWP & ~FILE_A & getBitBoardCorrespondingTo(histPos)) != 0 )
                 {
                     oldCol = (byte) (hist_oldCol - 1);
                     newCol = hist_oldCol;
                     list = " " + oldCol + newCol+" E";
                 }
-                else if( ((pawnpos >> 1) & WP & ~FILE_H & getBitBoardCorrespondingTo(histPos)) != 0 )
+                else if( ((pawnpos >> 1) & mWP & ~FILE_H & getBitBoardCorrespondingTo(histPos)) != 0 )
                 {
                     oldCol = (byte) (hist_oldCol + 1);
                     newCol = hist_oldCol;
@@ -848,7 +848,7 @@ public class BBStruct {
             else if( (bbstruct.mWR & oldPos) != 0) { bbstruct.mWR &= ~oldPos; bbstruct.mWR |= newPos; }
             else if( (bbstruct.mWK & oldPos) != 0) { bbstruct.mWK &= ~oldPos; bbstruct.mWK |= newPos; }
             else {
-                System.out.println("turn of: " + mmoveW + " BBstruct.checkIfSafe: some error");
+                System.out.println("turn of white: BBstruct.checkIfSafe: some error");
                 printString2("wb", mWB);
                 printString2("wp", mWP);
                 printString2("wn", mWN);
@@ -882,7 +882,7 @@ public class BBStruct {
             else if( (bbstruct.mBR & oldPos) != 0) { bbstruct.mBR &= ~oldPos; bbstruct.mBR |= newPos; }
             else if( (bbstruct.mBK & oldPos) != 0) { bbstruct.mBK &= ~oldPos; bbstruct.mBK |= newPos; }
             else {
-                System.out.println("turn of: " + mmoveW + " BBstruct.checkIfSafe: some error");
+                System.out.println("turn of: black BBstruct.checkIfSafe: some error");
                 printString2("bb", mBB);
                 printString2("bp", mBP);
                 printString2("bn", mBN);
