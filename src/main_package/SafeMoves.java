@@ -1,16 +1,17 @@
-package temp;
+package main_package;
 
 import static utils.Constants.*;
 import static utils.MethodUtils.*;
 
-public class TempMoves {
+class SafeMoves {
 
+    // called from Moves.java to get safemoves from a given movelist
     /**
      * returns a safemovelist from a given movelist
      * @param movelist
      * @return String of safe movelist from a given movelist
      */
-    public static String getSafeMovesFrom(String movelist)
+    static String getSafeMovesFrom(String movelist)
     {
         BBStruct bbstruct;
         String safelist = "";
@@ -54,7 +55,7 @@ public class TempMoves {
             }
             else    // is general move
             {
-                System.out.println("general move temp: " +temp);
+//                System.out.println("general move temp: " +temp);
                 oldRow = Character.getNumericValue(temp.charAt(1));
                 oldCol = Character.getNumericValue(temp.charAt(2));
                 newRow = Character.getNumericValue(temp.charAt(3));
@@ -102,7 +103,7 @@ public class TempMoves {
             else if( (bbstruct.mWQ & oldPos) != 0) { bbstruct.mWQ &= ~oldPos; bbstruct.mWQ |= newPos; }
             else if( (bbstruct.mWR & oldPos) != 0) { bbstruct.mWR &= ~oldPos; bbstruct.mWR |= newPos; }
             else if( (bbstruct.mWK & oldPos) != 0) { bbstruct.mWK &= ~oldPos; bbstruct.mWK |= newPos; }
-            else System.out.println("TempMoves.checkIfSafe: some error");
+            else System.out.println("SafeMoves.checkIfSafe: some error");
         }
         else
         {
@@ -121,7 +122,7 @@ public class TempMoves {
             else if( (bbstruct.mBQ & oldPos) != 0) { bbstruct.mBQ &= ~oldPos; bbstruct.mBQ |= newPos; }
             else if( (bbstruct.mBR & oldPos) != 0) { bbstruct.mBR &= ~oldPos; bbstruct.mBR |= newPos; }
             else if( (bbstruct.mBK & oldPos) != 0) { bbstruct.mBK &= ~oldPos; bbstruct.mBK |= newPos; }
-            else System.out.println("TempMoves.checkIfSafe: some error");
+            else System.out.println("SafeMoves.checkIfSafe: some error");
         }
         
         bbstruct.updateTempCap();

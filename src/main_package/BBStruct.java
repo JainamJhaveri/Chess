@@ -1,10 +1,10 @@
-package temp;
+package main_package;
 
 import static utils.Constants.*;
 import static main_package.Moves.*;
 import static utils.MethodUtils.*;
 
-public class BBStruct {
+class BBStruct {
 
     long    mWP = 0L, mWR = 0L, mWN = 0L, mWB = 0L, mWQ = 0L, mWK = 0L,
             mBP = 0L, mBR = 0L, mBN = 0L, mBB = 0L, mBQ = 0L, mBK = 0L;
@@ -18,7 +18,7 @@ public class BBStruct {
     /***
      * assigning global bitboards in the temp object's bitboards
      */
-    public BBStruct() {
+    BBStruct() {
         this.mWP = WP;
         this.mWR = WR;
         this.mWN = WN;
@@ -39,7 +39,7 @@ public class BBStruct {
         updateTempCap();
     }
 
-    public BBStruct(BBStruct mybb) {
+    BBStruct(BBStruct mybb) {
         this.mWP = mybb.mWP;
         this.mWR = mybb.mWR;
         this.mWN = mybb.mWN;
@@ -263,10 +263,15 @@ public class BBStruct {
         return whitescore;
     }
 
-    public int evaluate() {
+    /**
+     * evaluation function that returns a heuristic-value for a given position
+     * @return score for that position
+     */
+    int evaluate() {
         int ws = getWhiteScore();
         int bs = getBlackScore();
         return bs - ws;
+//        return 0;
     }
 
 
@@ -290,7 +295,7 @@ public class BBStruct {
     }
 
 
-    private void promotePawnTo(long pos, char promotionPiece) {
+    private void updatePromotePawnBitBoard(long pos, char promotionPiece) {
         if(mmoveW)
         {
             mWP &= ~pos;
@@ -347,7 +352,7 @@ public class BBStruct {
                 newRow = 0;
             }
             updateBitBoard(oldRow, oldCol, newRow, newCol);
-            promotePawnTo(getBitBoardCorrespondingTo((newRow * 8) + newCol), promotionPiece);
+            updatePromotePawnBitBoard(getBitBoardCorrespondingTo((newRow * 8) + newCol), promotionPiece);
         }
         else if( isEnpassMove(move)  )
         {
@@ -624,7 +629,7 @@ public class BBStruct {
     {
         String list = "";
 
-        list += getMoveListFromBitBoards(ROOK, 'H', "rook", whoAmI);
+        list += getMoveListFromBitBoards(ROOK, 'H', whoAmI);
         list = getSafeMovesFrom(list);
 
         return list;
@@ -634,7 +639,7 @@ public class BBStruct {
     {
         String list = "";
 
-        list += getMoveListFromBitBoards(BISHOP, 'D', "bishop", whoAmI);
+        list += getMoveListFromBitBoards(BISHOP, 'D', whoAmI);
         list = getSafeMovesFrom(list);
 
         return list;
@@ -644,7 +649,7 @@ public class BBStruct {
     {
         String list = "";
 
-        list += getMoveListFromBitBoards(KNIGHT, 'N', "knight", whoAmI);
+        list += getMoveListFromBitBoards(KNIGHT, 'N', whoAmI);
         list = getSafeMovesFrom(list);
 
         return list;
@@ -654,7 +659,7 @@ public class BBStruct {
     {
         String list = "";
 
-        list += getMoveListFromBitBoards(KING, 'K', "king", whoAmI);
+        list += getMoveListFromBitBoards(KING, 'K', whoAmI);
         list = getSafeMovesFrom(list);
 
         return list;
@@ -667,7 +672,7 @@ public class BBStruct {
      * @param choice
      * @return String of movelist
      */
-    private String getMoveListFromBitBoards(long PIECE_BB, char choice, String piece, char whoAmI)
+    private String getMoveListFromBitBoards(long PIECE_BB, char choice, char whoAmI)
     {
         String list = "";
         long moves = PIECE_BB;

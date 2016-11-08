@@ -1,7 +1,5 @@
 package utils;
 
-import temp.BBStruct;
-
 import static utils.Constants.*;
 
 public class MethodUtils
@@ -91,7 +89,7 @@ public class MethodUtils
 
     public static boolean isEnpassMove(String move, int newCol, int newRow, int oldCol)
     {
-        System.out.println(move + " " +oldCol + newCol);
+//        System.out.println(move + " " +oldCol + newCol);
         return          move.charAt(4) == 'E'
                 && oldCol == Character.getNumericValue(move.charAt(1))
                 && newCol == Character.getNumericValue(move.charAt(2))
@@ -99,7 +97,7 @@ public class MethodUtils
                 ( !moveW && (newRow == 2) ) );
     }
 
-    // general methods for checking whether a type of move .. called from TempMoves.java and BBStruct.java
+    // general methods for checking whether a type of move .. called from SafeMoves.java and BBStruct.java
     public static boolean isPromotionMove(String move)
     {
         return move.charAt(4) == 'P';

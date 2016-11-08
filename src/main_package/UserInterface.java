@@ -1,7 +1,6 @@
 package main_package;
 
-import temp.BBStruct;
-
+import static main_package.UpdateBitBoards.*;
 import static utils.Constants.*;
 import static utils.MethodUtils.*;
 import static main_package.Moves.*;
@@ -14,7 +13,6 @@ import java.awt.image.ImageProducer;
 import java.awt.image.RGBImageFilter;
 import java.io.File;
 import java.io.IOException;
-import java.util.Scanner;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
@@ -28,6 +26,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
     private int oldCol = 0, oldRow = 0;     // oldRow, oldCol are row, col of bitboard
     private boolean click2 = false;
     private String movelist = "";
+    private boolean performFlag = false;
 
 
     public UserInterface(char[][] initialCB)
@@ -94,6 +93,20 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                 g.drawImage(img_piece, base_x + j * disp, base_y + i * disp, this);
             }
         }
+        perform();
+    }
+
+    private void perform() {
+        if( moveW || !performFlag) return;
+
+        // if it is black's move then evaluate and print minimax move for black
+        long starttime = System.currentTimeMillis();
+        AlphaBeta mm = new AlphaBeta();
+        System.out.println( mm.getAlphabetamove() );
+        long endtime = System.currentTimeMillis();
+
+        System.out.println("evaluation time: "+(endtime-starttime) + " ms");
+        performFlag = false;
     }
 
     @Override
@@ -110,17 +123,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         else
         {
             handleSecondClick(x, y, e);
-            // if it is black's move then print minimax move for black
-            if( !moveW )
-            {
-
-                long starttime = System.currentTimeMillis();
-                Minimax mm = new Minimax();
-                System.out.println( mm.getMinimaxMoveForBlack() );
-                long endtime = System.currentTimeMillis();
-
-                System.out.println("eval time: "+(endtime-starttime) + " ms");
-            }
+            performFlag = true;
         }
     }
 
@@ -133,105 +136,47 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
      */
     private void updateDisplayArray(int oldRow, int oldCol, int newRow, int newCol)
     {
-        System.out.println("Updating Display Array: "+(7-newRow)+", "+newCol
-                +" is now ->"+dispCB[7 - oldRow][oldCol]+", While: "
-                +(7-oldRow)+", "+oldCol+" is now BLANK");
-        char temp = dispCB[7 - newRow][newCol];
         dispCB[7 - newRow][newCol] = dispCB[7 - oldRow][oldCol];
         dispCB[7 - oldRow][oldCol] = BLANK;
     }
 
 
-    private char promotePawn(long pos)
-    {
-        int choice ;
-        char piece = ' ';
-        do
-        {
-            System.out.println("What do you wish to promote the pawn to?");
-            System.out.println("1.Queen, 2.Rook, 3.Bishop, 4.Knight");
-            System.out.println("Enter Choice (1/2/3/4) - ");
-            Scanner sc = new Scanner(System.in);
-            choice = sc.nextInt();
-        } while( choice < 1 || choice > 4 );
-
-        if( moveW )
-        {
-            WP = WP & ~pos;
-            switch( choice )
-            {
-                case 1: WQ = WQ | pos;  piece = W_QUEEN;
-                        break;
-                case 2: WR = WR | pos;  piece = W_ROOK;
-                        break;
-                case 3: WB = WB | pos;  piece = W_BISHOP;
-                        break;
-                case 4: WN = WN | pos;  piece = W_KNIGHT;
-                        break;
-                default:    System.out.println("Warning! Invalid Pawn Promotion Chosen! Program Should Never Reach Here");
-                            break;
-            }
-        }
-        else
-        {
-            BP = BP & ~pos;
-            switch(choice)
-            {
-                case 1: BQ = BQ | pos;  piece = B_QUEEN;
-                        break;
-                case 2: BR = BR | pos;  piece = B_ROOK;
-                        break;
-                case 3: BB = BB | pos;  piece = B_BISHOP;
-                        break;
-                case 4: BN = BN | pos;  piece = B_KNIGHT;
-                        break;
-                default:    System.out.println("Warning! Invalid Pawn Promotion Chosen! Program Should Never Reach Here");
-                            break;
-            }
-        }
-        updateCap();
-        return piece;
-    }
-
     private void highlightSquares(Graphics g)
     {
         int newRow, newCol;
-        if( click2 )
-        {
-            for(int i=0; i<movelist.length()/5; i++)
-            {
-                String temp = movelist.substring((i*5), (i*5)+5);
-                System.out.println(temp+ ": " + temp.charAt(4));
+        if( !click2 ) return;
 
-                //if not pawn promotion                
-                if( Character.isDigit(temp.charAt(3)) )
-                {
-                    newRow = Character.getNumericValue(temp.charAt(3));
-                    newCol = Character.getNumericValue(temp.charAt(4));
-                    g.drawImage(img_green, base_x + (newCol * disp), base_y + ( (7-newRow) * disp ), this);
-//                    System.out.println("Green Square Debugging - " + temp + ": " + newRow+", "+newCol);
-                }
-                // if pawn promotion
-                else if( temp.charAt(4) == 'P' )
-                {
-                    newCol = Character.getNumericValue(temp.charAt(2));
-//                    System.out.println("Green Square Debugging: " + temp );
-                    if( moveW )
-                        g.drawImage(img_green, base_x + (newCol * disp), base_y, this);
-                    else
-                        g.drawImage(img_green, base_x + (newCol * disp), base_y + (7 * disp), this);
-                }
-//                // if enpass move
-                else if( temp.charAt(4) == 'E')
-                {
-                    newCol = Character.getNumericValue(temp.charAt(2));
-                    if( moveW )
-                        g.drawImage(img_green, base_x + (newCol * disp), base_y + (2 * disp), this);
-                    else
-                        g.drawImage(img_green, base_x + (newCol * disp), base_y + (5 * disp), this);
-                }
+        for(int i=0; i<movelist.length()/5; i++)
+        {
+            String temp = movelist.substring((i*5), (i*5)+5);
+
+            //if not pawn promotion
+            if( Character.isDigit(temp.charAt(3)) )
+            {
+                newRow = Character.getNumericValue(temp.charAt(3));
+                newCol = Character.getNumericValue(temp.charAt(4));
+                g.drawImage(img_green, base_x + (newCol * disp), base_y + ( (7-newRow) * disp ), this);
+            }
+            // if pawn promotion
+            else if( temp.charAt(4) == 'P' )
+            {
+                newCol = Character.getNumericValue(temp.charAt(2));
+                if( moveW )
+                    g.drawImage(img_green, base_x + (newCol * disp), base_y, this);
+                else
+                    g.drawImage(img_green, base_x + (newCol * disp), base_y + (7 * disp), this);
+            }
+            // if enpass move
+            else if( temp.charAt(4) == 'E')
+            {
+                newCol = Character.getNumericValue(temp.charAt(2));
+                if( moveW )
+                    g.drawImage(img_green, base_x + (newCol * disp), base_y + (2 * disp), this);
+                else
+                    g.drawImage(img_green, base_x + (newCol * disp), base_y + (5 * disp), this);
             }
         }
+
     }
 
     private Image makeTransparent(String imagepath, int hexTransparency )
@@ -333,7 +278,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
             }
             else
             {
-                System.out.println("Either Blank square or a piece whose moves are not possible or "
+                System.err.println("Either Blank square or a piece whose moves are not possible or "
                         + "opposite player's piece is clicked is clicked!");
             }
 
@@ -361,7 +306,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
 
                     updateDisplayArray(oldRow, oldCol, newRow, newCol);
                     updateBitBoard(oldRow, oldCol, newRow, newCol);
-                    char piecePromotedTo = promotePawn(getBitBoardCorrespondingTo((newRow * 8) + newCol));
+                    char piecePromotedTo = updatePromotePawnBitBoard(newRow, newCol);
 
                     dispCB[7 - newRow][newCol] = piecePromotedTo;
 
@@ -420,7 +365,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                     }
 
                     updateDisplayArray(oldRow, oldCol, capRow, newCol);
-                    updatePawnCapBitBoard(getBitBoardCorrespondingTo((capRow * 8) + newCol), pawn);
+                    updatePawnCapBitBoard(capRow, newCol, pawn);
 
                     moveW = !moveW;
                     break;
@@ -487,97 +432,6 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         System.out.println("---- game over ----");
         System.exit(0);
         // resetBoard();
-    }
-
-
-    /***
-     * 1. finds and removes opposite piece (if it is present) at oldposition(oldRow, oldCol) on it's bitboard
-     * 2. removes my piece from oldposition(oldRow, oldCol) and adding to newPositon(newRow, newCol) on it's bitboard
-     * 3. calls updateCap() method
-     * @param oldRow
-     * @param oldCol
-     * @param newRow
-     * @param newCol
-     */
-    private static void updateBitBoard(int oldRow, int oldCol, int newRow, int newCol)
-    {
-        long oldPos = getBitBoardCorrespondingTo((oldRow * 8) + oldCol);
-        long newPos = getBitBoardCorrespondingTo((newRow * 8) + newCol);
-
-        if( moveW )
-        {
-            // removing opponent's piece if it existed on newposition where mypiece is going to be moved
-            if( (BB & newPos) != 0)      BB &= ~newPos;
-            else if( (BN & newPos) != 0) BN &= ~newPos;
-            else if( (BP & newPos) != 0) BP &= ~newPos;
-            else if( (BQ & newPos) != 0) BQ &= ~newPos;
-            else if( (BR & newPos) != 0) BR &= ~newPos;
-            else if( (BK & newPos) != 0) BK &= ~newPos;
-            else System.out.println("UI.updateBitBoard: Blank square where your piece want to move");
-
-            // removing mypiece from oldposition and moving to newposition
-            if( (WB & oldPos) != 0)      { WB &= ~oldPos; WB |= newPos; }
-            else if( (WN & oldPos) != 0) { WN &= ~oldPos; WN |= newPos; }
-            else if( (WP & oldPos) != 0) { WP &= ~oldPos; WP |= newPos; }
-            else if( (WQ & oldPos) != 0) { WQ &= ~oldPos; WQ |= newPos; }
-            else if( (WR & oldPos) != 0) { WR &= ~oldPos; WR |= newPos;
-                                            if( CASTLEW_QSIDE && ((WR & CASTLE_ROOKS[0]) == 0) )
-                                                CASTLEW_QSIDE = false;
-                                            else if ( CASTLEW_KSIDE && ( (WR & CASTLE_ROOKS[1]) == 0) )
-                                                CASTLEW_KSIDE = false;  }
-            else if( (WK & oldPos) != 0) { WK &= ~oldPos; WK |= newPos;
-                                            CASTLEW_KSIDE = false;
-                                            CASTLEW_QSIDE = false;  }
-            else System.out.println("UI.updateBitBoard: shouldn't reach here!");
-        }
-        else
-        {
-            // removing opponent's piece if it existed on newposition where mypiece is going to be moved
-            if( (WB & newPos) != 0)      WB &= ~newPos;
-            else if( (WN & newPos) != 0) WN &= ~newPos;
-            else if( (WP & newPos) != 0) WP &= ~newPos;
-            else if( (WQ & newPos) != 0) WQ &= ~newPos;
-            else if( (WR & newPos) != 0) WR &= ~newPos;
-            else if( (WK & newPos) != 0) WK &= ~newPos;
-            else System.out.println("updateBitBoard: Blank piece where your piece want to move");
-
-            // removing mypiece from oldposition and moving to newposition
-            if( (BB & oldPos) != 0)      { BB &= ~oldPos; BB |= newPos; }
-            else if( (BN & oldPos) != 0) { BN &= ~oldPos; BN |= newPos; }
-            else if( (BP & oldPos) != 0) { BP &= ~oldPos; BP |= newPos; }
-            else if( (BQ & oldPos) != 0) { BQ &= ~oldPos; BQ |= newPos; }
-            else if( (BR & oldPos) != 0) { BR &= ~oldPos; BR |= newPos;
-                                            if( CASTLEB_QSIDE && ((BR & CASTLE_ROOKS[2]) == 0) )
-                                                CASTLEB_QSIDE = false;
-                                            else if ( CASTLEB_KSIDE && ((BR & CASTLE_ROOKS[3]) == 0) )
-                                                CASTLEB_KSIDE = false;  }
-            else if( (BK & oldPos) != 0) { BK &= ~oldPos; BK |= newPos;
-                                            CASTLEB_KSIDE = false;
-                                            CASTLEB_QSIDE = false;  }
-            else System.out.println("shouldn't reach here!");
-        }
-
-        history = ""+ oldRow + oldCol + newRow + newCol;
-        updateCap();
-    }
-
-
-    /**
-     * This method updates bitboard of captured piece using pos bitboard.
-     * pos bitboard is returned by the updateBitBoard(..) method.
-     * pos is the bit board of position to which the selected piece had moved.
-     * @param pos position which should be removed from bitboard of captured piece
-     * @param pieceCap char piece whose bitboard needs to be updated
-     */
-    private static void updatePawnCapBitBoard(long pos, char pieceCap)
-    {
-        switch(pieceCap)
-        {
-            case B_PAWN:    BP &= ~pos; break;
-            case W_PAWN:    WP &= ~pos; break;
-            default: System.out.println("Shouldn't reach here !");
-        }
-        updateCap();
     }
 
 

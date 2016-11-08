@@ -155,6 +155,6 @@ public class Constants {
     public static final int VAL_QUEEN = 9;
     public static final int VAL_ROOK = 5;
 
-    public static final int DEPTH = 4;
+    public static final int DEPTH = 6;
 
 }

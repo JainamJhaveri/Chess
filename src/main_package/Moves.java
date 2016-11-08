@@ -1,7 +1,5 @@
 package main_package;
 
-import temp.TempMoves;
-
 import static utils.Constants.*;
 import static utils.MethodUtils.*;
 
@@ -91,28 +89,30 @@ public class Moves {
     static String possibleCastle(char whoAmI)
     {
         String list = "";
-        printString2("OCCUPIEDSQ", OCCUPIEDSQ);
+        long unsafe;
         if( whoAmI == IAMWHITE)
         {
+            unsafe = unsafeForWhite();
             if ( ( CASTLEW_QSIDE && ((WR & CASTLE_ROOKS[0])!= 0) )
-               && ( (unsafeForWhite() & CASTLE_CHECK[0])  == 0 )
+               && ( (unsafe & CASTLE_CHECK[0])  == 0 )
                && ( (OCCUPIEDSQ & CASTLE_CHECK[0] & ~WK) == 0  )      )
                     list += " 0402";
 
 
             if (  ( CASTLEW_KSIDE && ((WR & CASTLE_ROOKS[1])!= 0) )
-               && ( (unsafeForWhite() & CASTLE_CHECK[1]) == 0 )
+               && ( (unsafe & CASTLE_CHECK[1]) == 0 )
                && ( (OCCUPIEDSQ & CASTLE_CHECK[1] & ~WK) == 0  )      )
                     list += " 0406";
         }
         else
         {
+            unsafe = unsafeForBlack();
             if (  ( CASTLEB_QSIDE && ((BR & CASTLE_ROOKS[2])!= 0) )
-               && ( (unsafeForBlack()& CASTLE_CHECK[2]) == 0 )
+               && ( (unsafe & CASTLE_CHECK[2]) == 0 )
                && ( (OCCUPIEDSQ & CASTLE_CHECK[2] & ~BK) == 0  )      )
                     list += " 7472";
             if (   ( CASTLEB_KSIDE && ((BR & CASTLE_ROOKS[3])!= 0) )
-                && ( (unsafeForBlack()& CASTLE_CHECK[3]) == 0 )
+                && ( (unsafe & CASTLE_CHECK[3]) == 0 )
                 && ( (OCCUPIEDSQ & CASTLE_CHECK[3] & ~BK) == 0  )      )
                 list += " 7476";
         }
@@ -169,7 +169,7 @@ public class Moves {
             piecepositions = piecepositions & (piecepositions-1);
         }
 
-        printString2("UNSAFE MOVES", unsafemoves);
+        //printString2("UNSAFE MOVES", unsafemoves);
         return unsafemoves;
     }
 
@@ -221,7 +221,7 @@ public class Moves {
             piecepositions = piecepositions & (piecepositions-1);
         }
 
-        printString2("UNSAFE MOVES", unsafemoves);
+        //printString2("UNSAFE MOVES", unsafemoves);
         return unsafemoves;
     }
 
@@ -232,15 +232,15 @@ public class Moves {
         if(whoAmI == IAMWHITE)
         {
             list = possibleWP(pawnpos) + possibleEnPass(pawnpos, whoAmI);
-            list = TempMoves.getSafeMovesFrom(list);
-            System.out.println( "actual possible moves: " +list );
+            list = SafeMoves.getSafeMovesFrom(list);
+            System.out.println( "WP possible moves: " +list );
 
         }
         else
         {
             list = possibleBP(pawnpos) + possibleEnPass(pawnpos, whoAmI);
-            list = TempMoves.getSafeMovesFrom(list);
-            System.out.println( "actual possible moves: " +list );
+            list = SafeMoves.getSafeMovesFrom(list);
+            System.out.println( "BP possible moves: " +list );
         }
 
 
@@ -255,33 +255,31 @@ public class Moves {
         /*  << 9 :: white pawn can capture right if there is a capturable black piece and that piece is not on FILE_A after shift */
         moves = (pawnpos << 9) & CAPTURABLE_B & ~RANK_8 & ~FILE_A;
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, -1);
-        System.out.println("After right cap: "+list);
+
         /*  << 7 :: white pawn can capture left if there is a capturable black piece and that piece is not on FILE_H after shift */
         moves = (pawnpos << 7) & CAPTURABLE_B & ~RANK_8 & ~FILE_H;
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, 1);
-        System.out.println("After left cap: "+list);
+
         /*  >> 8 :: pawn can be pushed 1 position if it doesn't go on rank 8 after push and there are no piece below its current rank */
         moves = (pawnpos << 8) & ~RANK_8 & ~OCCUPIEDSQ;
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -1, 0);
-        System.out.println("After pawn push 1: "+list);
+
         /*  << 16 :: pawn can be pushed 2 positions if it is on rank 2 and there are no pieces on rank 4 or rank 3 for the corresponding pawn */
         moves = ( (pawnpos & RANK_2) << 16 ) &  ~( (OCCUPIEDSQ & RANK_4) | ((OCCUPIEDSQ & RANK_3) << 8) );
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, -2, 0);
-        System.out.println("After pawn push 1: "+list);
 
         /*  << 9 :: right capture + promotion */
         moves = (pawnpos << 9) & CAPTURABLE_B & RANK_8 & ~FILE_A;
         list += getPromotionPaths(moves, -1);
-        System.out.println("After right cap + promotion: "+list);
+
         /*  << 7 :: left capture + promotion */
         moves = (pawnpos << 7) & CAPTURABLE_B & RANK_8 & ~FILE_H;
         list += getPromotionPaths(moves, 1);
-        System.out.println("After left cap + promotion: "+list);
+
         /*  << 8 :: simple promotion */
         moves = (pawnpos << 8) & RANK_8 & ~OCCUPIEDSQ;
         list += getPromotionPaths(moves, 0);
-        System.out.println("After simple promotion: "+list);
-        System.out.println("\npawn movelist: " +  list);
+
         return list;
     }
 
@@ -293,55 +291,51 @@ public class Moves {
         /*  >> 9 :: black pawn can capture right if there is a capturable black piece and that piece is not on FILE_H after shift */
         moves = (pawnpos >> 9) & CAPTURABLE_W & ~RANK_1 & ~FILE_H;
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 1, 1);
-        System.out.println("After right cap: "+list);
+
         /*  >> 7 :: black pawn can capture left if there is a capturable black piece and that piece is not on FILE_A after shift */
         moves = (pawnpos >> 7) & CAPTURABLE_W & ~RANK_1 & ~FILE_A;
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 1, -1);
-        System.out.println("After left cap: "+list);
+
         /*  >> 8 :: pawn can be pushed 1 position if it doesn't go on rank 1 after push and there are no piece below its current rank */
         moves = (pawnpos >> 8) & ~RANK_1 & ~OCCUPIEDSQ;
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 1, 0);
-        System.out.println("After pawn push 1: "+list);
+
         /*  >> 16 :: pawn can be pushed 2 positions if it is on rank 7 and there are no pieces on rank 5 or rank 6 for the corresponding pawn */
         moves = ( (pawnpos & RANK_7) >> 16 ) &  ~( (OCCUPIEDSQ & RANK_5) | ((OCCUPIEDSQ & RANK_6) >> 8) );
         list += getMovesWhereRelDifferenceFromNewCoordsIs(moves, 2, 0);
-        System.out.println("After pawn push 1: "+list);
 
         /*  >> 9 :: right capture + promotion */
         moves = (pawnpos >> 9) & CAPTURABLE_W & RANK_1 & ~FILE_H;
         list += getPromotionPaths(moves, 1);
-        System.out.println("After right cap + promotion: "+list);
+
         /*  >> 7 :: left capture + promotion */
         moves = (pawnpos >> 7) & CAPTURABLE_W & RANK_1 & ~FILE_A;
         list += getPromotionPaths(moves, -1);
-        System.out.println("After left cap + promotion: "+list);
+
         /*  >> 8 :: simple promotion */
         moves = (pawnpos >> 8) & RANK_1 & ~OCCUPIEDSQ;
         list += getPromotionPaths(moves, 0);
-        System.out.println("After simple promotion: "+list);
-        System.out.println("\npawn movelist: " +  list);
+
         return list;
     }
 
     static String possibleR(long ROOK, char whoAmI)
     {
         String list = "";
-        printString2("rook: ", ROOK);
-        list += getMoveListFromBitBoards(ROOK, 'H', "rook", whoAmI);
+        //printString2("rook: ", ROOK);
+        list += getMoveListFromBitBoards(ROOK, 'H', whoAmI);
+        list = SafeMoves.getSafeMovesFrom(list);
         System.out.println("rook movelist: " +  list);
-        list = TempMoves.getSafeMovesFrom(list);
-        System.out.println( "actual possible moves: " +list );
         return list;
     }
 
     static String possibleB(long BISHOP, char whoAmI)
     {
         String list = "";
-        printString2("bishop: ", BISHOP);
-        list += getMoveListFromBitBoards(BISHOP, 'D', "bishop", whoAmI);
+        //printString2("bishop: ", BISHOP);
+        list += getMoveListFromBitBoards(BISHOP, 'D', whoAmI);
+        list = SafeMoves.getSafeMovesFrom(list);
         System.out.println("bishop movelist: " +  list);
-        list = TempMoves.getSafeMovesFrom(list);
-        System.out.println( "actual possible moves: " +list );
         return list;
     }
 
@@ -349,34 +343,31 @@ public class Moves {
     static String possibleQ(long QUEEN, char whoAmI)
     {
         String list = "";
-        printString2("queen: ", QUEEN);
-        list += getMoveListFromBitBoards(QUEEN, 'H', "queen", whoAmI);
-        list += getMoveListFromBitBoards(QUEEN, 'D', "queen", whoAmI);
+        //printString2("queen: ", QUEEN);
+        list += getMoveListFromBitBoards(QUEEN, 'H', whoAmI);
+        list += getMoveListFromBitBoards(QUEEN, 'D', whoAmI);
+        list = SafeMoves.getSafeMovesFrom(list);
         System.out.println("queen movelist: " +  list);
-        list = TempMoves.getSafeMovesFrom(list);
-        System.out.println( "actual possible moves: " +list );
         return list;
     }
 
     static String possibleN(long KNIGHT, char whoAmI)
     {
         String list = "";
-        printString2("knight: ", KNIGHT);
-        list += getMoveListFromBitBoards(KNIGHT, 'N', "knight", whoAmI);
-        System.out.println(list);
-        list = TempMoves.getSafeMovesFrom(list);
-        System.out.println( "actual possible moves: " +list );
+        //printString2("knight: ", KNIGHT);
+        list += getMoveListFromBitBoards(KNIGHT, 'N', whoAmI);
+        list = SafeMoves.getSafeMovesFrom(list);
+        System.out.println("knight movelist: " +  list);
         return list;
     }
 
     static String possibleK(long KING, char whoAmI)
     {
         String list = "";
-        printString2("king:", KING);
-        list += getMoveListFromBitBoards(KING, 'K', "king", whoAmI);
-        System.out.println(list);
-        list = TempMoves.getSafeMovesFrom(list);
-        System.out.println( "actual possible moves: " +list );
+        //printString2("king:", KING);
+        list += getMoveListFromBitBoards(KING, 'K', whoAmI);
+        list = SafeMoves.getSafeMovesFrom(list);
+        System.out.println("king movelist: " + list);
         return list;
     }
 
@@ -388,7 +379,7 @@ public class Moves {
      * @param choice
      * @return String of movelist
      */
-    private static String getMoveListFromBitBoards(long PIECE_BB, char choice, String piece, char whoAmI)
+    private static String getMoveListFromBitBoards(long PIECE_BB, char choice, char whoAmI)
     {
 
         String list = "";
@@ -406,7 +397,7 @@ public class Moves {
                     oldRow = oldposition / 8;
                     oldCol = oldposition % 8 ;
                     newmoves = HVMoves(oldposition) & ~PIECES_I_CANT_CAPTURE;
-                    printString2( piece+"MOVES: ", newmoves);
+                    //printString2( piece+"MOVES: ", newmoves);
 
                     while(newmoves != 0)
                     {
@@ -426,7 +417,7 @@ public class Moves {
                     oldRow = oldposition / 8;
                     oldCol = oldposition % 8 ;
                     newmoves = DiagonalMoves(oldposition) & ~PIECES_I_CANT_CAPTURE;
-                    printString2( piece+"MOVES: ", newmoves);
+                    //printString2( piece+"MOVES: ", newmoves);
 
                     while(newmoves != 0)
                     {
@@ -446,7 +437,7 @@ public class Moves {
                     oldRow = oldposition / 8;
                     oldCol = oldposition % 8 ;
                     newmoves = KnightMoves(oldposition) & ~PIECES_I_CANT_CAPTURE;
-                    printString2( piece+"MOVES: ", newmoves);
+                    //printString2( piece+"MOVES: ", newmoves);
 
                     while(newmoves != 0)
                     {
@@ -467,7 +458,7 @@ public class Moves {
                     oldCol = oldposition % 8 ;
                     long unsafeMoves = ( whoAmI == IAMWHITE )  ?   unsafeForWhite() :  unsafeForBlack();
                     newmoves = KingMoves(oldposition) & ~PIECES_I_CANT_CAPTURE & ~unsafeMoves;
-                    printString2( piece+"MOVES: ", newmoves);
+                    //printString2( piece+"MOVES: ", newmoves);
 
                     while(newmoves != 0)
                     {
@@ -488,7 +479,7 @@ public class Moves {
     }
 
     /**
-     * In initialChessboard[][] which is passed from AlphaBetaChess class, topleft is 0,0 and bottomright is 7,7
+     * In initialChessboard[][] which is passed from Main class, topleft is 0,0 and bottomright is 7,7
      * In our bitboards, leftmost bit is 7,7(63: h8) and rightmost bit 0,0 (0: a1)
      * initialCB ==> bitBoardPosition : position
       (7,7) => (0,7): 7
@@ -524,42 +515,6 @@ public class Moves {
             }
         }
         updateCap();
-    }
-
-    /**
-     * This method returns char array generated from all 12 bitboards.
-        * In our bitboards,                                       leftmost bit is 7,7 and rightmost bit 0,0
-        * But for the board to be displayed in AlphaBetaChess class,  topleft is 0,0 and bottomright is 7,7.
-        * Hence, this method shifts bits, checks which bitboard contains a piece on that position and
-        * populates myBitBoard array with corresponding piece.
-     * @return char array
-    **/
-    static char[][] getDisplayBoard()
-    {
-//        printString2("WP", WP);
-        byte shifts;
-        char myBitBoard[][] = new char[8][8];
-        for(byte i=0; i<8; i++)
-        {
-            for(byte j=0; j<8; j++)
-            {
-                shifts = (byte) ( (7 - i) * 8 + j ) ;    // from 0 to 63 shifts
-                if(      ((WP >> shifts) & 1) == 1  ) myBitBoard[i][j] = W_PAWN;
-                else if( ((WB >> shifts) & 1) == 1  ) myBitBoard[i][j] = W_BISHOP;
-                else if( ((WN >> shifts) & 1) == 1  ) myBitBoard[i][j] = W_KNIGHT;
-                else if( ((WR >> shifts) & 1) == 1  ) myBitBoard[i][j] = W_ROOK;
-                else if( ((WQ >> shifts) & 1) == 1  ) myBitBoard[i][j] = W_QUEEN;
-                else if( ((WK >> shifts) & 1) == 1  ) myBitBoard[i][j] = W_KING;
-
-                else if( ((BP >> shifts) & 1) == 1  ) myBitBoard[i][j] = B_PAWN;
-                else if( ((BB >> shifts) & 1) == 1  ) myBitBoard[i][j] = B_BISHOP;
-                else if( ((BN >> shifts) & 1) == 1  ) myBitBoard[i][j] = B_KNIGHT;
-                else if( ((BR >> shifts) & 1) == 1  ) myBitBoard[i][j] = B_ROOK;
-                else if( ((BQ >> shifts) & 1) == 1  ) myBitBoard[i][j] = B_QUEEN;
-                else if( ((BK >> shifts) & 1) == 1  ) myBitBoard[i][j] = B_KING;
-            }
-        }
-        return myBitBoard;
     }
 
 
@@ -636,5 +591,4 @@ public class Moves {
         OCCUPIEDSQ = (WP|WR|WN|WB|WQ|WK|BP|BR|BN|BB|BQ|BK);
     }
 
-    
 }
