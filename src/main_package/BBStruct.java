@@ -239,42 +239,6 @@ class BBStruct {
         return newmoves;
     }
 
-    private int getBlackScore()
-    {
-        int numBB = Long.bitCount(mBB);
-        int numBN = Long.bitCount(mBN);
-        int numBQ = Long.bitCount(mBQ);
-        int numBP = Long.bitCount(mBP);
-        int numBR = Long.bitCount(mBR);
-
-        int blackscore = numBB * VAL_BISHOP + numBN * VAL_KNIGHT + numBQ * VAL_QUEEN + numBP * VAL_PAWN + numBR * VAL_ROOK;
-        return blackscore;
-    }
-
-    private int getWhiteScore()
-    {
-        int numWB = Long.bitCount(mWB);
-        int numWN = Long.bitCount(mWN);
-        int numWQ = Long.bitCount(mWQ);
-        int numWP = Long.bitCount(mWP);
-        int numWR = Long.bitCount(mWR);
-
-        int whitescore = numWB * VAL_BISHOP + numWN * VAL_KNIGHT + numWQ * VAL_QUEEN + numWP * VAL_PAWN + numWR * VAL_ROOK ;
-        return whitescore;
-    }
-
-    /**
-     * evaluation function that returns a heuristic-value for a given position
-     * @return score for that position
-     */
-    int evaluate() {
-        int ws = getWhiteScore();
-        int bs = getBlackScore();
-        return bs - ws;
-//        return 0;
-    }
-
-
     private boolean isBBCastleMove(String move)
     {
 
