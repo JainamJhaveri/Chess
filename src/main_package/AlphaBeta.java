@@ -4,7 +4,8 @@ import static utils.Constants.DEPTH;
 
 class AlphaBeta
 {
-
+    private String moveSeq[] = new String[7];
+    private String moveSeqMain[] = new String[7];
     private String alphabetamove = "";
 
     String getAlphabetamove()
@@ -12,20 +13,32 @@ class AlphaBeta
         BBStruct currentBB = new BBStruct(); // initialize current bitboards in a BBStruct object
         int ans = alphaBetaMax(DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, currentBB);
         System.out.println(" Over here: " +ans);
+        printArr(moveSeqMain);
         return alphabetamove;
+    }
+
+    private void printArr(String[] moveSeq) {
+        System.out.println("movesequence: ");
+        for( String move: moveSeq){
+            System.out.print(move);
+        }
+        System.out.println();
     }
 
     private int alphaBetaMin(int depth, int alpha, int beta, BBStruct bb)
     {
         if( depth == 0 ) return -Rating.evaluate(bb);
         String movelist = bb.getMoves();
+        String move = "";
 
         for( int i=0; i<movelist.length()/5; i++ )
         {
-            String move = movelist.substring((i*5), (i*5)+5);
+            move = movelist.substring((i*5), (i*5)+5);
 
             BBStruct mybb = new BBStruct(bb);
             mybb.makeMove(move);
+            //if(moveSeq[depth]==null)
+                moveSeq[depth] = move;
             int score = alphaBetaMax(depth-1, alpha, beta, mybb);
 
             if( score <= alpha )
@@ -34,6 +47,10 @@ class AlphaBeta
             }
             if( score < beta )
             {
+                moveSeq[depth] = move;
+                moveSeqMain = moveSeq;
+                System.out.print(move + "the array is\t");
+                printArr(moveSeq);
                 beta = score;
             }
         }
@@ -45,25 +62,34 @@ class AlphaBeta
         if( depth == 0 ) return Rating.evaluate(bb);
         String movelist = bb.getMoves();
 
+        String move = "";
         for( int i=0; i<movelist.length()/5; i++ )
         {
-            String move = movelist.substring((i*5), (i*5)+5);
+            move = movelist.substring((i*5), (i*5)+5);
 
             BBStruct mybb = new BBStruct(bb);
             mybb.makeMove(move);
+            //if(moveSeq[depth]==null)
+                moveSeq[depth] = move;
             int score = alphaBetaMin(depth-1, alpha, beta, mybb);
 
             if( score >= beta )
             {
-                if( depth == DEPTH )
-                    alphabetamove = move;
                 return beta;
             }
             if( score > alpha )
             {
+                moveSeq[depth] = move;
+                moveSeqMain = moveSeq;
+                System.out.print(move + "the array is\t");
+                printArr(moveSeq);
                 alpha = score;
-                if( depth == DEPTH )
-                    alphabetamove = move;
+//                if( depth == DEPTH ) {
+//                    alphabetamove = move;
+//                    System.out.println("\nAplhaBetaMove Is - " + alphabetamove);
+//                    printArr(moveSeqMain);
+//                }
+                alphabetamove = moveSeq[6];
             }
         }
         return alpha;
