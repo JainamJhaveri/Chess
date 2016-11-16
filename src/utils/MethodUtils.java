@@ -1,5 +1,6 @@
 package utils;
 
+import static main_package.Moves.*;
 import static utils.Constants.*;
 
 public class MethodUtils

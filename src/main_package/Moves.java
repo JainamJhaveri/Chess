@@ -22,16 +22,23 @@ import static utils.MethodUtils.*;
 public class Moves {
     public static long WP = 0L, WR = 0L, WN = 0L, WB = 0L, WQ = 0L, WK = 0L, BP = 0L, BR = 0L, BN = 0L, BB = 0L, BQ = 0L, BK = 0L; // 12 bitboards
     private static long PIECES_W_CANT_CAPTURE, CAPTURABLE_W, PIECES_B_CANT_CAPTURE, CAPTURABLE_B, OCCUPIEDSQ;
+    public static boolean CASTLEW_KSIDE = true, // true indicates that castle is still possible
+            CASTLEW_QSIDE = true,
+            CASTLEB_KSIDE = true,
+            CASTLEB_QSIDE = true;
+
     static String history = "";
 
     static String possibleWMoves()
     {
-        return possibleB(WB|WQ, IAMWHITE) + possibleN(WN, IAMWHITE) + possibleR(WR|WQ, IAMWHITE) + possibleP(WP, IAMWHITE) + possibleK(WK, IAMWHITE);
+        return possibleB(WB|WQ, IAMWHITE) + possibleN(WN, IAMWHITE) + possibleR(WR|WQ, IAMWHITE) + possibleP(WP, IAMWHITE) + possibleK(WK, IAMWHITE)
+                +   possibleCastle(IAMWHITE);
     }
 
     static String possibleBMoves()
     {
-        return possibleB(BB|BQ, IAMBLACK) + possibleN(BN, IAMBLACK) + possibleR(BR|BQ, IAMBLACK) + possibleP(BP, IAMBLACK) + possibleK(BK, IAMBLACK);
+        return possibleB(BB|BQ, IAMBLACK) + possibleN(BN, IAMBLACK) + possibleR(BR|BQ, IAMBLACK) + possibleP(BP, IAMBLACK) + possibleK(BK, IAMBLACK)
+                +   possibleCastle(IAMBLACK);
     }
 
     private static String possibleEnPass(long pawnpos, char whoAmI)

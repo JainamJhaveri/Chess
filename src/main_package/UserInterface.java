@@ -392,7 +392,11 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
 
         repaint();
 
-        isCheckmateStalemate();
+        if( isCheckmateStalemate() )
+        {
+            System.exit(0);
+            // resetBoard();
+        };
 
     }
 
@@ -400,13 +404,13 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
      * called after each move to check if checkmate or stalemate condition has reached.
      * Game over and program quits in both cases else the game continues normally
      */
-    private void isCheckmateStalemate()
+    private boolean isCheckmateStalemate()
     {
         System.out.println("movelist from isCheckmateStalemate: " +movelist);
 
         if(moveW)
         {
-            if(possibleWMoves().length() != 0) return;
+            if(possibleWMoves().length() != 0) return false;
             if( (WK & unsafeForWhite()) != 0 )
             {
                 System.out.println("checkmate > > black wins");
@@ -419,7 +423,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
 
         else
         {
-            if(possibleBMoves().length() != 0) return;
+            if(possibleBMoves().length() != 0) return false;
             if( (BK & unsafeForBlack()) != 0 )
             {
                 System.out.println("checkmate > > white wins");
@@ -430,8 +434,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
             }
         }
         System.out.println("---- game over ----");
-        System.exit(0);
-        // resetBoard();
+        return true;
     }
 
 

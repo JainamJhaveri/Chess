@@ -207,7 +207,7 @@ class BBStruct {
         return (fwdDiaPossibilities | backDiaPossibilities);
     }
 
-    private static long mKnightMoves(int oldposition)
+    private long mKnightMoves(int oldposition)
     {
         long newmoves;
         if(oldposition > 18)
@@ -223,7 +223,7 @@ class BBStruct {
         return newmoves;
     }
 
-    private static long mKingMoves(int oldposition)
+    private long mKingMoves(int oldposition)
     {
         long newmoves;
         if(oldposition > 9)
@@ -290,13 +290,15 @@ class BBStruct {
     public String getMoves()
     {
         if(mmoveW)
-            return possiblemB(mWB|mWQ, IAMWHITE) + possiblemN(mWN, IAMWHITE) + possiblemR(mWR|mWQ, IAMWHITE) + possiblemP(mWP, IAMWHITE) + possiblemK(mWK, IAMWHITE);
+            return possiblemB(mWB|mWQ, IAMWHITE) + possiblemN(mWN, IAMWHITE) + possiblemR(mWR|mWQ, IAMWHITE) + possiblemP(mWP, IAMWHITE) + possiblemK(mWK, IAMWHITE)
+                    + possiblemCastle(IAMWHITE);
         else
-            return possiblemB(mBB|mBQ, IAMBLACK) + possiblemN(mBN, IAMBLACK) + possiblemR(mBR|mBQ, IAMBLACK) + possiblemP(mBP, IAMBLACK) + possiblemK(mBK, IAMBLACK);
+            return possiblemB(mBB|mBQ, IAMBLACK) + possiblemN(mBN, IAMBLACK) + possiblemR(mBR|mBQ, IAMBLACK) + possiblemP(mBP, IAMBLACK) + possiblemK(mBK, IAMBLACK)
+                    + possiblemCastle(IAMBLACK);
     }
 
 
-    public void makeMove(String move)
+    void makeMove(String move)
     {
         int oldRow, oldCol, newRow, newCol;
 
@@ -626,6 +628,41 @@ class BBStruct {
         list += getMoveListFromBitBoards(KING, 'K', whoAmI);
         list = getSafeMovesFrom(list);
 
+        return list;
+    }
+
+    private String possiblemCastle(char whoAmI)
+    {
+        String list = "";
+        long unsafe;
+        if( whoAmI == IAMWHITE)
+        {
+            unsafe = unsafeForWhite();
+            if ( ( mCASTLEW_QSIDE && ((mWR & CASTLE_ROOKS[0])!= 0) )
+                    && ( (unsafe & CASTLE_CHECK[0])  == 0 )
+                    && ( (mOCCUPIEDSQ & CASTLE_CHECK[0] & ~mWK) == 0  )      )
+                list += " 0402";
+
+
+            if (  ( mCASTLEW_KSIDE && ((mWR & CASTLE_ROOKS[1])!= 0) )
+                    && ( (unsafe & CASTLE_CHECK[1]) == 0 )
+                    && ( (mOCCUPIEDSQ & CASTLE_CHECK[1] & ~mWK) == 0  )      )
+                list += " 0406";
+        }
+        else
+        {
+            unsafe = unsafeForBlack();
+            if (  ( mCASTLEB_QSIDE && ((mBR & CASTLE_ROOKS[2])!= 0) )
+                    && ( (unsafe & CASTLE_CHECK[2]) == 0 )
+                    && ( (mOCCUPIEDSQ & CASTLE_CHECK[2] & ~mBK) == 0  )      )
+                list += " 7472";
+            if (   ( mCASTLEB_KSIDE && ((BR & CASTLE_ROOKS[3])!= 0) )
+                    && ( (unsafe & CASTLE_CHECK[3]) == 0 )
+                    && ( (mOCCUPIEDSQ & CASTLE_CHECK[3] & ~mBK) == 0  )      )
+                list += " 7476";
+        }
+
+//        System.out.println(whoAmI+" castle movelist: " +  list);
         return list;
     }
 

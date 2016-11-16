@@ -132,11 +132,6 @@ public class Constants {
                                                0x0100000000000000L, 
                                                0x8000000000000000L};    
 
-    public static boolean CASTLEW_KSIDE = true, // true indicates that castle is still possible
-                          CASTLEW_QSIDE = true, 
-                          CASTLEB_KSIDE = true, 
-                          CASTLEB_QSIDE = true;
-    
     public static final char IAMWHITE = 'W';
     public static final char IAMBLACK = 'B';
     

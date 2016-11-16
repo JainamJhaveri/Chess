@@ -37,22 +37,12 @@ class AlphaBeta
 
             BBStruct mybb = new BBStruct(bb);
             mybb.makeMove(move);
-            //if(moveSeq[depth]==null)
-                moveSeq[depth] = move;
+
             int score = alphaBetaMax(depth-1, alpha, beta, mybb);
 
-            if( score <= alpha )
-            {
-                return alpha;
-            }
-            if( score < beta )
-            {
-                moveSeq[depth] = move;
-                moveSeqMain = moveSeq;
-                System.out.print(move + "the array is\t");
-                printArr(moveSeq);
-                beta = score;
-            }
+            if( score <= alpha ) return alpha;
+            if( score < beta ) beta = score;
+
         }
         return beta;
     }
@@ -69,27 +59,16 @@ class AlphaBeta
 
             BBStruct mybb = new BBStruct(bb);
             mybb.makeMove(move);
-            //if(moveSeq[depth]==null)
-                moveSeq[depth] = move;
+
             int score = alphaBetaMin(depth-1, alpha, beta, mybb);
 
             if( score >= beta )
-            {
                 return beta;
-            }
-            if( score > alpha )
-            {
-                moveSeq[depth] = move;
-                moveSeqMain = moveSeq;
-                System.out.print(move + "the array is\t");
-                printArr(moveSeq);
+            if( score > alpha ) {
                 alpha = score;
-//                if( depth == DEPTH ) {
-//                    alphabetamove = move;
-//                    System.out.println("\nAplhaBetaMove Is - " + alphabetamove);
-//                    printArr(moveSeqMain);
-//                }
-                alphabetamove = moveSeq[6];
+                if( depth == DEPTH ) {
+                    alphabetamove = move;
+                }
             }
         }
         return alpha;
