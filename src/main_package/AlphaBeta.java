@@ -18,11 +18,19 @@ class AlphaBeta
         return alphabetamove;
     }
 
-    private void printArr(String[] moveSeq) {
+    private void printArr(String[] moveSeqMain) {
+        System.out.print("\nfinal sequence: ");
+        for( String move: moveSeq){
+            System.out.print(move+" ");
+        }
+    }
+
+    private void printArr(String[] moveSeq, int score, int alpha, int beta) {
         System.out.print("\nmovesequence: ");
         for( String move: moveSeq){
             System.out.print(move+" ");
         }
+        System.out.print("\tscore: " +score +" a: "+alpha+" b: "+beta);
     }
 
     private int alphaBetaMin(int depth, int alpha, int beta, BBStruct bb)
@@ -47,7 +55,7 @@ class AlphaBeta
             {
                 moveSeq[depth] = move;
                 moveSeqMain = moveSeq;
-                printArr(moveSeq);
+                printArr(moveSeq, score, alpha, beta);
                 beta = score;
             }
         }
@@ -76,7 +84,7 @@ class AlphaBeta
             {
                 moveSeq[depth] = move;
                 moveSeqMain = moveSeq;
-                printArr(moveSeq);
+                printArr(moveSeq, score, alpha, beta);
                 alpha = score;
                 alphabetamove = moveSeq[DEPTH];
             }
