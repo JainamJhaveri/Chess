@@ -4,7 +4,7 @@ import static utils.Constants.DEPTH;
 
 class AlphaBeta
 {
-
+    // FIXME: 18/11/16 return proper alpha beta move..!
     private String moveSeq[] = new String[DEPTH+1];
     private String moveSeqMain[] = new String[DEPTH+1];
     private String alphabetamove = "";
@@ -54,7 +54,7 @@ class AlphaBeta
             {
                 moveSeq[depth] = move;
                 moveSeqMain = moveSeq;
-                printArr(moveSeq, score, alpha, beta);
+//                printArr(moveSeq, score, alpha, beta);
                 beta = score;
             }
         }
@@ -82,7 +82,7 @@ class AlphaBeta
             {
                 moveSeq[depth] = move;
                 moveSeqMain = moveSeq;
-                printArr(moveSeq, score, alpha, beta);
+//                printArr(moveSeq, score, alpha, beta);
                 alpha = score;
                 alphabetamove = moveSeq[DEPTH];
             }
@@ -91,8 +91,6 @@ class AlphaBeta
     }
 
 }
-
-
 
 //
 //    /*  ----------  testing minimax ----------- */

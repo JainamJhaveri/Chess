@@ -4,7 +4,7 @@ import static utils.Constants.*;
 import static utils.Constants.VAL_ROOK;
 
 class Rating {
-
+    // TODO: check for checkmate stalemate condition during evalution
     /**
      * evaluation function that returns a heuristic-value for a given position
      * @return score for that position

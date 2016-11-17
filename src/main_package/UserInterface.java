@@ -101,12 +101,118 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         // if it is black's move then evaluate and print minimax move for black
         long starttime = System.currentTimeMillis();
         AlphaBeta mm = new AlphaBeta();
-        System.out.println( "\nCPU move: " +mm.getAlphabetamove() );
+        String cpumove = mm.getAlphabetamove();
+        System.out.println( "\nCPU move: " +cpumove );
         long endtime = System.currentTimeMillis();
 
         System.out.println("evaluation time: "+(endtime-starttime) + " ms");
         performFlag = false;
+
+        makeCPUMove(cpumove);
     }
+
+    private void makeCPUMove(String move)
+    {
+        int oldRow, oldCol, newRow, newCol;
+
+        if( isPromotionMove(move) )
+        {
+            oldCol = Character.getNumericValue(move.charAt(1));
+            newCol = Character.getNumericValue(move.charAt(2));
+
+            char promotionPiece = move.charAt(3);
+            if(moveW)
+            {
+                oldRow = 6;
+                newRow = 7;
+            }
+            else
+            {
+                oldRow = 1;
+                newRow = 0;
+            }
+
+            updateDisplayArray(oldRow, oldCol, newRow, newCol);
+            updateBitBoard(oldRow, oldCol, newRow, newCol);
+            updatePromotePawnBitBoard(newRow, newCol);
+            dispCB[7 - newRow][newCol] = promotionPiece;
+
+            moveW = !moveW;
+        }
+        else if( isEnpassMove(move)  )
+        {
+            char pawn;
+            int capRow;
+            oldCol = Character.getNumericValue(move.charAt(1));
+            newCol = Character.getNumericValue(move.charAt(2));
+            if(moveW)
+            {
+                oldRow = 4;
+                newRow = 5;
+                pawn = B_PAWN;
+                capRow = newRow - 1;
+            }
+            else
+            {
+                oldRow = 3;
+                newRow = 2;
+                pawn = W_PAWN;
+                capRow = newRow + 1;
+            }
+
+            updateDisplayArray(oldRow, oldCol, newRow, newCol);
+            updateDisplayArray(oldRow, oldCol, capRow, newCol);
+            updateBitBoard(oldRow, oldCol, newRow, newCol);
+            updatePawnCapBitBoard(capRow, newCol, pawn);
+
+            moveW = !moveW;
+        }
+        else if( isCastleMove(move))
+        {
+            oldRow = Character.getNumericValue(move.charAt(1));
+            oldCol = Character.getNumericValue(move.charAt(2));
+            newRow = Character.getNumericValue(move.charAt(3));
+            newCol = Character.getNumericValue(move.charAt(4));
+
+            // update kings bitboard and disp array
+            updateDisplayArray(oldRow, oldCol, newRow, newCol);
+            updateBitBoard(oldRow, oldCol, newRow, newCol);
+
+            int rook_oldCol;
+            int rook_newCol;
+            if( newCol == 6 )
+            {
+                rook_oldCol = 7;
+                rook_newCol = 5;
+            }
+
+            else
+            {
+                rook_oldCol = 0;
+                rook_newCol = 3;
+            }
+
+            // update rooks bitboard and disp array
+            updateDisplayArray(oldRow, rook_oldCol, newRow, rook_newCol);
+            updateBitBoard(oldRow, rook_oldCol, newRow, rook_newCol);
+
+            moveW = !moveW;
+        }
+        else    // is general move
+        {
+            oldRow = Character.getNumericValue(move.charAt(1));
+            oldCol = Character.getNumericValue(move.charAt(2));
+            newRow = Character.getNumericValue(move.charAt(3));
+            newCol = Character.getNumericValue(move.charAt(4));
+
+            updateDisplayArray(oldRow, oldCol, newRow, newCol);
+            updateBitBoard(oldRow, oldCol, newRow, newCol);
+
+            moveW = !moveW;
+        }
+        repaint();
+    }
+
 
     @Override
     public void mouseReleased(MouseEvent e)
@@ -290,7 +396,6 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         {
             int newRow = 7 - ( (y - base_y)/disp );
             int newCol = (x - base_x)/disp;
-            boolean canMove = false;    // debugging variable to check if any of highlighted square is clicked
 
             System.out.println("Movelist Length = "+movelist.length()/5);
 
