@@ -3,7 +3,8 @@ package utils;
 public class Constants {
 
 // --- Linux specific constants begin ---
-    private static final String basepath = "/home/jainu/Projects/IdeaProjects/Chess/";
+    private static final String basepath = "C:\\Users\\jaina_000\\IdeaProjects\\Chess\\";
+//    private static final String basepath = "/home/jainu/Projects/IdeaProjects/Chess/";
     private static final String black_basepath = basepath + "CP/blackpcs/";
     private static final String white_basepath = basepath + "CP/whitepcs/";
     public static final String path_board = basepath + "CP/chessboard.png";

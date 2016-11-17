@@ -4,8 +4,9 @@ import static utils.Constants.DEPTH;
 
 class AlphaBeta
 {
-    private String moveSeq[] = new String[7];
-    private String moveSeqMain[] = new String[7];
+
+    private String moveSeq[] = new String[DEPTH+1];
+    private String moveSeqMain[] = new String[DEPTH+1];
     private String alphabetamove = "";
 
     String getAlphabetamove()
@@ -18,11 +19,10 @@ class AlphaBeta
     }
 
     private void printArr(String[] moveSeq) {
-        System.out.println("movesequence: ");
+        System.out.print("\nmovesequence: ");
         for( String move: moveSeq){
-            System.out.print(move);
+            System.out.print(move+" ");
         }
-        System.out.println();
     }
 
     private int alphaBetaMin(int depth, int alpha, int beta, BBStruct bb)
@@ -37,12 +37,19 @@ class AlphaBeta
 
             BBStruct mybb = new BBStruct(bb);
             mybb.makeMove(move);
+            moveSeq[depth] = move;
 
             int score = alphaBetaMax(depth-1, alpha, beta, mybb);
-
-            if( score <= alpha ) return alpha;
-            if( score < beta ) beta = score;
-
+            if( score <= alpha ) {
+                return alpha;
+            }
+            if( score < beta )
+            {
+                moveSeq[depth] = move;
+                moveSeqMain = moveSeq;
+                printArr(moveSeq);
+                beta = score;
+            }
         }
         return beta;
     }
@@ -51,24 +58,27 @@ class AlphaBeta
     {
         if( depth == 0 ) return Rating.evaluate(bb);
         String movelist = bb.getMoves();
-
         String move = "";
+
         for( int i=0; i<movelist.length()/5; i++ )
         {
             move = movelist.substring((i*5), (i*5)+5);
 
             BBStruct mybb = new BBStruct(bb);
             mybb.makeMove(move);
+            moveSeq[depth] = move;
 
             int score = alphaBetaMin(depth-1, alpha, beta, mybb);
-
-            if( score >= beta )
+            if( score >= beta ) {
                 return beta;
-            if( score > alpha ) {
+            }
+            if( score > alpha )
+            {
+                moveSeq[depth] = move;
+                moveSeqMain = moveSeq;
+                printArr(moveSeq);
                 alpha = score;
-                if( depth == DEPTH ) {
-                    alphabetamove = move;
-                }
+                alphabetamove = moveSeq[DEPTH];
             }
         }
         return alpha;

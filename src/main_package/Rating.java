@@ -36,7 +36,7 @@ class Rating {
 
         int blackscore = numBB * VAL_BISHOP + numBN * VAL_KNIGHT + numBQ * VAL_QUEEN + numBP * VAL_PAWN + numBR * VAL_ROOK;
         int whitescore = numWB * VAL_BISHOP + numWN * VAL_KNIGHT + numWQ * VAL_QUEEN + numWP * VAL_PAWN + numWR * VAL_ROOK;
-        return whitescore - blackscore;
+        return blackscore - whitescore;
     }
 
     private static int evaluateAttack(BBStruct bb) {
