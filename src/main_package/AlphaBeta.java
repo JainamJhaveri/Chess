@@ -18,9 +18,9 @@ class AlphaBeta
         return alphabetamove;
     }
 
-    private void printArr(String[] moveSeqMain) {
+    private void printArr(String[] list) {
         System.out.print("\nfinal sequence: ");
-        for( String move: moveSeq){
+        for( String move: list){
             System.out.print(move+" ");
         }
     }
@@ -37,15 +37,14 @@ class AlphaBeta
     {
         if( depth == 0 ) return -Rating.evaluate(bb);
         String movelist = bb.getMoves();
-        String move = "";
+        String move;
 
         for( int i=0; i<movelist.length()/5; i++ )
         {
             move = movelist.substring((i*5), (i*5)+5);
-
+            moveSeq[depth] = move;
             BBStruct mybb = new BBStruct(bb);
             mybb.makeMove(move);
-            moveSeq[depth] = move;
 
             int score = alphaBetaMax(depth-1, alpha, beta, mybb);
             if( score <= alpha ) {
@@ -66,15 +65,14 @@ class AlphaBeta
     {
         if( depth == 0 ) return Rating.evaluate(bb);
         String movelist = bb.getMoves();
-        String move = "";
+        String move;
 
         for( int i=0; i<movelist.length()/5; i++ )
         {
             move = movelist.substring((i*5), (i*5)+5);
-
+            moveSeq[depth] = move;
             BBStruct mybb = new BBStruct(bb);
             mybb.makeMove(move);
-            moveSeq[depth] = move;
 
             int score = alphaBetaMin(depth-1, alpha, beta, mybb);
             if( score >= beta ) {

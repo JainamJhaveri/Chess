@@ -26,7 +26,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
     private int oldCol = 0, oldRow = 0;     // oldRow, oldCol are row, col of bitboard
     private boolean click2 = false;
     private String movelist = "";
-    private boolean performFlag = false;
+    private boolean performFlag = false;    // flag to indicate whether alpha-beta move prediction should be made or not
 
 
     public UserInterface(char[][] initialCB)
@@ -55,17 +55,16 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         addMouseMotionListener(this);
     }
 
-
     @Override
-    protected void paintComponent(Graphics g)
+    public void paint(Graphics g)
     {
-        super.paintComponent(g);
+        super.paint(g);
 
         g.drawImage(img_board, base_x, base_y, this);
         highlightSquares(g);
-        
+
         /*--------------------------------------------------------------------------------------------------------
-        img_piece is used as a reference pointer to the images iteratively. Following 'for' loop will populate 
+        img_piece is used as a reference pointer to the images iteratively. Following 'for' loop will populate
                 the chessboard with images of pieces according to the contents of dispCB array.
         ---------------------------------------------------------------------------------------------------------*/
         Image img_piece;
@@ -87,7 +86,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                     default:        img_piece = null;   break;
                 }
                 /*--------------------------------------------------------------------------------------------------------
-                                drawing images by displacing 'j' (with base_x as horizontal base) 
+                                drawing images by displacing 'j' (with base_x as horizontal base)
                                             for each 'i' with base_y as vertical base
                 ---------------------------------------------------------------------------------------------------------*/
                 g.drawImage(img_piece, base_x + j * disp, base_y + i * disp, this);
@@ -102,7 +101,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         // if it is black's move then evaluate and print minimax move for black
         long starttime = System.currentTimeMillis();
         AlphaBeta mm = new AlphaBeta();
-        System.out.println( mm.getAlphabetamove() );
+        System.out.println( "\nCPU move: " +mm.getAlphabetamove() );
         long endtime = System.currentTimeMillis();
 
         System.out.println("evaluation time: "+(endtime-starttime) + " ms");
@@ -123,16 +122,16 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
         else
         {
             handleSecondClick(x, y, e);
-            performFlag = true;
+            perform();
         }
     }
 
     /**
      * This method updates dispCB array by removing the piece at oldRow, oldCol and moving it to newRow, newCol.
-     * @param oldRow
-     * @param oldCol
-     * @param newRow
-     * @param newCol
+     * @param oldRow where piece was placed
+     * @param oldCol where piece was placed
+     * @param newRow where piece is to be placed
+     * @param newCol where piece is to be placed
      */
     private void updateDisplayArray(int oldRow, int oldCol, int newRow, int newCol)
     {
@@ -206,7 +205,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
      * Checks if clicked inside the board and the click is a left-click
      * @param x: x=e.getX();
      * @param y: y=e.getY();
-     * @param e
+     * @param e: mouseEvent received from mouseReleased, mouseEntered. ... methods
      * @return true if clicked inside the board else false
      */
     private boolean isClickedInsideBoard(int x, int y, MouseEvent e)
@@ -302,7 +301,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                 if( isPromotionMove(temp, newRow, newCol) )
                 {
                     System.out.println("promotion move temp: " +temp);
-                    canMove = true;
+                    performFlag = true;
 
                     updateDisplayArray(oldRow, oldCol, newRow, newCol);
                     updateBitBoard(oldRow, oldCol, newRow, newCol);
@@ -316,7 +315,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                 else if( isCastleMove(temp, newCol, newRow, oldRow, oldCol) )
                 {
                     System.out.println("castle move temp: " +temp);
-                    canMove = true;
+                    performFlag = true;
 
                     // update kings bitboard and disp array
                     updateDisplayArray(oldRow, oldCol, newRow, newCol);
@@ -346,7 +345,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                 else if( isEnpassMove(temp, newCol, newRow, oldCol)  )
                 {
                     System.out.println("enpass move temp: " +temp);
-                    canMove = true;
+                    performFlag = true;
 
                     updateDisplayArray(oldRow, oldCol, newRow, newCol);
                     updateBitBoard(oldRow, oldCol, newRow, newCol);
@@ -373,7 +372,7 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                 else if( isGeneralMove(temp, newCol, newRow) )
                 {
                     System.out.println("general move temp: " +temp);
-                    canMove = true;
+                    performFlag = true;
 
                     updateDisplayArray(oldRow, oldCol, newRow, newCol);
                     updateBitBoard(oldRow, oldCol, newRow, newCol);
@@ -381,22 +380,22 @@ public class UserInterface extends JPanel implements MouseListener, MouseMotionL
                     moveW = !moveW;
                     break;
                 }
+                
             }
 
             System.out.println("New Square Clicked Is - "+newRow+", "+newCol);
-            System.out.println("Selected Move is " +canMove);
+            System.out.println("Selected Move is " +performFlag);
 
         }
         click2 = false;
 
-
-        repaint();
+        paint(this.getGraphics());
 
         if( isCheckmateStalemate() )
         {
             System.exit(0);
             // resetBoard();
-        };
+        }
 
     }
 
