@@ -14,7 +14,7 @@ class AlphaBeta
         BBStruct currentBB = new BBStruct(); // initialize current bitboards in a BBStruct object
         int ans = alphaBetaMax(DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, currentBB);
         System.out.println(" Over here: " +ans);
-        printArr(moveSeqMain);
+//        printArr(moveSeqMain);
         return alphabetamove;
     }
 
@@ -42,7 +42,7 @@ class AlphaBeta
         for( int i=0; i<movelist.length()/5; i++ )
         {
             move = movelist.substring((i*5), (i*5)+5);
-            moveSeq[depth] = move;
+//            moveSeq[depth] = move;
             BBStruct mybb = new BBStruct(bb);
             mybb.makeMove(move);
 
@@ -52,8 +52,8 @@ class AlphaBeta
             }
             if( score < beta )
             {
-                moveSeq[depth] = move;
-                moveSeqMain = moveSeq;
+//                moveSeq[depth] = move;
+//                moveSeqMain = moveSeq;
 //                printArr(moveSeq, score, alpha, beta);
                 beta = score;
             }
@@ -70,7 +70,7 @@ class AlphaBeta
         for( int i=0; i<movelist.length()/5; i++ )
         {
             move = movelist.substring((i*5), (i*5)+5);
-            moveSeq[depth] = move;
+//            moveSeq[depth] = move;
             BBStruct mybb = new BBStruct(bb);
             mybb.makeMove(move);
 
@@ -80,11 +80,13 @@ class AlphaBeta
             }
             if( score > alpha )
             {
-                moveSeq[depth] = move;
-                moveSeqMain = moveSeq;
+//                moveSeq[depth] = move;
+//                moveSeqMain = moveSeq;
 //                printArr(moveSeq, score, alpha, beta);
                 alpha = score;
-                alphabetamove = moveSeq[DEPTH];
+//                alphabetamove = moveSeq[DEPTH];
+                if(depth == DEPTH)
+                    alphabetamove = move;
             }
         }
         return alpha;
