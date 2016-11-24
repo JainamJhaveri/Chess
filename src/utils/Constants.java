@@ -2,21 +2,13 @@ package utils;
 
 public class Constants {
 
-// --- Linux specific constants begin ---
-    private static final String basepath = "C:\\Users\\jaina_000\\IdeaProjects\\Chess\\";
-//    private static final String basepath = "/home/jainu/Projects/IdeaProjects/Chess/";
-    private static final String black_basepath = basepath + "CP/blackpcs/";
-    private static final String white_basepath = basepath + "CP/whitepcs/";
-    public static final String path_board = basepath + "CP/chessboard.png";
-    public static final String path_greenSq = basepath + "CP/green.png";
-// --- Linux specific constants end --
 
 // --- Windows specific constants begin --
-//    private static final String basepath = "C:\\Users\\Sony\\Documents\\NetBeansProjects\\Chess\\";
-//    private static final String black_basepath = basepath + "CP\\blackpcs\\";
-//    private static final String white_basepath = basepath + "CP\\whitepcs\\";
-//    public static final String path_board = basepath + "CP\\chessboard.png";
-//    public static final String path_greenSq = basepath + "CP\\green.png";
+    private static final String basepath = "C:\\Users\\Sony\\Documents\\NetBeansProjects\\Chess\\";
+    private static final String black_basepath = basepath + "CP\\blackpcs\\";
+    private static final String white_basepath = basepath + "CP\\whitepcs\\";
+    public static final String path_board = basepath + "CP\\chessboard.png";
+    public static final String path_greenSq = basepath + "CP\\green.png";
 // --- Windows specific constants end ---
 
     public static final String path_B = white_basepath + "B.png";
@@ -25,31 +17,31 @@ public class Constants {
     public static final String path_P = white_basepath + "P.png";
     public static final String path_Q = white_basepath + "Q.png";
     public static final String path_R = white_basepath + "R.png";
-        
+
     public static final String path_b = black_basepath + "b.png";
     public static final String path_k = black_basepath + "k.png";
     public static final String path_n = black_basepath + "n.png";
     public static final String path_p = black_basepath + "p.png";
     public static final String path_q = black_basepath + "q.png";
     public static final String path_r = black_basepath + "r.png";
-    
+
     public static final char W_ROOK = 'R';
     public static final char W_KNIGHT = 'N';
     public static final char W_BISHOP = 'B';
     public static final char W_QUEEN = 'Q';
-    public static final char W_KING = 'K';   
+    public static final char W_KING = 'K';
     public static final char W_PAWN = 'P';
     public static final char BLANK = ' ';
     public static final char B_ROOK = 'r';
     public static final char B_KNIGHT = 'n';
     public static final char B_BISHOP = 'b';
     public static final char B_QUEEN = 'q';
-    public static final char B_KING = 'k';   
+    public static final char B_KING = 'k';
     public static final char B_PAWN = 'p';
- 
+
     public static final char promotedTo[] = {W_QUEEN, W_ROOK, W_KNIGHT, W_BISHOP};
-    
-    public static final long BackDiagonalMask[] = 
+
+    public static final long BackDiagonalMask[] =
     {
         0x1L,
         0x102L,
@@ -59,7 +51,7 @@ public class Constants {
         0x10204081020L,
         0x1020408102040L,
         0x102040810204080L,
-        0x204081020408000L,        
+        0x204081020408000L,
         0x408102040800000L,
         0x810204080000000L,
         0x1020408000000000L,
